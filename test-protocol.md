@@ -1,4 +1,4 @@
-# Phase 3: Test Protocol — 15 Variable Sets
+# Phase 3: Test Protocol — 25 Variable Sets
 
 Each set exercises a different design scenario through the canonical narrative pipeline (root pdf-export.ts).
 
@@ -359,9 +359,239 @@ For each set, the canonical pipeline computes:
 
 ---
 
+### SET 16 — Extreme Flood Scenario (500-year return period)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-16: Extreme Flood |
+| catchmentArea | 35.0 km² |
+| runoffCoefficient | 0.65 |
+| rainfallIntensity | 200 mm/hr |
+| surplusWeirLength | 20.0 m |
+| heightOfFallWeir | 1.50 m |
+| streamAreaHFL | 85.0 m² |
+| meanVelocityHFL | 4.0 m/s |
+| hfl | 18.000 | ofl | 16.500 | lbl | 15.800 |
+| rtl | 17.200 | bottomDeck | 16.800 | carriageW | 12.0 |
+| numVents | 6 | ventWidth | 4.0 | ventHeight | 3.5 |
+| approachVelocity | 3.5 | siltFactor | 1.8 | cdVent | 4.1 |
+| deckWidth | 12.0 | deckSpan | 10.0 | deckThickness | 0.70 | numSpans | 6 |
+| liveLoadType | IRC Class AA | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 2.0 | siltLoadDeck | 2.0 |
+| SBC | 18.0 t/m² | d_LBL | 4.0 |
+
+**Expected**: Q_design ≈ 400+ cumecs. Extreme velocity → very high afflux. Requires massive vent area. Critical stability checks.
+
+---
+
+### SET 17 — Minimum Viable Crossing (single vent, minimal span)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-17: Minimal Crossing |
+| catchmentArea | 0.5 km² |
+| runoffCoefficient | 0.40 |
+| rainfallIntensity | 80 mm/hr |
+| surplusWeirLength | 5.0 m |
+| heightOfFallWeir | 0.25 m |
+| streamAreaHFL | 3.5 m² |
+| meanVelocityHFL | 0.8 m/s |
+| hfl | 3.200 | ofl | 2.800 | lbl | 2.500 |
+| rtl | 3.000 | bottomDeck | 2.800 | carriageW | 4.5 |
+| numVents | 1 | ventWidth | 3.0 | ventHeight | 1.0 |
+| approachVelocity | 0.6 | siltFactor | 0.9 | cdVent | 0.9 |
+| deckWidth | 4.5 | deckSpan | 3.0 | deckThickness | 0.25 | numSpans | 1 |
+| liveLoadType | IRC Class A | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 1.8 | siltLoadDeck | 0.5 |
+| SBC | 8.0 t/m² | d_LBL | 1.5 |
+
+**Expected**: Q_design ≈ 15 cumecs. Single vent → high obstruction risk. Minimal cost design.
+
+---
+
+### SET 18 — Urban Drainage Channel (high runoff, confined space)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-18: Urban Drainage |
+| catchmentArea | 2.5 km² |
+| runoffCoefficient | 0.75 |
+| rainfallIntensity | 140 mm/hr |
+| surplusWeirLength | 8.0 m |
+| heightOfFallWeir | 0.45 m |
+| streamAreaHFL | 12.0 m² |
+| meanVelocityHFL | 2.5 m/s |
+| hfl | 7.500 | ofl | 6.800 | lbl | 6.300 |
+| rtl | 7.100 | bottomDeck | 6.800 | carriageW | 9.0 |
+| numVents | 3 | ventWidth | 2.2 | ventHeight | 1.8 |
+| approachVelocity | 2.0 | siltFactor | 1.4 | cdVent | 0.9 |
+| deckWidth | 9.0 | deckSpan | 6.5 | deckThickness | 0.40 | numSpans | 3 |
+| liveLoadType | IRC Class 70R | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 1.9 | siltLoadDeck | 1.2 |
+| SBC | 12.0 t/m² | d_LBL | 2.2 |
+
+**Expected**: Q_design ≈ 73 cumecs. High C due to urbanization. Confined vent space. Moderate afflux.
+
+---
+
+### SET 19 — Agricultural Area (low runoff, wide channel)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-19: Agricultural Crossing |
+| catchmentArea | 18.0 km² |
+| runoffCoefficient | 0.25 |
+| rainfallIntensity | 70 mm/hr |
+| surplusWeirLength | 30.0 m |
+| heightOfFallWeir | 0.80 m |
+| streamAreaHFL | 150.0 m² |
+| meanVelocityHFL | 0.9 m/s |
+| hfl | 5.000 | ofl | 4.500 | lbl | 4.100 |
+| rtl | 4.700 | bottomDeck | 4.400 | carriageW | 10.0 |
+| numVents | 4 | ventWidth | 4.0 | ventHeight | 2.0 |
+| approachVelocity | 0.7 | siltFactor | 1.6 | cdVent | 4.1 |
+| deckWidth | 10.0 | deckSpan | 8.0 | deckThickness | 0.45 | numSpans | 4 |
+| liveLoadType | IRC Class A | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 1.5 | siltLoadDeck | 0.6 |
+| SBC | 10.0 t/m² | d_LBL | 2.0 |
+
+**Expected**: Q_design ≈ 88 cumecs (Weir governs due to wide channel). Low velocity → low afflux. Wide vents provided.
+
+---
+
+### SET 20 — Desert Flash Flood (high intensity, short duration)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-20: Desert Flash Flood |
+| catchmentArea | 15.0 km² |
+| runoffCoefficient | 0.35 |
+| rainfallIntensity | 180 mm/hr |
+| surplusWeirLength | 12.0 m |
+| heightOfFallWeir | 0.60 m |
+| streamAreaHFL | 25.0 m² |
+| meanVelocityHFL | 3.2 m/s |
+| hfl | 9.000 | ofl | 8.200 | lbl | 7.600 |
+| rtl | 8.600 | bottomDeck | 8.200 | carriageW | 8.0 |
+| numVents | 4 | ventWidth | 2.8 | ventHeight | 2.2 |
+| approachVelocity | 2.8 | siltFactor | 0.8 | cdVent | 0.9 |
+| deckWidth | 8.0 | deckSpan | 6.0 | deckThickness | 0.50 | numSpans | 4 |
+| liveLoadType | IRC Class A | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 2.2 | siltLoadDeck | 1.5 |
+| SBC | 15.0 t/m² | d_LBL | 2.5 |
+
+**Expected**: Q_design ≈ 262 cumecs. High intensity → Rational governs. High velocity → significant afflux.
+
+---
+
+### SET 21 — Tidal Estuary (variable water level, salinity)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-21: Tidal Estuary |
+| catchmentArea | 12.0 km² |
+| runoffCoefficient | 0.45 |
+| rainfallIntensity | 100 mm/hr |
+| surplusWeirLength | 15.0 m |
+| heightOfFallWeir | 0.70 m |
+| streamAreaHFL | 45.0 m² |
+| meanVelocityHFL | 1.4 m/s |
+| hfl | 8.500 | ofl | 7.800 | lbl | 7.200 |
+| rtl | 8.100 | bottomDeck | 7.700 | carriageW | 11.0 |
+| numVents | 4 | ventWidth | 3.5 | ventHeight | 2.5 |
+| approachVelocity | 1.2 | siltFactor | 1.9 | cdVent | 4.1 |
+| deckWidth | 11.0 | deckSpan | 8.5 | deckThickness | 0.55 | numSpans | 4 |
+| liveLoadType | IRC Class AA | waterDensity | 1025 | concreteDensity | 2500 | dragCoefficient | 2.3 | siltLoadDeck | 1.4 |
+| SBC | 14.0 t/m² | d_LBL | 3.0 |
+
+**Expected**: Q_design ≈ 150 cumecs. Higher water density → greater uplift. Tidal effects on HFL. Corrosion considerations.
+
+---
+
+### SET 22 — Glacier Melt Stream (cold water, high sediment)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-22: Glacier Melt |
+| catchmentArea | 8.0 km² |
+| runoffCoefficient | 0.55 |
+| rainfallIntensity | 90 mm/hr |
+| surplusWeirLength | 10.0 m |
+| heightOfFallWeir | 0.50 m |
+| streamAreaHFL | 18.0 m² |
+| meanVelocityHFL | 2.8 m/s |
+| hfl | 11.000 | ofl | 10.200 | lbl | 9.600 |
+| rtl | 10.600 | bottomDeck | 10.200 | carriageW | 7.0 |
+| numVents | 3 | ventWidth | 2.5 | ventHeight | 2.0 |
+| approachVelocity | 2.4 | siltFactor | 2.2 | cdVent | 0.9 |
+| deckWidth | 7.0 | deckSpan | 5.5 | deckThickness | 0.45 | numSpans | 3 |
+| liveLoadType | IRC Class A | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 2.0 | siltLoadDeck | 2.2 |
+| SBC | 16.0 t/m² | d_LBL | 2.8 |
+
+**Expected**: Q_design ≈ 110 cumecs. High sediment load → deeper scour. Cold water effects on concrete.
+
+---
+
+### SET 23 — Railway Bridge (heavy static load, different code)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-23: Railway Crossing |
+| catchmentArea | 6.0 km² |
+| runoffCoefficient | 0.48 |
+| rainfallIntensity | 95 mm/hr |
+| surplusWeirLength | 9.0 m |
+| heightOfFallWeir | 0.40 m |
+| streamAreaHFL | 14.0 m² |
+| meanVelocityHFL | 1.9 m/s |
+| hfl | 7.200 | ofl | 6.500 | lbl | 6.000 |
+| rtl | 6.800 | bottomDeck | 6.400 | carriageW | 8.0 |
+| numVents | 3 | ventWidth | 2.2 | ventHeight | 1.8 |
+| approachVelocity | 1.5 | siltFactor | 1.1 | cdVent | 0.9 |
+| deckWidth | 8.0 | deckSpan | 6.0 | deckThickness | 0.60 | numSpans | 3 |
+| liveLoadType | IRC Class AA | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 1.9 | siltLoadDeck | 1.8 |
+| SBC | 20.0 t/m² | d_LBL | 2.5 |
+
+**Expected**: Q_design ≈ 76 cumecs. Railway loading → very high dead load. Thick deck required. Stability critical.
+
+---
+
+### SET 24 — Emergency Access (minimal design, rapid deployment)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-24: Emergency Access |
+| catchmentArea | 1.2 km² |
+| runoffCoefficient | 0.42 |
+| rainfallIntensity | 85 mm/hr |
+| surplusWeirLength | 6.0 m |
+| heightOfFallWeir | 0.30 m |
+| streamAreaHFL | 5.0 m² |
+| meanVelocityHFL | 1.0 m/s |
+| hfl | 4.500 | ofl | 4.000 | lbl | 3.600 |
+| rtl | 4.200 | bottomDeck | 3.900 | carriageW | 5.0 |
+| numVents | 2 | ventWidth | 2.0 | ventHeight | 1.2 |
+| approachVelocity | 0.8 | siltFactor | 1.0 | cdVent | 0.9 |
+| deckWidth | 5.0 | deckSpan | 3.5 | deckThickness | 0.30 | numSpans | 2 |
+| liveLoadType | IRC Class 70R | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 1.7 | siltLoadDeck | 0.8 |
+| SBC | 8.0 t/m² | d_LBL | 1.8 |
+
+**Expected**: Q_design ≈ 24 cumecs. Minimal design for emergency access. Lower safety factors acceptable for temporary use.
+
+---
+
+### SET 25 — Heritage Site (aesthetic constraints, limited modification)
+| Variable | Value |
+|----------|-------|
+| projectName | Bridge-25: Heritage Site |
+| catchmentArea | 4.5 km² |
+| runoffCoefficient | 0.50 |
+| rainfallIntensity | 110 mm/hr |
+| surplusWeirLength | 8.0 m |
+| heightOfFallWeir | 0.45 m |
+| streamAreaHFL | 11.0 m² |
+| meanVelocityHFL | 1.6 m/s |
+| hfl | 6.800 | ofl | 6.100 | lbl | 5.600 |
+| rtl | 6.400 | bottomDeck | 6.000 | carriageW | 7.5 |
+| numVents | 3 | ventWidth | 2.0 | ventHeight | 1.5 |
+| approachVelocity | 1.3 | siltFactor | 1.2 | cdVent | 0.9 |
+| deckWidth | 7.5 | deckSpan | 5.5 | deckThickness | 0.35 | numSpans | 3 |
+| liveLoadType | IRC Class A | waterDensity | 1000 | concreteDensity | 2500 | dragCoefficient | 1.8 | siltLoadDeck | 1.0 |
+| SBC | 12.0 t/m² | d_LBL | 2.2 |
+
+**Expected**: Q_design ≈ 68 cumecs. Aesthetic constraints limit vent size. Careful balance of form and function.
+
+---
+
 ## Output Verification Checklist (per set)
 
-For each of the 15 sets, the generated PDF must contain:
+For each of the 25 sets, the generated PDF must contain:
 
 - [ ] Cover page with correct project name and design philosophy
 - [ ] Section 1: Design Philosophy & Scope (all 14 sections present)
