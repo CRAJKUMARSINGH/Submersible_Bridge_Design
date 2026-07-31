@@ -13,7 +13,8 @@
     "generate-copycat": "tsx ./scripts/generate-sample-copycat.ts",
     "test:verbatim": "node --import tsx --test ./scripts/verbatim-renderer.test.ts",
     "certify-verbatim": "npm run test:verbatim && tsx ./scripts/certify-verbatim-test.ts",
-    "test:rice-grain": "node ./scripts/rice-grain-test.cjs"
+    "test:rice-grain": "node ./scripts/rice-grain-test.cjs",
+    "compare": "node scripts/compare-pages.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
