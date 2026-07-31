@@ -1,0 +1,2 @@
+set_id,projectName,qDesign_m3s,governingMethod,pctObsRTL,pctObsHFL,maxScourDepth_m,fbl_m,fAnchor_kN,totalVerticalLoad_kN,fDragTotal_kN,passRTL,passHFL,scourSafe,anchorsNeeded,OVERALL
+set-19,Massive HFL vs RTL Gap,971.111,Rational Method,97.05,98.92,5.763,100.237,-146.78,351.68,4.12,FAIL,FAIL,FAIL,NO,REVIEW

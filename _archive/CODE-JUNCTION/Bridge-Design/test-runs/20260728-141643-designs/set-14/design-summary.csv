@@ -1,0 +1,2 @@
+set_id,projectName,qDesign_m3s,governingMethod,pctObsRTL,pctObsHFL,maxScourDepth_m,fbl_m,fAnchor_kN,totalVerticalLoad_kN,fDragTotal_kN,passRTL,passHFL,scourSafe,anchorsNeeded,OVERALL
+set-14,Uplift-Anchors-Required Case,288.000,Rational Method,97.59,99.14,3.843,100.357,-34.20,149.53,0.79,FAIL,FAIL,FAIL,NO,REVIEW

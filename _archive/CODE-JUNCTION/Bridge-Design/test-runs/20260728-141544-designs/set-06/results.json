@@ -1,0 +1,39 @@
+{
+  "qRational": 33.333333333333336,
+  "qWeir": 2.1182523663388175,
+  "qVelocity": 13.5,
+  "qDesign": 33.333333333333336,
+  "governingMethod": "Rational Method",
+  "designDischarge": 33.333333333333336,
+  "aVent": 1.7999999999999998,
+  "effectiveWidth": 37.03703703703704,
+  "aRTL": 22.222222222222012,
+  "aHFL": 44.44444444444455,
+  "pctObsRTL": 91.89999999999992,
+  "pctObsHFL": 95.95000000000002,
+  "passRTL": false,
+  "passHFL": false,
+  "velocityHFL": 0.7499999999999983,
+  "hAfflux": 28.27832706536188,
+  "laceyPerimeter": 27.424137786507227,
+  "laceyScourDepth": 1.6397994138392509,
+  "maxScourDepth": 2.0825452555758486,
+  "fbl": 99.11745474442415,
+  "recommendedDepth": 0.8825452555758488,
+  "scourSafe": true,
+  "wSelf": 33.550200000000004,
+  "wSilt": 6.156,
+  "wLive": 554,
+  "totalVerticalLoad": 178.2062,
+  "fDrag": 0.42749999999999816,
+  "fUplift": 13.420080000000002,
+  "fAnchor": -20.13012,
+  "fDragTotal": 1.7099999999999926,
+  "verdict": {
+    "pass": false,
+    "reasons": [
+      "Ventway @ RTL obstructs 91.9% (limit 70%)",
+      "Ventway @ HFL obstructs 96.0% (limit 30%)"
+    ]
+  }
+}

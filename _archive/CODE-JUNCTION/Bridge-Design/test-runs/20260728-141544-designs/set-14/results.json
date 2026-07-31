@@ -1,0 +1,40 @@
+{
+  "qRational": 288,
+  "qWeir": 20.042137207097575,
+  "qVelocity": 77,
+  "qDesign": 288,
+  "governingMethod": "Rational Method",
+  "designDischarge": 288,
+  "aVent": 8,
+  "effectiveWidth": 221.53846153846152,
+  "aRTL": 332.30769230769226,
+  "aHFL": 930.461538461539,
+  "pctObsRTL": 97.5925925925926,
+  "pctObsHFL": 99.14021164021165,
+  "passRTL": false,
+  "passHFL": false,
+  "velocityHFL": 0.3095238095238093,
+  "hAfflux": 275.3750526047803,
+  "laceyPerimeter": 80.61017305526642,
+  "laceyScourDepth": 3.025945313373952,
+  "maxScourDepth": 3.842950547984919,
+  "fbl": 100.35704945201509,
+  "recommendedDepth": -0.3570494520150902,
+  "scourSafe": false,
+  "wSelf": 57.3885,
+  "wSilt": 13,
+  "wLive": 554,
+  "totalVerticalLoad": 149.53135714285713,
+  "fDrag": 0.11321275510204067,
+  "fUplift": 23.184953999999998,
+  "fAnchor": -34.203546,
+  "fDragTotal": 0.7924892857142847,
+  "verdict": {
+    "pass": false,
+    "reasons": [
+      "Ventway @ RTL obstructs 97.6% (limit 70%)",
+      "Ventway @ HFL obstructs 99.1% (limit 30%)",
+      "Foundation level above required scour depth"
+    ]
+  }
+}

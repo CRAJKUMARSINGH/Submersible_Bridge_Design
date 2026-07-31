@@ -1,0 +1,2 @@
+set_id,projectName,qDesign_m3s,governingMethod,pctObsRTL,pctObsHFL,maxScourDepth_m,fbl_m,fAnchor_kN,totalVerticalLoad_kN,fDragTotal_kN,passRTL,passHFL,scourSafe,anchorsNeeded,OVERALL
+set-01,Small Rural Bridge,61.389,Rational Method,93.40,96.33,2.454,99.346,-29.80,151.00,1.88,FAIL,FAIL,PASS,NO,REVIEW

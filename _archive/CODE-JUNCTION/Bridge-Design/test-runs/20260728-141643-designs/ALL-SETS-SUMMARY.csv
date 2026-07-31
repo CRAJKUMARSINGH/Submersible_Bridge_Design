@@ -1,0 +1,26 @@
+set_id,projectName,qDesign_m3s,governingMethod,pctObsRTL,pctObsHFL,maxScourDepth_m,fbl_m,fAnchor_kN,totalVerticalLoad_kN,fDragTotal_kN,passRTL,passHFL,scourSafe,anchorsNeeded,OVERALL
+set-01,Small Rural Bridge,61.389,Rational Method,93.40,96.33,2.454,99.346,-29.80,151.00,1.88,FAIL,FAIL,PASS,NO,REVIEW
+set-02,Medium Valley Crossing,249.333,Rational Method,96.47,98.35,3.663,99.537,-55.18,179.22,1.69,FAIL,FAIL,FAIL,NO,REVIEW
+set-03,High Rainfall Zone,695.139,Rational Method,98.15,99.18,4.876,99.624,-84.98,243.13,2.14,FAIL,FAIL,FAIL,NO,REVIEW
+set-04,Desert Flash Flood,225.000,Rational Method,94.13,97.18,4.332,98.168,-50.58,171.70,7.45,FAIL,FAIL,PASS,NO,REVIEW
+set-05,Himalayan Snowmelt,466.667,Rational Method,94.86,97.43,4.070,100.930,-131.33,330.77,5.14,FAIL,FAIL,FAIL,NO,REVIEW
+set-06,Minor Village Crossing,33.333,Rational Method,91.90,95.95,2.083,99.117,-20.13,178.21,1.71,FAIL,FAIL,PASS,NO,REVIEW
+set-07,State Highway Link,991.667,Rational Method,97.71,98.86,5.637,98.363,-176.58,396.30,8.51,FAIL,FAIL,PASS,NO,REVIEW
+set-08,Coastal Estuary Creek,229.167,Rational Method,97.55,98.66,3.676,101.824,-72.35,200.03,1.26,FAIL,FAIL,FAIL,NO,REVIEW
+set-09,Tea Estate Crossing,1280.000,Rational Method,98.78,99.44,6.138,98.662,-84.98,226.43,2.29,FAIL,FAIL,PASS,NO,REVIEW
+set-10,Double-Lane Collector,831.250,Rational Method,97.50,98.81,5.315,98.885,-139.06,339.50,6.08,FAIL,FAIL,PASS,NO,REVIEW
+set-11,Sandy Bed High Scour,550.000,Rational Method,42.01,72.53,2.312,101.488,-98.88,259.96,3.78,PASS,FAIL,FAIL,NO,REVIEW
+set-12,Very Low Discharge (Min Edge),2.500,Area-Velocity,60.00,80.00,0.967,99.433,-11.12,205.99,1.62,PASS,FAIL,PASS,NO,REVIEW
+set-13,Near-Limit Obstruction Test,410.667,Rational Method,98.77,99.30,4.465,98.335,-40.47,168.14,2.87,FAIL,FAIL,PASS,NO,REVIEW
+set-14,Uplift-Anchors-Required Case,288.000,Rational Method,97.59,99.14,3.843,100.357,-34.20,149.53,0.79,FAIL,FAIL,FAIL,NO,REVIEW
+set-15,Deep Scour Shallow GL,1312.500,Rational Method,95.79,97.60,7.407,96.093,-188.35,437.67,22.11,FAIL,FAIL,PASS,NO,REVIEW
+set-16,Single Span Footbridge Type,14.514,Rational Method,82.36,91.18,1.465,99.535,-25.75,603.92,0.29,FAIL,FAIL,FAIL,NO,REVIEW
+set-17,IRC Class AA Heavy Haul,277.333,Rational Method,36.00,68.00,1.679,101.321,-140.09,343.67,7.62,PASS,FAIL,FAIL,NO,REVIEW
+set-18,Low Drag Aerodynamic Pier,329.861,Rational Method,97.40,98.79,4.151,98.849,-64.38,217.13,1.58,FAIL,FAIL,PASS,NO,REVIEW
+set-19,Massive HFL vs RTL Gap,971.111,Rational Method,97.05,98.92,5.763,100.237,-146.78,351.68,4.12,FAIL,FAIL,FAIL,NO,REVIEW
+set-20,Dense Urban Minor Drain,104.194,Rational Method,95.57,98.31,2.928,99.172,-29.80,167.66,1.39,FAIL,FAIL,PASS,NO,REVIEW
+set-21,Boulder Bed Stream (High f),428.750,Rational Method,96.79,98.43,3.724,100.176,-92.70,247.56,3.59,FAIL,FAIL,FAIL,NO,REVIEW
+set-22,Very High Live Load,311.667,Rational Method,96.97,98.59,4.073,98.927,-229.63,514.55,8.36,FAIL,FAIL,PASS,NO,REVIEW
+set-23,Small Vents High Count,230.000,Rational Method,96.81,98.54,3.681,98.719,-15.89,77.51,2.70,FAIL,FAIL,PASS,NO,REVIEW
+set-24,Overflow Check RTL==HFL,365.556,Rational Method,98.63,98.63,4.295,98.705,-64.38,197.55,3.50,FAIL,FAIL,PASS,NO,REVIEW
+set-25,Maximum Inputs Stress Test,5500.000,Rational Method,49.60,74.80,2.649,104.351,-376.70,779.14,16.90,PASS,FAIL,FAIL,NO,REVIEW

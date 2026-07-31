@@ -2,13 +2,15 @@ import React from 'react';
 import { Link, useLocation } from 'wouter';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Calculator, Waves, Construction, FileText, PenLine, Layers, FileSpreadsheet, ScrollText } from 'lucide-react';
+import { Calculator, Waves, Construction, FileText, PenLine, Layers, FileSpreadsheet, ScrollText, BookText, ShieldCheck } from 'lucide-react';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 const navItems = [
+  { href: '/document-viewer', label: 'Document Viewer', sub: 'Verbatim source browser', icon: BookText },
+  { href: '/tests', label: 'Certification Tests', sub: '16 shared update checks', icon: ShieldCheck },
   { href: '/import', label: 'Variable Import', sub: 'CSV / Excel sheet input', icon: FileSpreadsheet },
   { href: '/statutory-preview', label: 'A4 Statutory Preview', sub: 'Live page-style report view', icon: ScrollText },
   { href: '/', label: 'Step 1: Discharge', sub: 'Rational / Weir / Velocity', icon: Calculator },

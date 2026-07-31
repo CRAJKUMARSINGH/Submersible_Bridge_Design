@@ -1,0 +1,2 @@
+set_id,projectName,qDesign_m3s,governingMethod,pctObsRTL,pctObsHFL,maxScourDepth_m,fbl_m,fAnchor_kN,totalVerticalLoad_kN,fDragTotal_kN,passRTL,passHFL,scourSafe,anchorsNeeded,OVERALL
+set-16,Single Span Footbridge Type,14.514,Rational Method,82.36,91.18,1.465,99.535,-25.75,603.92,0.29,FAIL,FAIL,FAIL,NO,REVIEW

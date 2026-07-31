@@ -1,0 +1,2 @@
+set_id,projectName,qDesign_m3s,governingMethod,pctObsRTL,pctObsHFL,maxScourDepth_m,fbl_m,fAnchor_kN,totalVerticalLoad_kN,fDragTotal_kN,passRTL,passHFL,scourSafe,anchorsNeeded,OVERALL
+set-15,Deep Scour Shallow GL,1312.500,Rational Method,95.79,97.60,7.407,96.093,-188.35,437.67,22.11,FAIL,FAIL,PASS,NO,REVIEW

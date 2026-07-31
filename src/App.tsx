@@ -11,6 +11,8 @@ const SummaryReport = lazy(() => import('./pages/summary'));
 const DrawingsPage = lazy(() => import('./pages/drawings'));
 const ImportVariablesPage = lazy(() => import('./pages/import-variables'));
 const StatutoryPreviewPage = lazy(() => import('./pages/statutory-preview'));
+const DocumentViewerPage = lazy(() => import('./pages/document-viewer'));
+const DocumentTestsPage = lazy(() => import('./pages/document-tests'));
 const NotFound = lazy(() => import('./pages/not-found'));
 
 const queryClient = new QueryClient({
@@ -40,6 +42,8 @@ function Router() {
     <AppLayout>
       <Suspense fallback={<RouteFallback />}>
         <Switch>
+          <Route path="/document-viewer" component={DocumentViewerPage} />
+          <Route path="/tests" component={DocumentTestsPage} />
           <Route path="/" component={Step1Discharge} />
           <Route path="/import" component={ImportVariablesPage} />
           <Route path="/statutory-preview" component={StatutoryPreviewPage} />

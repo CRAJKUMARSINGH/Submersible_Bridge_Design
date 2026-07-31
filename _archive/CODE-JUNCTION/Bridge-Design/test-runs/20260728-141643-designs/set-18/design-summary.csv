@@ -1,0 +1,2 @@
+set_id,projectName,qDesign_m3s,governingMethod,pctObsRTL,pctObsHFL,maxScourDepth_m,fbl_m,fAnchor_kN,totalVerticalLoad_kN,fDragTotal_kN,passRTL,passHFL,scourSafe,anchorsNeeded,OVERALL
+set-18,Low Drag Aerodynamic Pier,329.861,Rational Method,97.40,98.79,4.151,98.849,-64.38,217.13,1.58,FAIL,FAIL,PASS,NO,REVIEW

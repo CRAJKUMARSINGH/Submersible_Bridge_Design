@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Submersible Causeway Design Calculator"
+version = "1.0.0"
+id = "artifacts/causeway-design"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18554
+
+[services.development]
+run = "pnpm --filter @workspace/causeway-design run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/causeway-design", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/causeway-design/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18554"
+BASE_PATH = "/"

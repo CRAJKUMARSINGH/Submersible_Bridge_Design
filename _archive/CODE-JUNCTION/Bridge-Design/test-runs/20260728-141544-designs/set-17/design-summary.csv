@@ -1,0 +1,2 @@
+set_id,projectName,qDesign_m3s,governingMethod,pctObsRTL,pctObsHFL,maxScourDepth_m,fbl_m,fAnchor_kN,totalVerticalLoad_kN,fDragTotal_kN,passRTL,passHFL,scourSafe,anchorsNeeded,OVERALL
+set-17,IRC Class AA Heavy Haul,277.333,Rational Method,36.00,68.00,1.679,101.321,-140.09,343.67,7.62,PASS,FAIL,FAIL,NO,REVIEW

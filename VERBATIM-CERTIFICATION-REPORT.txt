@@ -1,0 +1,54 @@
+VERBATIM CERTIFICATION TEST REPORT
+=================================
+Date: 2026-07-30T14:07:55.596Z
+Sample File: C:\Users\Rajkumar.DESKTOP-4ISBKM0\Downloads\Submersible_Bridge_Design\attached_assets\Type Design of submersible causeway.txt
+
+SUMMARY
+-------
+Certification: PASS
+Total source lines: 8446
+Non-empty source lines: 4008
+Rendered lines: 4008
+Exact line matches: 4008
+Narrative lines: 1660
+Exact narrative matches: 1660
+Section/title lines: 112
+Exact section/title matches: 112
+
+DETAILS
+-------
+Line 35: segments=1 kind=section text="DESIGN  OF  VENTED SUBMERSIBLE CAUSEWAY"
+Line 38: segments=1 kind=body text="Name of the work:-B.T to the R/f KB Road to P.Bheemavaram"
+Line 39: segments=1 kind=section text="Design Philosophy:-"
+Line 46: segments=1 kind=body text="Step1:-"
+Line 47: segments=1 kind=body text="The design of submersible Causeway is carried out as per the procedure out lined below:-"
+Line 49: segments=1 kind=body text="The design discharge was fixed after arriving discharge based on the following methods:-"
+Line 51: segments=1 kind=body text="a.Discharge of the  stream is arrived using area-velocity method and catchment area method.Further the discharge from th"
+Line 52: segments=1 kind=body text="broad-crested wier and height of fall is locally enquired.The discharge is arrived"
+Line 53: segments=1 kind=body text="using broad crested wier formula."
+Line 56: segments=1 kind=body text="Step2:-"
+Line 58: segments=1 kind=body text="a.Hydraulic particulars like HFL,OFL are fixed as per the local enquiry."
+Line 60: segments=1 kind=body text="b.It is proposed to design the structure as vented submersible causeway.RTL of the causeway is kept below the HFL,so tha"
+Line 61: segments=1 kind=body text="70%, when the flow is at RTL.Further,when the flow is at HFL,the obstruction to"
+Line 62: segments=1 kind=body text="flow is kept below 30%.All the above ventway calculations are done as per"
+Line 63: segments=1 kind=body text="IRC SP:82--2008."
+Line 65: segments=1 kind=body text="c.After finalisation of design discharge,RTL and ventway calculations,afflux calculations are carried out."
+Line 67: segments=1 kind=body text="d.Normal scour depth with reference to HFL was calculated using Lacey's equations"
+Line 69: segments=1 kind=body text="e.After arriving at the Maximum scour depth,bottom level of the foundation was fixed below the maximum scour depth"
+Line 71: segments=1 kind=body text="Step3:-"
+Line 73: segments=1 kind=body text="After arriving at RTL,bottom of foundation level and required ventway,the dimensions of the bridge are finalised."
+Line 500: segments=1 kind=body text="X"
+Line 1500: segments=1 kind=body text="i)On top of RCC Strip footing"
+Line 2500: segments=1 kind=body text="The footing needs to be designed for 1.5 times the"
+Line 3500: segments=1 kind=body text="For M20 grade of concrete permissible compressive stress in direct compression is 5N/mm2"
+Line 6500: segments=1 kind=body text="-3.3"
+Line 7500: segments=1 kind=body text="Angle of shearing resistance of back fill material&material at toe portion(Q) ="
+PASS: All non-empty source lines are represented
+PASS: All rendered lines reconstruct exactly
+PASS: All narrative lines reconstruct exactly
+PASS: All section/title lines reconstruct exactly
+PASS: Rice-grain target phrases are preserved
+
+FAILURES
+--------
+None

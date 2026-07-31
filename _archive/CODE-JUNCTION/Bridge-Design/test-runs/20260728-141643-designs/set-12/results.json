@@ -1,0 +1,38 @@
+{
+  "qRational": 2.3333333333333335,
+  "qWeir": 0.3049996721309714,
+  "qVelocity": 2.5,
+  "qDesign": 2.5,
+  "governingMethod": "Area-Velocity",
+  "designDischarge": 2.5,
+  "aVent": 0.5,
+  "effectiveWidth": 6.25,
+  "aRTL": 1.2500000000000178,
+  "aHFL": 2.5000000000000355,
+  "pctObsRTL": 60.00000000000056,
+  "pctObsHFL": 80.00000000000028,
+  "passRTL": true,
+  "passHFL": false,
+  "velocityHFL": 0.9999999999999858,
+  "hAfflux": 1.7022818791946432,
+  "laceyPerimeter": 7.510409442899902,
+  "laceyScourDepth": 0.7611274648641048,
+  "maxScourDepth": 0.9666318803774131,
+  "fbl": 99.4333681196226,
+  "recommendedDepth": 0.5666318803774004,
+  "scourSafe": true,
+  "wSelf": 19.07064,
+  "wSilt": 2.25,
+  "wLive": 554,
+  "totalVerticalLoad": 205.98730666666665,
+  "fDrag": 0.5399999999999846,
+  "fUplift": 7.9460999999999995,
+  "fAnchor": -11.124540000000001,
+  "fDragTotal": 1.619999999999954,
+  "verdict": {
+    "pass": false,
+    "reasons": [
+      "Ventway @ HFL obstructs 80.0% (limit 30%)"
+    ]
+  }
+}
