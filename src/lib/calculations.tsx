@@ -7,6 +7,12 @@ const getTraceableInput = (id: string, fallback: number) => {
   return item && typeof item.value === 'number' ? item.value : fallback;
 };
 
+const calculateObstructionPercent = (ventArea: number, flowArea: number) => {
+  if (flowArea <= 0) return 0;
+  const obstruction = (1 - (ventArea / flowArea)) * 100;
+  return Math.min(100, Math.max(0, obstruction));
+};
+
 export type Inputs = {
   // Metadata
   projectName: string;
@@ -178,8 +184,8 @@ export function CalculationsProvider({ children }: { children: ReactNode }) {
     const depthHFL = Math.max(0, inputs.hfl - inputs.gl);
     const aHFL = depthHFL * effectiveWidth;
 
-    const pctObsRTL = aRTL > 0 ? (1 - (aVent / aRTL)) * 100 : 0;
-    const pctObsHFL = aHFL > 0 ? (1 - (aVent / aHFL)) * 100 : 0;
+    const pctObsRTL = calculateObstructionPercent(aVent, aRTL);
+    const pctObsHFL = calculateObstructionPercent(aVent, aHFL);
 
     const passRTL = pctObsRTL < 70;
     const passHFL = pctObsHFL < 30;

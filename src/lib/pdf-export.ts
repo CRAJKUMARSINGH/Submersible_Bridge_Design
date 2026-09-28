@@ -4,6 +4,14 @@ import type { Inputs, ComputedResults } from './calculations';
 
 const f = (n: number, d = 2) => n.toFixed(d);
 
+function getDesignDischargeSummary(inputs: Inputs, results: ComputedResults) {
+  if (inputs.customDesignDischarge !== null) {
+    return `DESIGN DISCHARGE  Q = ${f(results.designDischarge)} m³/s   (Manual override from Step 2)`;
+  }
+
+  return `DESIGN DISCHARGE  Q = ${f(results.designDischarge)} m³/s   (Governed by: ${results.governingMethod})`;
+}
+
 function hatch(doc: jsPDF, rx: number, ry: number, rw: number, rh: number, step = 3.5) {
   const prevLW = doc.getLineWidth();
   doc.setLineWidth(0.15);
@@ -516,7 +524,14 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   doc.setFontSize(11); doc.setFont('helvetica', 'bold');
   doc.text('SHEET 2 — STEP 1: DESIGN DISCHARGE', W / 2, 15, { align: 'center' });
   doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-  doc.text('Discharge computed by three methods; maximum governs.', W / 2, 19, { align: 'center' });
+  doc.text(
+    inputs.customDesignDischarge !== null
+      ? 'Discharge computed by three methods; Step 2 manual override is applied to downstream design.'
+      : 'Discharge computed by three methods; maximum governs.',
+    W / 2,
+    19,
+    { align: 'center' },
+  );
   doc.setLineWidth(0.4); doc.line(12, 22, W - 12, 22);
 
   autoTable(doc, {
@@ -538,7 +553,7 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   doc.setFontSize(9); doc.setFont('helvetica', 'bold');
   doc.setFillColor(245, 158, 11); doc.rect(12, y2 - 1, W - 24, 10, 'F');
   doc.setTextColor(12, 20, 45);
-  doc.text(`DESIGN DISCHARGE  Q = ${f(results.qDesign)} m³/s   (Governed by: ${results.governingMethod})`, W / 2, y2 + 5.5, { align: 'center' });
+  doc.text(getDesignDischargeSummary(inputs, results), W / 2, y2 + 5.5, { align: 'center' });
   doc.setTextColor(0);
 
   autoTable(doc, {

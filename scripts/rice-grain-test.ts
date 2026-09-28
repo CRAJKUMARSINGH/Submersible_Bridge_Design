@@ -15,7 +15,7 @@ async function extractPageText(pdfPath: string, pageNum: number): Promise<string
   // Since pdf-parse doesn't give page-by-page text directly, we'll use the text content
   // and split by page markers if available, or return all text
   const text = data.text;
-  const lines = text.split('\n').filter(l => l.trim());
+  const lines = text.split('\n').filter((l: string) => l.trim());
   
   // For now, return all lines since pdf-parse doesn't provide page-level extraction
   // We'll need to find the specific line based on context
@@ -45,14 +45,14 @@ async function runRiceGrainTest() {
     // we'll search for the known phrase from sample line 619
     const targetPhrase = 'width of abutment is considered for full hieght upto HFL';
     
-    const sampleHasPhrase = sampleLines.some(l => l.includes(targetPhrase));
-    const outputHasPhrase = outputLines.some(l => l.includes(targetPhrase));
+    const sampleHasPhrase = sampleLines.some((l: string) => l.includes(targetPhrase));
+    const outputHasPhrase = outputLines.some((l: string) => l.includes(targetPhrase));
     
     console.log(`Sample contains target phrase: ${sampleHasPhrase}`);
     console.log(`Output contains target phrase: ${outputHasPhrase}`);
     
     if (outputHasPhrase) {
-      const matchingLine = outputLines.find(l => l.includes(targetPhrase));
+      const matchingLine = outputLines.find((l: string) => l.includes(targetPhrase));
       console.log(`Output line: "${matchingLine}"`);
     }
     
