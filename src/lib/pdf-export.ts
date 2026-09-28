@@ -460,7 +460,7 @@ function drawPlanView(doc: jsPDF, inp: Inputs, res: ComputedResults) {
 }
 
 export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
 
