@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 
+const calculateObstructionPercent = (ventArea: number, flowArea: number) => {
+  if (flowArea <= 0) return 0;
+  const obstruction = (1 - (ventArea / flowArea)) * 100;
+  return Math.min(100, Math.max(0, obstruction));
+};
+
 export type Inputs = {
   // Metadata
   projectName: string;
@@ -21,6 +27,10 @@ export type Inputs = {
   hfl: number;
   gl: number;
   rtl: number;
+  ofl_m: number;
+  lbl_m: number;
+  bottomDeck_m: number;
+  carriageWidth_m: number;
   numVents: number;
   ventWidth: number;
   ventHeight: number;
@@ -33,11 +43,13 @@ export type Inputs = {
   deckSpan: number;
   deckThickness: number;
   numSpans: number;
-  liveLoadType: "IRC Class A" | "IRC Class AA";
+  liveLoadType: "IRC Class A" | "IRC Class AA" | "IRC Class 70R";
   waterDensity: number;
   concreteDensity: number;
   dragCoefficient: number;
   siltLoadDeck: number;
+  sbc_kN_m2: number;
+  d_LBL_depth_m: number;
 };
 
 export type ComputedResults = {
@@ -68,6 +80,8 @@ export type ComputedResults = {
   fbl: number;
   recommendedDepth: number;
   scourSafe: boolean;
+  passMinCarriageWidth_m: boolean;
+  minCarriageWidthNote: string;
 
   // Step 3
   wSelf: number;
@@ -107,6 +121,10 @@ export const defaultInputs: Inputs = {
   hfl: 102.5,
   gl: 100.0,
   rtl: 101.2,
+  ofl_m: 5.1,
+  lbl_m: 4.2,
+  bottomDeck_m: 5.5,
+  carriageWidth_m: 7.5,
   numVents: 4,
   ventWidth: 1.5,
   ventHeight: 0.9,
@@ -123,7 +141,20 @@ export const defaultInputs: Inputs = {
   concreteDensity: 2500,
   dragCoefficient: 2.0,
   siltLoadDeck: 1.2,
+  sbc_kN_m2: 98,
+  d_LBL_depth_m: 2.0,
 };
+
+export const DEFAULT_GEOMETRY = {
+  PIER_W_M: 0.4,
+  ABUT_W_M: 0.8,
+  FEXT_M: 0.4,
+  APP_M: 3.0,
+  PMARG_M: 2.0,
+  BANK_MULT: 1.6,
+} as const;
+
+export type Geometry = typeof DEFAULT_GEOMETRY;
 
 const CalculationsContext = createContext<CalculationsContextType | null>(null);
 
@@ -171,8 +202,8 @@ export function CalculationsProvider({ children }: { children: ReactNode }) {
     const depthHFL = Math.max(0, inputs.hfl - inputs.gl);
     const aHFL = depthHFL * effectiveWidth;
 
-    const pctObsRTL = aRTL > 0 ? (1 - (aVent / aRTL)) * 100 : 0;
-    const pctObsHFL = aHFL > 0 ? (1 - (aVent / aHFL)) * 100 : 0;
+    const pctObsRTL = calculateObstructionPercent(aVent, aRTL);
+    const pctObsHFL = calculateObstructionPercent(aVent, aHFL);
 
     const passRTL = pctObsRTL < 70;
     const passHFL = pctObsHFL < 30;
@@ -191,11 +222,14 @@ export function CalculationsProvider({ children }: { children: ReactNode }) {
     const fbl = inputs.hfl - maxScourDepth;
     const recommendedDepth = inputs.gl - fbl;
     const scourSafe = fbl < (inputs.gl - 0.5);
+    const passMinCarriageWidth_m = inputs.carriageWidth_m >= 6.0;
+    const minCarriageWidthNote = inputs.carriageWidth_m < 6.0 ? `FAIL: Carriageway ${inputs.carriageWidth_m.toFixed(3)}m < 6.0m (IRC SP:82-2008 Cl.6.4.2(vi))` : `PASS: ${inputs.carriageWidth_m.toFixed(3)}m ≥ 6.0m minimum`;
 
     // ─── STEP 3 ───────────────────────────────────────────────────────────────
     const wSelf = (inputs.concreteDensity * 9.81 * inputs.deckWidth * inputs.deckSpan * inputs.deckThickness) / 1000;
     const wSilt = inputs.siltLoadDeck * inputs.deckWidth * inputs.deckSpan;
-    const wLive = inputs.liveLoadType === "IRC Class AA" ? 700 : 554;
+    const wLive = inputs.liveLoadType === "IRC Class 70R" ? 900 : inputs.liveLoadType === "IRC Class AA" ? 700 : 554;
+    /* [PLACEHOLDER E1 — IRC Class 70R wLive=900kN is DEFAULT ESTIMATE pending E1 decision (IRC 6 axle table). RED-FLAGGED — OVERRIDE.] */
     const totalVerticalLoad = wSelf + wSilt + (wLive / inputs.numSpans);
 
     const fDrag = (inputs.dragCoefficient * 0.5 * inputs.waterDensity * Math.pow(velocityHFL, 2) * (inputs.deckWidth * inputs.deckThickness)) / 1000;
@@ -209,6 +243,7 @@ export function CalculationsProvider({ children }: { children: ReactNode }) {
       pctObsRTL, pctObsHFL, passRTL, passHFL,
       velocityHFL, hAfflux,
       laceyPerimeter, laceyScourDepth, maxScourDepth, fbl, recommendedDepth, scourSafe,
+      passMinCarriageWidth_m, minCarriageWidthNote,
       wSelf, wSilt, wLive, totalVerticalLoad,
       fDrag, fUplift, fAnchor, fDragTotal,
     };

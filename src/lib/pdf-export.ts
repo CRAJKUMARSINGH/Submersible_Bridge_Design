@@ -1,8 +1,18 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Inputs, ComputedResults } from './calculations';
+import { DEFAULT_GEOMETRY } from './calculations';
+import { buildDesignFormulaTrace } from './design-formula-trace';
 
 const f = (n: number, d = 2) => n.toFixed(d);
+
+function getDesignDischargeSummary(inputs: Inputs, results: ComputedResults) {
+  if (inputs.customDesignDischarge !== null) {
+    return `DESIGN DISCHARGE  Q = ${f(results.designDischarge)} m³/s   (Manual override from Step 2)`;
+  }
+
+  return `DESIGN DISCHARGE  Q = ${f(results.designDischarge)} m³/s   (Governed by: ${results.governingMethod})`;
+}
 
 function hatch(doc: jsPDF, rx: number, ry: number, rw: number, rh: number, step = 3.5) {
   const prevLW = doc.getLineWidth();
@@ -131,12 +141,22 @@ function border(doc: jsPDF) {
   doc.rect(10, 10, W - 20, H - 20);
 }
 
+function pageFooterDisclaimer(doc: jsPDF) {
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(80);
+  doc.text('Automated — not independently verified unless signed in Appendix S', W - 12, H - 10, { align: 'right' });
+  doc.setTextColor(0);
+}
+
 function drawCrossSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   border(doc);
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
 
-  const PIER_W = 0.4, ABUT_W = 0.6, FEXT = 0.4;
+  const PIER_W = DEFAULT_GEOMETRY.PIER_W_M, ABUT_W = DEFAULT_GEOMETRY.ABUT_W_M, FEXT = DEFAULT_GEOMETRY.FEXT_M;
   const nPiers = inp.numVents - 1;
   const totW = 2 * ABUT_W + nPiers * PIER_W + inp.numVents * inp.ventWidth;
   const deckTop = inp.rtl + inp.deckThickness;
@@ -235,7 +255,7 @@ function drawCrossSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   doc.text(`SCOUR ${f(res.maxScourDepth)}m`, ax + 1.5, (yGL + yFBL) / 2, { baseline: 'middle' });
   doc.setDrawColor(0);
 
-  titleBlock(doc, inp, 'CROSS SECTION AT A-A', 'CS/DRG/01', '1:50 (SCHEMATIC)', '5', '7');
+  titleBlock(doc, inp, 'CROSS SECTION AT A-A', 'CS/DRG/01', '1:50 (SCHEMATIC)', '5', '9');
 }
 
 function drawLongSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
@@ -243,7 +263,7 @@ function drawLongSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
 
-  const ABUT_W = 0.8, PIER_W = 0.4, FEXT = 0.4, APP = 3.0;
+  const ABUT_W = DEFAULT_GEOMETRY.ABUT_W_M, PIER_W = DEFAULT_GEOMETRY.PIER_W_M, FEXT = DEFAULT_GEOMETRY.FEXT_M, APP = DEFAULT_GEOMETRY.APP_M;
   const totL = inp.numSpans * inp.deckSpan;
   const worldL = totL + 2 * ABUT_W + 2 * APP;
   const deckTop = inp.rtl + inp.deckThickness;
@@ -344,7 +364,7 @@ function drawLongSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   vDim(doc, ML + dW + 8, yGL, yFBL, `SCOUR ${f(res.maxScourDepth)}m`);
   vDim(doc, mx(xLA) - 10, yDT, yRTL, `t=${f(inp.deckThickness, 3)}m`);
 
-  titleBlock(doc, inp, 'LONGITUDINAL SECTION B-B', 'CS/DRG/02', '1:50 (SCHEMATIC)', '6', '7');
+  titleBlock(doc, inp, 'LONGITUDINAL SECTION B-B', 'CS/DRG/02', '1:50 (SCHEMATIC)', '6', '9');
 }
 
 function drawPlanView(doc: jsPDF, inp: Inputs, res: ComputedResults) {
@@ -352,10 +372,10 @@ function drawPlanView(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
 
-  const ABUT_W = 0.8, APP = 3.0;
+  const ABUT_W = DEFAULT_GEOMETRY.ABUT_W_M, APP = DEFAULT_GEOMETRY.APP_M;
   const totL = inp.numSpans * inp.deckSpan;
   const worldL = totL + 2 * ABUT_W + 2 * APP;
-  const PMARG = 1.5, worldW = inp.deckWidth + 2 * PMARG;
+  const PMARG = DEFAULT_GEOMETRY.PMARG_M, worldW = inp.deckWidth + 2 * PMARG;
 
   const ML = 20, MR = 20, MT = 20, TB = 46, MB = 12;
   const dW = W - ML - MR, dH = H - MT - TB - MB;
@@ -366,7 +386,7 @@ function drawPlanView(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   const my = (wy: number) => MT + (wy + PMARG) * vS;
 
   const yTop = -inp.deckWidth / 2, yBot = inp.deckWidth / 2;
-  const bankW = inp.deckWidth * 1.6;
+  const bankW = inp.deckWidth * DEFAULT_GEOMETRY.BANK_MULT;
 
   doc.setFontSize(10); doc.setFont('helvetica', 'bold');
   doc.text('PLAN VIEW', W / 2, 15, { align: 'center' });
@@ -448,7 +468,66 @@ function drawPlanView(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   doc.text(`N_SPANS = ${inp.numSpans}  |  N_VENTS = ${inp.numVents}  |  VENT: ${f(inp.ventWidth)}m × ${f(inp.ventHeight)}m`,
     ML + dW / 2, H - TB - MB - 4, { align: 'center' });
 
-  titleBlock(doc, inp, 'PLAN VIEW', 'CS/DRG/03', '1:50 (SCHEMATIC)', '7', '7');
+  titleBlock(doc, inp, 'PLAN VIEW', 'CS/DRG/03', '1:50 (SCHEMATIC)', '7', '9');
+}
+
+function addFormulaTraceSheet(
+  doc: jsPDF,
+  inputs: Inputs,
+  results: ComputedResults,
+  sections: Array<'Step 1 — Discharge' | 'Step 2 — Hydraulic' | 'Step 3 — Structural'>,
+  sheet: string,
+  title: string,
+) {
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const rows = buildDesignFormulaTrace(inputs, results).filter((row) => sections.includes(row.section));
+
+  doc.addPage();
+  doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F');
+  doc.setTextColor(0); doc.setDrawColor(0); border(doc);
+  doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+  doc.text(title, W / 2, 15, { align: 'center' });
+  doc.setFontSize(6.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(85);
+  doc.text(
+    'Live trace of equations implemented in this app. Additional prototype equations outside this model are not recalculated.',
+    W / 2, 20, { align: 'center' },
+  );
+  doc.setTextColor(0);
+
+  autoTable(doc, {
+    startY: 25,
+    margin: { left: 12, right: 12, bottom: 38 },
+    head: [['ID', 'Equation', 'Substitution from current design', 'Result', 'Prototype text reference']],
+    body: rows.map((row) => [
+      row.id,
+      row.equation,
+      row.substitution,
+      `${row.result} ${row.unit}`,
+      row.prototypeReference,
+    ]),
+    theme: 'grid',
+    styles: { font: 'helvetica', fontSize: 5.3, cellPadding: 1, overflow: 'linebreak', textColor: [20, 20, 20] },
+    headStyles: { fillColor: [12, 20, 45], textColor: [245, 158, 11], fontStyle: 'bold', fontSize: 5.8 },
+    bodyStyles: { minCellHeight: 4.5 },
+    columnStyles: {
+      0: { cellWidth: 20, fontStyle: 'bold' },
+      1: { cellWidth: 59 },
+      2: { cellWidth: 99 },
+      3: { cellWidth: 27, halign: 'right', fontStyle: 'bold' },
+      4: { cellWidth: 60 },
+    },
+  });
+
+  const tableEnd = (doc as any).lastAutoTable.finalY as number;
+  doc.setFontSize(5.5); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
+  doc.text(
+    'Prototype equations not modeled here remain unchanged in the source text; their old numeric examples must not be used as updated results.',
+    12, Math.min(tableEnd + 4, H - 38),
+  );
+  doc.setTextColor(0);
+  titleBlock(doc, inputs, title, 'CS/CALC/TRACE', '—', sheet, '9');
+  pageFooterDisclaimer(doc);
 }
 
 export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
@@ -465,13 +544,32 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   doc.setTextColor(245, 158, 11); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
   doc.text('GOVERNMENT OF INDIA  |  MINISTRY OF ROAD TRANSPORT & HIGHWAYS', W / 2, 25, { align: 'center' });
 
+  const dx = 20, dy = 30, dw = W - 40, dh = 40;
+  doc.setDrawColor(185, 28, 28);
+  doc.setFillColor(254, 249, 195);
+  doc.setLineWidth(0.8);
+  doc.rect(dx, dy, dw, dh, 'FD');
+  doc.setTextColor(127, 29, 29);
+  doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+  doc.text('⚠️ AUTOMATED REPORT — NOT INDEPENDENTLY VERIFIED', W / 2, dy + 9, { align: 'center' });
+  doc.setFontSize(11); doc.setFont('helvetica', 'normal');
+  const bodyLines = [
+    'This document was generated by automated software. Engineering values, drawings dimension labels,',
+    'load calculation results, and code clause references have NOT been compared against manually',
+    'verified reference information signed by a licensed Professional Engineer.'
+  ];
+  bodyLines.forEach((ln, i) => doc.text(ln, W / 2, dy + 18 + i * 5, { align: 'center', maxWidth: dw - 10 }));
+  doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+  doc.text('DO NOT USE FOR CONSTRUCTION UNTIL APPENDIX S (V&V SIGN-OFF PAGE) IS SIGNED AND DATED.', W / 2, dy + dh - 6, { align: 'center', maxWidth: dw - 10 });
+  doc.setTextColor(0); doc.setDrawColor(0); doc.setLineWidth(0.3);
+
   doc.setFontSize(22); doc.setTextColor(255, 255, 255);
-  doc.text('DESIGN OF VENTED SUBMERSIBLE CAUSEWAY', W / 2, 65, { align: 'center' });
+  doc.text('DESIGN OF VENTED SUBMERSIBLE CAUSEWAY', W / 2, 110, { align: 'center' });
   doc.setFontSize(11); doc.setTextColor(200, 200, 200);
-  doc.text('HYDRAULIC & STRUCTURAL DESIGN REPORT', W / 2, 76, { align: 'center' });
+  doc.text('HYDRAULIC & STRUCTURAL DESIGN REPORT', W / 2, 121, { align: 'center' });
 
   doc.setDrawColor(245, 158, 11); doc.setLineWidth(0.5);
-  doc.line(W / 2 - 80, 82, W / 2 + 80, 82);
+  doc.line(W / 2 - 80, 127, W / 2 + 80, 127);
 
   doc.setFontSize(9.5); doc.setTextColor(220, 220, 220); doc.setFont('helvetica', 'normal');
   const meta = [
@@ -481,15 +579,15 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
     ['Date', inputs.date],
   ];
   meta.forEach(([k, v], i) => {
-    doc.setFont('helvetica', 'bold'); doc.text(`${k}:`, W / 2 - 60, 95 + i * 9);
-    doc.setFont('helvetica', 'normal'); doc.text(v, W / 2 - 10, 95 + i * 9);
+    doc.setFont('helvetica', 'bold'); doc.text(`${k}:`, W / 2 - 60, 140 + i * 9);
+    doc.setFont('helvetica', 'normal'); doc.text(v, W / 2 - 10, 140 + i * 9);
   });
 
   doc.setTextColor(245, 158, 11); doc.setFontSize(8.5); doc.setFont('helvetica', 'bold');
-  doc.text('Designed as per IRC SP:82-2008 & IRC 6:2000', W / 2, 140, { align: 'center' });
+  doc.text('Designed as per IRC SP:82-2008 & IRC 6:2000', W / 2, 185, { align: 'center' });
 
   doc.setTextColor(200, 200, 200); doc.setFontSize(8); doc.setFont('helvetica', 'bold');
-  doc.text('CONTENTS', W / 2, 160, { align: 'center' });
+  doc.text('CONTENTS', W / 2, 205, { align: 'center' });
   doc.setFont('helvetica', 'normal');
   [
     ['Sheet 1', 'Cover Page'],
@@ -499,13 +597,17 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
     ['Sheet 5', 'Cross Section at A-A — Engineering Drawing'],
     ['Sheet 6', 'Longitudinal Section B-B — Engineering Drawing'],
     ['Sheet 7', 'Plan View — Engineering Drawing'],
+    ['Sheet 8', 'Live Formula Trace — Discharge and Hydraulic'],
+    ['Sheet 9', 'Live Formula Trace — Structural'],
   ].forEach(([s, t], i) => {
-    doc.text(`${s}`, W / 2 - 60, 170 + i * 8);
-    doc.text(t, W / 2 - 30, 170 + i * 8);
+    doc.text(`${s}`, W / 2 - 60, 215 + i * 8);
+    doc.text(t, W / 2 - 30, 215 + i * 8);
   });
 
   doc.setFontSize(6); doc.setTextColor(120, 120, 120);
   doc.text('Generated by CSWY-CALC 82 — IRC SP:82-2008 Compliant Design Tool', W / 2, H - 20, { align: 'center' });
+
+  pageFooterDisclaimer(doc);
 
   // ── SHEET 2: STEP 1 ────────────────────────────────────────────────────────
   doc.addPage();
@@ -516,7 +618,14 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   doc.setFontSize(11); doc.setFont('helvetica', 'bold');
   doc.text('SHEET 2 — STEP 1: DESIGN DISCHARGE', W / 2, 17, { align: 'center' });
   doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-  doc.text('Discharge computed by three methods; maximum governs.', W / 2, 23, { align: 'center' });
+  doc.text(
+    inputs.customDesignDischarge !== null
+      ? 'Discharge computed by three methods; Step 2 manual override is applied to downstream design.'
+      : 'Discharge computed by three methods; maximum governs.',
+    W / 2,
+    23,
+    { align: 'center' },
+  );
   doc.setLineWidth(0.4); doc.line(12, 26, W - 12, 26);
 
   autoTable(doc, {
@@ -538,7 +647,7 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   doc.setFontSize(9.5); doc.setFont('helvetica', 'bold');
   doc.setFillColor(245, 158, 11); doc.rect(12, y2 - 1, W - 24, 12, 'F');
   doc.setTextColor(12, 20, 45);
-  doc.text(`DESIGN DISCHARGE  Q = ${f(results.qDesign)} m³/s   (Governed by: ${results.governingMethod})`, W / 2, y2 + 6.5, { align: 'center' });
+  doc.text(getDesignDischargeSummary(inputs, results), W / 2, y2 + 6.5, { align: 'center' });
   doc.setTextColor(0);
 
   autoTable(doc, {
@@ -562,7 +671,8 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   doc.setFontSize(6); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
   doc.text('Ref: Rational Method (CWC guidelines), Broad-crested weir formula, IRC SP:82-2008', 12, (doc as any).lastAutoTable.finalY + 5);
   doc.setTextColor(0);
-  titleBlock(doc, inputs, 'DESIGN DISCHARGE — STEP 1', 'CS/CALC/01', '—', '2', '7');
+  titleBlock(doc, inputs, 'DESIGN DISCHARGE — STEP 1', 'CS/CALC/01', '—', '2', '9');
+  pageFooterDisclaimer(doc);
 
   // ── SHEET 3: STEP 2 ────────────────────────────────────────────────────────
   doc.addPage();
@@ -625,7 +735,8 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   doc.setFontSize(6); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
   doc.text('Ref: Lacey (1930) regime scour equations, Molesworth afflux formula, IRC SP:82-2008 Cl.6', 12, (doc as any).lastAutoTable.finalY + 4);
   doc.setTextColor(0);
-  titleBlock(doc, inputs, 'HYDRAULIC DESIGN — STEP 2', 'CS/CALC/02', '—', '3', '7');
+  titleBlock(doc, inputs, 'HYDRAULIC DESIGN — STEP 2', 'CS/CALC/02', '—', '3', '9');
+  pageFooterDisclaimer(doc);
 
   // ── SHEET 4: STEP 3 ────────────────────────────────────────────────────────
   doc.addPage();
@@ -686,6 +797,7 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
     body: [
       ['Ventway obstruction @ RTL', `${f(results.pctObsRTL, 1)}%`, '< 70% (IRC SP:82-2008)', results.passRTL ? 'PASS' : 'FAIL'],
       ['Ventway obstruction @ HFL', `${f(results.pctObsHFL, 1)}%`, '< 30% (IRC SP:82-2008)', results.passHFL ? 'PASS' : 'FAIL'],
+      ['Min carriageway width', `${f(inputs.carriageWidth_m, 3)}m`, '≥ 6.0m (IRC SP:82-2008 Cl.6.4.2(vi))', results.passMinCarriageWidth_m ? 'PASS' : 'FAIL'],
       ['Foundation depth vs scour', `${f(results.recommendedDepth, 2)}m below GL`, '> 0.5m below max scour', results.scourSafe ? 'SAFE' : 'REVIEW'],
       ['Deck uplift resistance', results.fAnchor > 0 ? 'Anchors needed' : 'Self-weight adequate', 'W_self > F_uplift', results.fAnchor <= 0 ? 'SAFE' : 'ANCHORS REQD'],
     ],
@@ -705,20 +817,41 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   doc.setFontSize(6); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
   doc.text('Ref: IRC 6:2000 (Loads & Combinations), IRC SP:82-2008 (Drag / Uplift / Silt on deck), IRC Class A/AA standard loading', 12, (doc as any).lastAutoTable.finalY + 4);
   doc.setTextColor(0);
-  titleBlock(doc, inputs, 'STRUCTURAL DESIGN — STEP 3', 'CS/CALC/03', '—', '4', '7');
+  titleBlock(doc, inputs, 'STRUCTURAL DESIGN — STEP 3', 'CS/CALC/03', '—', '4', '9');
+  pageFooterDisclaimer(doc);
 
   // ── SHEETS 5–7: DRAWINGS ───────────────────────────────────────────────────
   doc.addPage(); doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F');
   doc.setTextColor(0); doc.setDrawColor(0); doc.setLineWidth(0.3);
   drawCrossSection(doc, inputs, results);
+  pageFooterDisclaimer(doc);
 
   doc.addPage(); doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F');
   doc.setTextColor(0); doc.setDrawColor(0); doc.setLineWidth(0.3);
   drawLongSection(doc, inputs, results);
+  pageFooterDisclaimer(doc);
 
   doc.addPage(); doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F');
   doc.setTextColor(0); doc.setDrawColor(0); doc.setLineWidth(0.3);
   drawPlanView(doc, inputs, results);
+  pageFooterDisclaimer(doc);
+
+  addFormulaTraceSheet(
+    doc,
+    inputs,
+    results,
+    ['Step 1 — Discharge', 'Step 2 — Hydraulic'],
+    '8',
+    'SHEET 8 — LIVE FORMULA TRACE: DISCHARGE & HYDRAULIC',
+  );
+  addFormulaTraceSheet(
+    doc,
+    inputs,
+    results,
+    ['Step 3 — Structural'],
+    '9',
+    'SHEET 9 — LIVE FORMULA TRACE: STRUCTURAL',
+  );
 
   const filename = `Causeway_Design_${inputs.projectName.replace(/[^a-z0-9]/gi, '_')}.pdf`;
   doc.save(filename);
