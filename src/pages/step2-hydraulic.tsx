@@ -57,6 +57,22 @@ export default function Step2Hydraulic() {
                   <Input type="number" step="0.1" value={inputs.rtl} onChange={e => updateInput("rtl", Number(e.target.value))} />
                 </div>
                 <div className="space-y-2">
+                  <Label>OFL Ordinary Flood (m)</Label>
+                  <Input type="number" step="0.1" value={inputs.ofl_m} onChange={e => updateInput("ofl_m", Number(e.target.value))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>LBL Low Bed (m)</Label>
+                  <Input type="number" step="0.1" value={inputs.lbl_m} onChange={e => updateInput("lbl_m", Number(e.target.value))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Bottom of Deck (m)</Label>
+                  <Input type="number" step="0.1" value={inputs.bottomDeck_m} onChange={e => updateInput("bottomDeck_m", Number(e.target.value))} />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <Label>Carriageway Width (m) — E17 min 6.0m</Label>
+                  <Input type="number" step="0.1" value={inputs.carriageWidth_m} onChange={e => updateInput("carriageWidth_m", Number(e.target.value))} />
+                </div>
+                <div className="space-y-2">
                   <Label>Approach Vel (m/s)</Label>
                   <Input type="number" step="0.1" value={inputs.approachVelocity} onChange={e => updateInput("approachVelocity", Number(e.target.value))} />
                 </div>

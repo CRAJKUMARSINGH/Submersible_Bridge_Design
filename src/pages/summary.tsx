@@ -115,6 +115,7 @@ function SectionDiagram() {
 export default function SummaryReport() {
   const { inputs, results } = useCalculations();
   const [exporting, setExporting] = React.useState(false);
+  const V10_SIGNED_OFF = false;
 
   const handleExport = () => {
     setExporting(true);
@@ -124,14 +125,18 @@ export default function SummaryReport() {
     }, 50);
   };
 
-  const allPass = results.passRTL && results.passHFL && results.scourSafe && results.fAnchor <= 0;
+  const allPass = results.passRTL && results.passHFL && results.passMinCarriageWidth_m && results.scourSafe && results.fAnchor <= 0;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+      {!V10_SIGNED_OFF && (
+        <div className="v10-unsigned-banner" style={{border:'2px solid #b91c1c',background:'#fee2e2',padding:'12px',marginBottom:'16px',borderRadius:'6px',color:'#7f1d1d',fontWeight:600}}>Engineering accuracy NOT independently verified. PE V&V sign-off (V10) required before construction use.</div>
+      )}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">Summary Report</h2>
-          <p className="text-muted-foreground mt-1 text-sm">All IRC checks, computed values, and compliance status.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Live calculations and formula substitutions for the inputs currently modeled in this app.</p>
+          <p className="text-muted-foreground mt-1 text-xs">Unmapped equations in the long prototype remain reference-only and are not recalculated from these inputs.</p>
         </div>
         <button
           onClick={handleExport}
@@ -139,7 +144,7 @@ export default function SummaryReport() {
           className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-all font-semibold text-sm disabled:opacity-60 shrink-0"
         >
           <FileDown className="w-4 h-4" />
-          {exporting ? 'Generating…' : 'Export 7-Sheet PDF'}
+          {exporting ? 'Generating…' : 'Export 9-Sheet PDF'}
         </button>
       </div>
 
@@ -148,7 +153,7 @@ export default function SummaryReport() {
         <div className="flex items-center gap-3">
           <div className={`w-3 h-3 rounded-full ${allPass ? 'bg-success' : 'bg-destructive'}`} />
           <span className={`font-bold text-sm ${allPass ? 'text-success' : 'text-destructive'}`}>
-            {allPass ? 'ALL CHECKS PASSED — Design compliant with IRC SP:82-2008' : 'ONE OR MORE CHECKS FAILED — Review parameters'}
+            {allPass ? 'MODELLED CHECKS PASS — independent project-specific engineering review is still required' : 'MODEL CHECK FAILED — review parameters and obtain engineering review'}
           </span>
         </div>
       </div>
@@ -270,7 +275,8 @@ export default function SummaryReport() {
       {/* Compliance table */}
       <Card>
         <CardHeader>
-          <CardTitle>Compliance Summary — IRC SP:82-2008 & IRC 6:2000</CardTitle>
+          <CardTitle>Modeled Check Summary</CardTitle>
+          <p className="text-sm text-muted-foreground">Displayed criteria are checks in this app, not a project-specific code-compliance certification.</p>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -287,6 +293,7 @@ export default function SummaryReport() {
                 {[
                   { check: 'Ventway obstruction @ RTL', val: `${results.pctObsRTL.toFixed(1)}%`, limit: '< 70%', pass: results.passRTL },
                   { check: 'Ventway obstruction @ HFL', val: `${results.pctObsHFL.toFixed(1)}%`, limit: '< 30%', pass: results.passHFL },
+                  { check: 'Min carriageway width (E17)', val: `${inputs.carriageWidth_m.toFixed(2)}m`, limit: '≥ 6.0m (IRC SP:82 Cl.6.4.2(vi))', pass: results.passMinCarriageWidth_m },
                   { check: 'Foundation depth vs scour', val: `${results.recommendedDepth.toFixed(2)}m below GL`, limit: '> 0.5m', pass: results.scourSafe },
                   { check: 'Deck uplift resistance', val: `F_anchor = ${results.fAnchor.toFixed(2)} kN`, limit: 'W_self > F_uplift', pass: results.fAnchor <= 0 },
                 ].map(row => (

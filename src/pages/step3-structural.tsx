@@ -49,13 +49,22 @@ export default function Step3Structural() {
                 <select
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-primary font-mono"
                   value={inputs.liveLoadType}
-                  onChange={e => updateInput("liveLoadType", e.target.value as "IRC Class A" | "IRC Class AA")}
+                  onChange={e => updateInput("liveLoadType", e.target.value as "IRC Class A" | "IRC Class AA" | "IRC Class 70R")}
                 >
                   <option value="IRC Class A">IRC Class A (554 kN)</option>
                   <option value="IRC Class AA">IRC Class AA (700 kN)</option>
+                  <option value="IRC Class 70R">IRC Class 70R (900 kN est.)</option>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>SBC Safe Bearing (kN/m²)</Label>
+                  <Input type="number" step="1" value={inputs.sbc_kN_m2} onChange={e => updateInput("sbc_kN_m2", Number(e.target.value))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Depth Datum LBL (m)</Label>
+                  <Input type="number" step="0.1" value={inputs.d_LBL_depth_m} onChange={e => updateInput("d_LBL_depth_m", Number(e.target.value))} />
+                </div>
                 <div className="space-y-2">
                   <Label>ρ Water (kg/m³)</Label>
                   <Input type="number" step="1" value={inputs.waterDensity} onChange={e => updateInput("waterDensity", Number(e.target.value))} />
