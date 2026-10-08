@@ -1,4 +1,11 @@
 import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
+import engineeringInputs from './engineering_inputs.json';
+
+// Helper to get traced input value
+const getTraceableInput = (id: string, fallback: number) => {
+  const item = engineeringInputs.find(i => i.parameter_id === id);
+  return item && typeof item.value === 'number' ? item.value : fallback;
+};
 
 const calculateObstructionPercent = (ventArea: number, flowArea: number) => {
   if (flowArea <= 0) return 0;
@@ -104,9 +111,9 @@ export type CalculationsContextType = {
 };
 
 export const defaultInputs: Inputs = {
-  projectName: "Bridge #42 — Rural Connect",
-  streamName: "Kaveri Tributary",
-  location: "District XYZ",
+  projectName: "Type Design of Submersible Causeway",
+  streamName: "Not Specified",
+  location: "B.T to the R/f KB Road to P.Bheemavaram",
   date: "",
 
   catchmentArea: 12.5,
@@ -118,6 +125,7 @@ export const defaultInputs: Inputs = {
   meanVelocityHFL: 1.2,
 
   customDesignDischarge: null,
+<<<<<<< HEAD
   hfl: 102.5,
   gl: 100.0,
   rtl: 101.2,
@@ -125,6 +133,11 @@ export const defaultInputs: Inputs = {
   lbl_m: 4.2,
   bottomDeck_m: 5.5,
   carriageWidth_m: 7.5,
+=======
+  hfl: getTraceableInput("hfl", 102.5),
+  gl: getTraceableInput("lbl", 100.0), // Low bed level
+  rtl: getTraceableInput("rtl", 101.2),
+>>>>>>> 7d6bf46b1149d19e722a1a554bdf199477d39165
   numVents: 4,
   ventWidth: 1.5,
   ventHeight: 0.9,
@@ -132,13 +145,13 @@ export const defaultInputs: Inputs = {
   siltFactor: 1.0,
   cdVent: 0.9,
 
-  deckWidth: 4.5,
-  deckSpan: 2.0,
-  deckThickness: 0.25,
+  deckWidth: getTraceableInput("carriage_way_width", 4.5),
+  deckSpan: getTraceableInput("clear_right_span", 2.0),
+  deckThickness: getTraceableInput("deck_slab_thickness", 0.25),
   numSpans: 6,
   liveLoadType: "IRC Class A",
-  waterDensity: 1000,
-  concreteDensity: 2500,
+  waterDensity: getTraceableInput("unit_weight_water", 10) * 100, // converted back to kg/m3 if needed, or formula adjusted
+  concreteDensity: getTraceableInput("unit_weight_rcc", 25) * 100,
   dragCoefficient: 2.0,
   siltLoadDeck: 1.2,
   sbc_kN_m2: 98,

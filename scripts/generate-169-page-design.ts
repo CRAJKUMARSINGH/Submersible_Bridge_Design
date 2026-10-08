@@ -1,4 +1,4 @@
-﻿import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -669,7 +669,7 @@ async function main() {
   const sampleTextLines = loadSampleText();
   console.log(`Loaded ${sampleTextLines.length} lines from sample text file`);
 
-  const doc: any = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
+  const doc: any = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
 
   const allInputs = parseCSV(existsSync(DEFAULT_SEED) ? DEFAULT_SEED : join(ROOT, 'test-variables-25-sets.csv'));
@@ -679,14 +679,14 @@ async function main() {
   doc.setFillColor(8, 14, 36); doc.rect(0, 0, W, H, 'F');
   doc.setFillColor(245, 158, 11); doc.rect(0, 0, 8, H, 'F');
   doc.setFillColor(36, 99, 235); doc.rect(8, 0, 4, H, 'F');
-  doc.setFillColor(18, 28, 70); doc.rect(20, 40, W - 40, 70, 'F');
+  doc.setFillColor(18, 28, 70); doc.rect(14, 38, W - 28, 62, 'F');
   doc.setFillColor(245, 158, 11);
-  const heroCX = W / 2, heroY = 88, spanW = 32, spanN = 5;
+  const heroCX = W / 2, heroY = 76, spanW = 28, spanN = 5;
   for (let k = 0; k < spanN; k++) {
     const cx = heroCX - ((spanN - 1) * spanW) / 2 + k * spanW;
     doc.ellipse(cx, heroY, spanW * 0.42, 14, 'F');
   }
-  doc.setFillColor(18, 28, 70); doc.rect(20, heroY, W - 40, 22, 'F');
+  doc.setFillColor(18, 28, 70); doc.rect(14, heroY, W - 28, 22, 'F');
   doc.setFillColor(245, 158, 11);
   doc.rect(heroCX - spanN * spanW * 0.5 - 12, heroY - 3, spanN * spanW + 24, 3, 'F');
   doc.rect(heroCX - spanN * spanW * 0.5 - 16, heroY - 3, 4, 18, 'F');
@@ -695,23 +695,32 @@ async function main() {
   for (let k = 0; k < 3; k++) {
     const yy = heroY + 8 + k * 7;
     for (let x = 28; x < W - 28; x += 12) {
-      doc.curveTo(x, yy, x + 3, yy - 2, x + 6, yy);
-      doc.curveTo(x + 6, yy, x + 9, yy + 2, x + 12, yy);
+      const wave: [number, number][] = [
+        [x, yy],
+        [x + 3, yy - 2],
+        [x + 6, yy],
+        [x + 9, yy + 2],
+        [x + 12, yy],
+      ];
+      for (let p = 0; p < wave.length - 1; p++) {
+        doc.line(wave[p][0], wave[p][1], wave[p + 1][0], wave[p + 1][1]);
+      }
     }
   }
   doc.setDrawColor(0);
-  doc.setFillColor(12, 20, 45, 0.92); doc.rect(40, 130, W - 80, 72, 'F');
-  doc.setDrawColor(245, 158, 11); doc.setLineWidth(0.8); doc.rect(40, 130, W - 80, 72);
+  const infoX = 14, infoY = 108, infoW = W - 28, infoH = 82;
+  doc.setFillColor(12, 20, 45, 0.92); doc.rect(infoX, infoY, infoW, infoH, 'F');
+  doc.setDrawColor(245, 158, 11); doc.setLineWidth(0.8); doc.rect(infoX, infoY, infoW, infoH);
   doc.setTextColor(245, 158, 11); doc.setFontSize(8); doc.setFont('helvetica', 'bold');
-  doc.text('GOVERNMENT OF INDIA  \u2022  MINISTRY OF ROAD TRANSPORT & HIGHWAYS', W / 2, 146, { align: 'center' });
-  doc.setFontSize(30); doc.setTextColor(255, 255, 255);
-  doc.text('DESIGN OF VENTED', W / 2, 172, { align: 'center' });
-  doc.text('SUBMERSIBLE CAUSEWAY', W / 2, 200, { align: 'center' });
-  doc.setFontSize(12); doc.setTextColor(214, 226, 255);
-  doc.text('Full Engineering Design Report  \u2014  169 Pages', W / 2, 218, { align: 'center' });
-  doc.setFontSize(9.5); doc.setTextColor(245, 158, 11); doc.setFont('helvetica', 'bold');
-  doc.text('IRC SP:82-2008  \u2022  IRC 6:2000  \u2022  Engineering Calculations  \u2022  Drawings  \u2022  Statutory Compliance', W / 2, 236, { align: 'center' });
-  const kpiY = H - 120, cardW = 60, cardH = 50, gap = 16;
+  doc.text('GOVERNMENT OF INDIA  \u2022  MINISTRY OF ROAD TRANSPORT & HIGHWAYS', W / 2, infoY + 15, { align: 'center' });
+  doc.setFontSize(18); doc.setTextColor(255, 255, 255);
+  doc.text('DESIGN OF VENTED', W / 2, infoY + 38, { align: 'center' });
+  doc.text('SUBMERSIBLE CAUSEWAY', W / 2, infoY + 59, { align: 'center' });
+  doc.setFontSize(8.5); doc.setTextColor(214, 226, 255);
+  doc.text('Full Engineering Design Report  \u2014  169 Pages', W / 2, infoY + 70, { align: 'center' });
+  doc.setFontSize(5.5); doc.setTextColor(245, 158, 11); doc.setFont('helvetica', 'bold');
+  doc.text('IRC SP:82-2008  \u2022  IRC 6:2000  \u2022  Engineering Calculations  \u2022  Drawings  \u2022  Statutory Compliance', W / 2, infoY + 78, { align: 'center' });
+  const kpiY = H - 86, cardW = 31, cardH = 42, gap = 4;
   const cards: [string, string, [number,number,number]][] = [
     ['20', 'Design Cases', [245, 158, 11]],
     ['165', 'Calculation Pages', [59, 130, 246]],
@@ -726,16 +735,16 @@ async function main() {
     doc.setDrawColor(c[2][0], c[2][1], c[2][2]); doc.setLineWidth(0.6); doc.roundedRect(x, kpiY, cardW, cardH, 2, 2, 'S');
     doc.setTextColor(c[2][0], c[2][1], c[2][2]); doc.setFontSize(22); doc.setFont('helvetica', 'bold');
     doc.text(c[0], x + cardW / 2, kpiY + cardH / 2 - 1, { align: 'center', baseline: 'middle' });
-    doc.setTextColor(220, 230, 255); doc.setFontSize(7.5); doc.setFont('helvetica', 'normal');
+    doc.setTextColor(220, 230, 255); doc.setFontSize(5.8); doc.setFont('helvetica', 'normal');
     doc.text(c[1], x + cardW / 2, kpiY + cardH - 8, { align: 'center' });
   });
   doc.setFontSize(6); doc.setFont('helvetica', 'italic'); doc.setTextColor(160, 170, 200);
   doc.text('Infographic Cover \u2014 Page 1 / 169', W / 2, H - 16, { align: 'center' });
 
   // ─────────────── PAGES 2-165: VERBATIM NARRATIVE FROM SAMPLE .TXT ───────────────
-  // lineHeight=11.9mm -> floor((297-50-20)/11.9) = floor(227/11.9) = 19 lines/page
-  // verbatim starts page 2; critical phrase at filtered line 253 lands on:
-  //   page 2 + floor(253/19) = page 2 + 13 = page 15  (matches sample PDF page 15)
+  // A4 portrait narrative: 25 wrapped segments per page at 5.5pt / 9.2mm.
+  // This deliberately budgets pages 2-165 so the drawings occupy 166-168
+  // and the back cover remains the real page 169.
   doc.addPage();
   doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F'); border(doc);
 
@@ -747,10 +756,10 @@ async function main() {
   } as Inputs;
 
   let narrativePage = 2;
-  let yPos = 20;
-  const lineH = 11.9;
-  const leftM = 20;
-  const bodyW = W - 40;
+  let yPos = 18;
+  const lineH = 9.2;
+  const leftM = 9;
+  const bodyW = W - 18;
 
   for (let li = 0; li < sampleTextLines.length; li++) {
     const line = sampleTextLines[li].trim();
@@ -765,7 +774,7 @@ async function main() {
     }
 
     // Render, wrapping if the line is longer than bodyW
-    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(0);
+    doc.setFontSize(5.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(0);
     const segs = doc.splitTextToSize(line, bodyW);
     for (const seg of segs) {
       if (yPos > H - 50) {
@@ -779,11 +788,13 @@ async function main() {
       yPos += lineH;
     }
 
-    if (narrativePage > 165) break;
   }
   // Close the last verbatim page
   titleBlock(doc, sampleInput, 'DESIGN CALCULATIONS', 'CS/DC', '—', String(narrativePage), '169');
   console.log(`Verbatim ended on page ${narrativePage}`);
+  if (narrativePage !== 165) {
+    throw new Error(`A4 narrative budget ended on page ${narrativePage}; expected page 165 before drawings.`);
+  }
 
   // ─────────────── PAGES 166-168: ENGINEERING DRAWINGS ────────────────
   if (cases.length > 0) {
@@ -812,21 +823,10 @@ async function main() {
   doc.setFontSize(6); doc.setFont('helvetica', 'italic'); doc.setTextColor(160, 170, 200);
   doc.text('Back Cover \u2014 Page 169 / 169', W / 2, H - 16, { align: 'center' });
 
-  // ─────────────── FINAL TRIM TO EXACTLY 169 PAGES ─────────────────────
+  // ─────────────── FINAL PAGE COUNT ASSERTION ─────────────────────────
   const pageCount = doc.internal.pages.length - 1;
-  if (pageCount > 169) {
-    const extra = pageCount - 169;
-    for (let i = 0; i < extra; i++) doc.deletePage(doc.internal.pages.length - 1);
-  }
-  while (doc.internal.pages.length - 1 < 169) {
-    doc.addPage();
-    doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F'); border(doc);
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold');
-    doc.text('ADDENDUM PAGE', W / 2, H / 2, { align: 'center', baseline: 'middle' });
-    doc.setFontSize(8); doc.setFont('helvetica', 'italic'); doc.setTextColor(80);
-    doc.text(`Page ${doc.internal.pages.length - 1}/169`, W / 2, H / 2 + 10, { align: 'center', baseline: 'middle' });
-    doc.setTextColor(0);
-    titleBlock(doc, sampleInput, 'ADDENDUM', 'CS/ADDN', '—', String(doc.internal.pages.length - 1), '169');
+  if (pageCount !== 169) {
+    throw new Error(`Generated ${pageCount} pages; expected exactly 169 without filler pages.`);
   }
 
   const finalCount = doc.internal.pages.length - 1;
