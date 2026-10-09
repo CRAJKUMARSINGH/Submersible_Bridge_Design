@@ -161,8 +161,8 @@ function drawCrossSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   const totW = 2 * ABUT_W + nPiers * PIER_W + inp.numVents * inp.ventWidth;
   const deckTop = inp.rtl + inp.deckThickness;
 
-  const minEl = res.fbl - 0.8;
-  const maxEl = Math.max(inp.hfl, deckTop) + 0.6;
+  const minEl = res.fbl - DEFAULT_GEOMETRY.ABUT_W_M;
+  const maxEl = Math.max(inp.hfl, deckTop) + DEFAULT_GEOMETRY.ABUT_W_M;
   const elRange = maxEl - minEl;
 
   const ML = 30, MR = 18, MT = 14, TB = 36;
@@ -267,7 +267,7 @@ function drawLongSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   const totL = inp.numSpans * inp.deckSpan;
   const worldL = totL + 2 * ABUT_W + 2 * APP;
   const deckTop = inp.rtl + inp.deckThickness;
-  const minEl = res.fbl - 0.8, maxEl = Math.max(inp.hfl, deckTop) + 0.6;
+  const minEl = res.fbl - DEFAULT_GEOMETRY.ABUT_W_M, maxEl = Math.max(inp.hfl, deckTop) + DEFAULT_GEOMETRY.ABUT_W_M;
 
   const ML = 30, MR = 18, MT = 14, TB = 36;
   const dW = W - ML - MR, dH = H - MT - TB;
@@ -583,7 +583,6 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
   ].forEach(([s, t], i) => {
     doc.text(`${s}`, W / 2 - 60, H * 0.75 + i * 5);
     doc.text(t, W / 2 - 30, H * 0.75 + i * 5);
->>>>>>> 7d6bf46b1149d19e722a1a554bdf199477d39165
   });
 
   doc.setFontSize(5); doc.setTextColor(120, 120, 120);

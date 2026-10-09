@@ -125,7 +125,6 @@ export const defaultInputs: Inputs = {
   meanVelocityHFL: 1.2,
 
   customDesignDischarge: null,
-<<<<<<< HEAD
   hfl: 102.5,
   gl: 100.0,
   rtl: 101.2,
@@ -133,11 +132,6 @@ export const defaultInputs: Inputs = {
   lbl_m: 4.2,
   bottomDeck_m: 5.5,
   carriageWidth_m: 7.5,
-=======
-  hfl: getTraceableInput("hfl", 102.5),
-  gl: getTraceableInput("lbl", 100.0), // Low bed level
-  rtl: getTraceableInput("rtl", 101.2),
->>>>>>> 7d6bf46b1149d19e722a1a554bdf199477d39165
   numVents: 4,
   ventWidth: 1.5,
   ventHeight: 0.9,
