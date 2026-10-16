@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCalculations } from '../lib/calculations';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '../components/ui/components';
-import { exportDesignPDF } from '../lib/pdf-export';
+import { downloadDesignPDF } from '../lib/pdf-export';
 import { FileDown } from 'lucide-react';
 
 function SectionDiagram() {
@@ -120,7 +120,7 @@ export default function SummaryReport() {
   const handleExport = () => {
     setExporting(true);
     setTimeout(() => {
-      try { exportDesignPDF(inputs, results); }
+      try { downloadDesignPDF(inputs, results); }
       finally { setExporting(false); }
     }, 50);
   };

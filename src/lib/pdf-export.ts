@@ -511,11 +511,13 @@ function addFormulaTraceSheet(
     headStyles: { fillColor: [12, 20, 45], textColor: [245, 158, 11], fontStyle: 'bold', fontSize: 5.8 },
     bodyStyles: { minCellHeight: 4.5 },
     columnStyles: {
-      0: { cellWidth: 20, fontStyle: 'bold' },
-      1: { cellWidth: 59 },
-      2: { cellWidth: 99 },
-      3: { cellWidth: 27, halign: 'right', fontStyle: 'bold' },
-      4: { cellWidth: 60 },
+      // Total must stay ≤ 186 mm (A4 portrait 210 mm − 12 mm margins each side),
+      // otherwise jspdf-autotable clips the right-hand columns.
+      0: { cellWidth: 14, fontStyle: 'bold' },
+      1: { cellWidth: 46 },
+      2: { cellWidth: 70 },
+      3: { cellWidth: 20, halign: 'right', fontStyle: 'bold' },
+      4: { cellWidth: 36 },
     },
   });
 
@@ -530,7 +532,7 @@ function addFormulaTraceSheet(
   pageFooterDisclaimer(doc);
 }
 
-export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
+export function exportDesignPDF(inputs: Inputs, results: ComputedResults): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
@@ -713,8 +715,21 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
     columnStyles: { 1: { fontStyle: 'italic' }, 2: { fontStyle: 'italic' }, 3: { halign: 'right', fontStyle: 'bold' } },
   });
 
+  const y3c = (doc as any).lastAutoTable.finalY + 4;
+  let yRef = y3c;
+  if (results.sanityWarnings.length > 0) {
+    doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.setTextColor(180, 0, 0);
+    doc.text('SANITY ADVISORY:', 14, y3c);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5);
+    results.sanityWarnings.forEach((w, i) => {
+      doc.text(`• ${w}`, 14, y3c + 4 + i * 3.6, { maxWidth: W - 28 });
+    });
+    doc.setTextColor(0);
+    yRef = y3c + 4 + results.sanityWarnings.length * 3.6 + 2;
+  }
+
   doc.setFontSize(6); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
-  doc.text('Ref: Lacey (1930) regime scour equations, Molesworth afflux formula, IRC SP:82-2008 Cl.6', 12, (doc as any).lastAutoTable.finalY + 4);
+  doc.text('Ref: Lacey (1930) regime scour equations, Molesworth afflux formula, IRC SP:82-2008 Cl.6', 12, yRef);
   doc.setTextColor(0);
   titleBlock(doc, inputs, 'HYDRAULIC DESIGN — STEP 2', 'CS/CALC/02', '—', '3', '9');
   pageFooterDisclaimer(doc);
@@ -834,6 +849,11 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults) {
     'SHEET 9 — LIVE FORMULA TRACE: STRUCTURAL',
   );
 
+  return doc;
+}
+
+/** Convenience wrapper for the UI: build the report and trigger a browser download. */
+export function downloadDesignPDF(inputs: Inputs, results: ComputedResults): void {
   const filename = `Causeway_Design_${inputs.projectName.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-  doc.save(filename);
+  exportDesignPDF(inputs, results).save(filename);
 }

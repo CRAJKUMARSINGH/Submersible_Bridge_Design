@@ -89,6 +89,7 @@ export type ComputedResults = {
   scourSafe: boolean;
   passMinCarriageWidth_m: boolean;
   minCarriageWidthNote: string;
+  sanityWarnings: string[];
 
   // Step 3
   wSelf: number;
@@ -165,6 +166,99 @@ export type Geometry = typeof DEFAULT_GEOMETRY;
 
 const CalculationsContext = createContext<CalculationsContextType | null>(null);
 
+/**
+ * Pure computation core — single source of truth for all derived results.
+ * Deliberately free of React so the UI, unit tests and head-less CLI harnesses
+ * (e.g. scripts/generate-11span-gad.ts) all share one implementation and can
+ * never silently drift apart.
+ */
+export function computeResults(inputs: Inputs): ComputedResults {
+  // ─── STEP 1 ───────────────────────────────────────────────────────────────
+  const qRational = (inputs.runoffCoefficient * inputs.rainfallIntensity * inputs.catchmentArea) / 3.6;
+  const qWeir = 1.705 * inputs.surplusWeirLength * Math.pow(inputs.heightOfFallWeir, 1.5);
+  const qVelocity = inputs.streamAreaHFL * inputs.meanVelocityHFL;
+
+  let qDesign = qRational;
+  let governingMethod = "Rational Method";
+  if (qWeir > qDesign) { qDesign = qWeir; governingMethod = "Weir Formula"; }
+  if (qVelocity > qDesign) { qDesign = qVelocity; governingMethod = "Area-Velocity"; }
+
+  // ─── STEP 2 ───────────────────────────────────────────────────────────────
+  const designDischarge = inputs.customDesignDischarge !== null ? inputs.customDesignDischarge : qDesign;
+
+  const aVent = inputs.numVents * inputs.ventWidth * inputs.ventHeight;
+  const appVel = inputs.approachVelocity > 0 ? inputs.approachVelocity : 0.01;
+  const effectiveWidth = designDischarge / appVel;
+
+  const depthRTL = Math.max(0, inputs.rtl - inputs.gl);
+  const aRTL = depthRTL * effectiveWidth;
+  const depthHFL = Math.max(0, inputs.hfl - inputs.gl);
+  const aHFL = depthHFL * effectiveWidth;
+
+  const pctObsRTL = calculateObstructionPercent(aVent, aRTL);
+  const pctObsHFL = calculateObstructionPercent(aVent, aHFL);
+
+  const passRTL = pctObsRTL < 70;
+  const passHFL = pctObsHFL < 30;
+
+  const velocityHFL = aHFL > 0 ? designDischarge / aHFL : 0;
+
+  let hAfflux = 0;
+  if (aVent > 0 && aHFL > aVent) {
+    hAfflux = (Math.pow(velocityHFL, 2) / 17.88 + 0.015) * (Math.pow(aHFL / aVent, 2) - 1);
+  }
+
+  const laceyPerimeter = 4.75 * Math.sqrt(designDischarge);
+  const sf = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
+  const laceyScourDepth = 0.473 * Math.pow(designDischarge / sf, 1 / 3);
+  const maxScourDepth = 1.27 * laceyScourDepth;
+  const fbl = inputs.hfl - maxScourDepth;
+  const recommendedDepth = inputs.gl - fbl;
+  const scourSafe = fbl < (inputs.gl - 0.5);
+  const passMinCarriageWidth_m = inputs.carriageWidth_m >= 6.0;
+  const minCarriageWidthNote = inputs.carriageWidth_m < 6.0 ? `FAIL: Carriageway ${inputs.carriageWidth_m.toFixed(3)}m < 6.0m (IRC SP:82-2008 Cl.6.4.2(vi))` : `PASS: ${inputs.carriageWidth_m.toFixed(3)}m ≥ 6.0m minimum`;
+
+  // ─── STEP 3 ───────────────────────────────────────────────────────────────
+  const wSelf = (inputs.concreteDensity * 9.81 * inputs.deckWidth * inputs.deckSpan * inputs.deckThickness) / 1000;
+  const wSilt = inputs.siltLoadDeck * inputs.deckWidth * inputs.deckSpan;
+  const wLive = inputs.liveLoadType === "IRC Class 70R" ? 900 : inputs.liveLoadType === "IRC Class AA" ? 700 : 554;
+  /* [PLACEHOLDER E1 — IRC Class 70R wLive=900kN is DEFAULT ESTIMATE pending E1 decision (IRC 6 axle table). RED-FLAGGED — OVERRIDE.] */
+  const totalVerticalLoad = wSelf + wSilt + (wLive / inputs.numSpans);
+
+  const fDrag = (inputs.dragCoefficient * 0.5 * inputs.waterDensity * Math.pow(velocityHFL, 2) * (inputs.deckWidth * inputs.deckThickness)) / 1000;
+  const fUplift = (inputs.waterDensity * 9.81 * (inputs.deckWidth * inputs.deckSpan * inputs.deckThickness)) / 1000;
+  const fAnchor = fUplift - wSelf;
+  const fDragTotal = fDrag * inputs.numSpans;
+
+  // ─── SANITY GUARDS ────────────────────────────────────────────────────────
+  // Emit explicit advisories instead of silently printing physically
+  // implausible numbers (e.g. an afflux larger than the whole bridge height).
+  const sanityWarnings: string[] = [];
+  const freeboard_m = inputs.rtl - inputs.hfl;
+  if (hAfflux > Math.max(freeboard_m, 0)) {
+    sanityWarnings.push(`Afflux h_f = ${hAfflux.toFixed(2)} m exceeds available freeboard (RTL − HFL = ${freeboard_m.toFixed(2)} m) — revise levels or enlarge ventway.`);
+  } else if (hAfflux > 0.5) {
+    sanityWarnings.push(`Afflux h_f = ${hAfflux.toFixed(2)} m exceeds the 0.50 m indicative limit (IRC SP:82-2008).`);
+  }
+  if (!scourSafe) {
+    sanityWarnings.push(`Scour: FBL ${fbl.toFixed(2)} m is not at least 0.50 m below GL ${inputs.gl.toFixed(2)} m — check foundation depth.`);
+  }
+  if (!passMinCarriageWidth_m) {
+    sanityWarnings.push(minCarriageWidthNote);
+  }
+
+  return {
+    qRational, qWeir, qVelocity, qDesign, governingMethod,
+    designDischarge, aVent, effectiveWidth, aRTL, aHFL,
+    pctObsRTL, pctObsHFL, passRTL, passHFL,
+    velocityHFL, hAfflux,
+    laceyPerimeter, laceyScourDepth, maxScourDepth, fbl, recommendedDepth, scourSafe,
+    passMinCarriageWidth_m, minCarriageWidthNote, sanityWarnings,
+    wSelf, wSilt, wLive, totalVerticalLoad,
+    fDrag, fUplift, fAnchor, fDragTotal,
+  };
+}
+
 export function CalculationsProvider({ children }: { children: ReactNode }) {
   const [inputs, setInputs] = useState<Inputs>(() => ({
     ...defaultInputs,
@@ -186,75 +280,7 @@ export function CalculationsProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const results = useMemo<ComputedResults>(() => {
-    // ─── STEP 1 ───────────────────────────────────────────────────────────────
-    const qRational = (inputs.runoffCoefficient * inputs.rainfallIntensity * inputs.catchmentArea) / 3.6;
-    const qWeir = 1.705 * inputs.surplusWeirLength * Math.pow(inputs.heightOfFallWeir, 1.5);
-    const qVelocity = inputs.streamAreaHFL * inputs.meanVelocityHFL;
-
-    let qDesign = qRational;
-    let governingMethod = "Rational Method";
-    if (qWeir > qDesign) { qDesign = qWeir; governingMethod = "Weir Formula"; }
-    if (qVelocity > qDesign) { qDesign = qVelocity; governingMethod = "Area-Velocity"; }
-
-    // ─── STEP 2 ───────────────────────────────────────────────────────────────
-    const designDischarge = inputs.customDesignDischarge !== null ? inputs.customDesignDischarge : qDesign;
-
-    const aVent = inputs.numVents * inputs.ventWidth * inputs.ventHeight;
-    const appVel = inputs.approachVelocity > 0 ? inputs.approachVelocity : 0.01;
-    const effectiveWidth = designDischarge / appVel;
-
-    const depthRTL = Math.max(0, inputs.rtl - inputs.gl);
-    const aRTL = depthRTL * effectiveWidth;
-    const depthHFL = Math.max(0, inputs.hfl - inputs.gl);
-    const aHFL = depthHFL * effectiveWidth;
-
-    const pctObsRTL = calculateObstructionPercent(aVent, aRTL);
-    const pctObsHFL = calculateObstructionPercent(aVent, aHFL);
-
-    const passRTL = pctObsRTL < 70;
-    const passHFL = pctObsHFL < 30;
-
-    const velocityHFL = aHFL > 0 ? designDischarge / aHFL : 0;
-
-    let hAfflux = 0;
-    if (aVent > 0 && aHFL > aVent) {
-      hAfflux = (Math.pow(velocityHFL, 2) / 17.88 + 0.015) * (Math.pow(aHFL / aVent, 2) - 1);
-    }
-
-    const laceyPerimeter = 4.75 * Math.sqrt(designDischarge);
-    const sf = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
-    const laceyScourDepth = 0.473 * Math.pow(designDischarge / sf, 1 / 3);
-    const maxScourDepth = 1.27 * laceyScourDepth;
-    const fbl = inputs.hfl - maxScourDepth;
-    const recommendedDepth = inputs.gl - fbl;
-    const scourSafe = fbl < (inputs.gl - 0.5);
-    const passMinCarriageWidth_m = inputs.carriageWidth_m >= 6.0;
-    const minCarriageWidthNote = inputs.carriageWidth_m < 6.0 ? `FAIL: Carriageway ${inputs.carriageWidth_m.toFixed(3)}m < 6.0m (IRC SP:82-2008 Cl.6.4.2(vi))` : `PASS: ${inputs.carriageWidth_m.toFixed(3)}m ≥ 6.0m minimum`;
-
-    // ─── STEP 3 ───────────────────────────────────────────────────────────────
-    const wSelf = (inputs.concreteDensity * 9.81 * inputs.deckWidth * inputs.deckSpan * inputs.deckThickness) / 1000;
-    const wSilt = inputs.siltLoadDeck * inputs.deckWidth * inputs.deckSpan;
-    const wLive = inputs.liveLoadType === "IRC Class 70R" ? 900 : inputs.liveLoadType === "IRC Class AA" ? 700 : 554;
-    /* [PLACEHOLDER E1 — IRC Class 70R wLive=900kN is DEFAULT ESTIMATE pending E1 decision (IRC 6 axle table). RED-FLAGGED — OVERRIDE.] */
-    const totalVerticalLoad = wSelf + wSilt + (wLive / inputs.numSpans);
-
-    const fDrag = (inputs.dragCoefficient * 0.5 * inputs.waterDensity * Math.pow(velocityHFL, 2) * (inputs.deckWidth * inputs.deckThickness)) / 1000;
-    const fUplift = (inputs.waterDensity * 9.81 * (inputs.deckWidth * inputs.deckSpan * inputs.deckThickness)) / 1000;
-    const fAnchor = fUplift - wSelf;
-    const fDragTotal = fDrag * inputs.numSpans;
-
-    return {
-      qRational, qWeir, qVelocity, qDesign, governingMethod,
-      designDischarge, aVent, effectiveWidth, aRTL, aHFL,
-      pctObsRTL, pctObsHFL, passRTL, passHFL,
-      velocityHFL, hAfflux,
-      laceyPerimeter, laceyScourDepth, maxScourDepth, fbl, recommendedDepth, scourSafe,
-      passMinCarriageWidth_m, minCarriageWidthNote,
-      wSelf, wSilt, wLive, totalVerticalLoad,
-      fDrag, fUplift, fAnchor, fDragTotal,
-    };
-  }, [inputs]);
+  const results = useMemo<ComputedResults>(() => computeResults(inputs), [inputs]);
 
   return (
     <CalculationsContext.Provider value={{ inputs, updateInput, mergeInputs, resetInputs, results }}>

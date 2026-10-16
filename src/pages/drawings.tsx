@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCalculations } from '../lib/calculations';
 import type { Inputs, ComputedResults } from '../lib/calculations';
-import { exportDesignPDF } from '../lib/pdf-export';
+import { downloadDesignPDF } from '../lib/pdf-export';
 import { FileDown, Layers } from 'lucide-react';
 
 // ─── Shared SVG helpers ───────────────────────────────────────────────────────
@@ -489,7 +489,7 @@ export default function DrawingsPage() {
   const handleExport = () => {
     setExporting(true);
     setTimeout(() => {
-      try { exportDesignPDF(inputs, results); }
+      try { downloadDesignPDF(inputs, results); }
       finally { setExporting(false); }
     }, 50);
   };
