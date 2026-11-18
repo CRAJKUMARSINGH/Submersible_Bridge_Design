@@ -101,6 +101,10 @@ export type Inputs = {
   windLivePressure_kg_m?: number;
   windLiveHeight_m?: number;
   seismicZone?: string;
+
+  // Task 18 — drawing presentation. True-north bearing of the plan view,
+  // measured clockwise from the drawing's vertical (0 = north up).
+  northBearing_deg?: number;
 };
 
 export type ComputedResults = {
@@ -234,6 +238,9 @@ export const defaultInputs: Inputs = {
   windLivePressure_kg_m: 300,
   windLiveHeight_m: 1.5,
   seismicZone: "I",
+
+  // Task 18 — north arrow points straight up on the plan view by default.
+  northBearing_deg: 0,
 };
 
 /**
@@ -286,6 +293,41 @@ export function foundationQPerMetreWidth(designDischarge: number, width: number)
 export function laceyNormalScourDepth(qPerMetreWidth: number, siltFactor: number): number {
   const sf = siltFactor > 0 ? siltFactor : 0.1;
   return 1.34 * Math.pow((qPerMetreWidth * qPerMetreWidth) / sf, 1 / 3);
+}
+
+/**
+ * Task 18 — Lacey scour profile across the waterway. Returns the scour depth
+ * (m) at a normalised position t ∈ [0, 1]: zero at the banks, D_normal at
+ * mid-stream, with the parabolic Lacey shape. Shared by the on-screen and the
+ * exported longitudinal sections so the drawn profile is the computed shape and
+ * not a cosmetic dip.
+ */
+export function laceyScourProfileDepth(normalScourDepth: number, t: number): number {
+  const clamped = Math.min(1, Math.max(0, t));
+  const rel = 1 - Math.abs(2 * clamped - 1);
+  return normalScourDepth * rel * rel;
+}
+
+/**
+ * Task 18 — true title-block scale. The drawn world length (metres) over the
+ * page length actually used gives "1:N". Where the vertical scale is
+ * exaggerated relative to the horizontal (as these sections are), both
+ * denominators are reported rather than hiding the distortion behind
+ * "SCHEMATIC".
+ */
+export function drawingScaleLabel(
+  worldMetres: number,
+  pageUnits: number,
+  vertical?: { worldMetres: number; pageUnits: number },
+): string {
+  const denom = (metres: number, units: number) => (units > 0 ? (metres * 1000) / units : 0);
+  const round = (n: number) => (n >= 10 ? Math.round(n) : Number(n.toFixed(1)));
+  const h = denom(worldMetres, pageUnits);
+  if (!(h > 0)) return 'N/A';
+  if (!vertical) return `1:${round(h)}`;
+  const v = denom(vertical.worldMetres, vertical.pageUnits);
+  if (v > 0 && Math.abs(v - h) / h <= 0.05) return `1:${round(h)}`;
+  return `1:${round(h)} H\n1:${round(v)} V`;
 }
 
 /**

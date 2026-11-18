@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCalculations, DEFAULT_GEOMETRY } from '../lib/calculations';
+import { useCalculations, DEFAULT_GEOMETRY, drawingScaleLabel, laceyScourProfileDepth } from '../lib/calculations';
 import type { Inputs, ComputedResults } from '../lib/calculations';
 import { downloadDesignPDF } from '../lib/pdf-export';
 import { FileDown, Layers } from 'lucide-react';
@@ -94,7 +94,12 @@ function TitleBlock({ inp, title, drwNo, scale, sheet, total, svgW, svgH, tbH = 
       <text x={midX + 4} y={by + row * 2 + 17} fontSize="9" fill="#000">{inp.date}</text>
 
       <text x={bx + bw - rightW + rightW / 4} y={by + 10} textAnchor="middle" fontSize="7" fill="#666" fontWeight="bold">SCALE</text>
-      <text x={bx + bw - rightW + rightW / 4} y={by + tbH / 2 - 2} textAnchor="middle" fontSize="11" fill="#000" fontWeight="bold">{scale}</text>
+      <text x={bx + bw - rightW + rightW / 4} y={by + tbH / 2 - 2 - (scale.split('\n').length - 1) * 6}
+        textAnchor="middle" fontSize="11" fill="#000" fontWeight="bold">
+        {scale.split('\n').map((ln, i) => (
+          <tspan key={ln + i} x={bx + bw - rightW + rightW / 4} dy={i === 0 ? 0 : 11}>{ln}</tspan>
+        ))}
+      </text>
 
       <text x={bx + bw - rightW / 4} y={by + 10} textAnchor="middle" fontSize="7" fill="#666" fontWeight="bold">SHEET</text>
       <text x={bx + bw - rightW / 4} y={by + tbH / 2 - 4} textAnchor="middle" fontSize="16" fill="#000" fontWeight="bold">{sheet}</text>
@@ -231,7 +236,8 @@ function CrossSectionSVG({ inp, res }: { inp: Inputs; res: ComputedResults }) {
         {inp.numVents} VENTS @ {inp.ventWidth.toFixed(2)}m × {inp.ventHeight.toFixed(2)}m (W×H)
       </text>
 
-      <TitleBlock inp={inp} title="CROSS SECTION AT A-A" drwNo="CS/DRG/01" scale="1:50" sheet="5" total="7" svgW={SVG_W} svgH={SVG_H} tbH={TITLE_H} />
+      <TitleBlock inp={inp} title="CROSS SECTION AT A-A" drwNo="CS/DRG/01"
+        scale={drawingScaleLabel(worldW, dW, { worldMetres: elRange, pageUnits: dH })} sheet="5" total="7" svgW={SVG_W} svgH={SVG_H} tbH={TITLE_H} />
     </svg>
   );
 }
@@ -308,8 +314,27 @@ function LongitudinalSVG({ inp, res }: { inp: Inputs; res: ComputedResults }) {
       <HatchLines x={mx(xLA)} y={yDT} w={(totL + 2 * ABUT_W) * hS} h={yRTL - yDT} step={9} stroke="#444" />
 
       {(() => {
-        const scx = mx((xLA + xRA + ABUT_W) / 2), dip = 0.4 * vS;
-        return <polyline points={`${mx(xCS)},${yGL} ${scx},${yGL + dip} ${mx(xCE)},${yGL}`} fill="none" stroke="#7c5d2e" strokeWidth="1.8" />;
+        // Task 18 — Lacey scour profile (normal scour D, max envelope D_m)
+        // replaces the former cosmetic dip.
+        const nProf = 40;
+        const pt = (depth: number, t: number) => [
+          mx(xCS + t * (xCE - xCS)),
+          yGL + laceyScourProfileDepth(depth, t) * vS,
+        ];
+        const poly = (depth: number) =>
+          Array.from({ length: nProf + 1 }, (_, i) => pt(depth, i / nProf).join(',')).join(' ');
+        return (
+          <g fill="none">
+            {res.maxScourDepth > res.laceyScourDepth && (
+              <polyline points={poly(res.maxScourDepth)} stroke="#7c5d2e" strokeWidth="1" strokeDasharray="5 4" />
+            )}
+            <polyline points={poly(res.laceyScourDepth)} stroke="#7c5d2e" strokeWidth="1.8" />
+            <text x={(mx(xCS) + mx(xCE)) / 2} y={yGL + res.laceyScourDepth * vS + 15}
+              textAnchor="middle" fontSize="9" fill="#7c5d2e">
+              NORMAL SCOUR D = {res.laceyScourDepth.toFixed(2)}m (max D_m = {res.maxScourDepth.toFixed(2)}m)
+            </text>
+          </g>
+        );
       })()}
 
       <line x1={ML - 50} x2={ML + dW + 5} y1={yHFL} y2={yHFL} stroke="#2563eb" strokeWidth="1.8" strokeDasharray="12 5" />
@@ -354,7 +379,8 @@ function LongitudinalSVG({ inp, res }: { inp: Inputs; res: ComputedResults }) {
         );
       })()}
 
-      <TitleBlock inp={inp} title="LONGITUDINAL SECTION B-B" drwNo="CS/DRG/02" scale="1:50" sheet="6" total="7" svgW={SVG_W} svgH={SVG_H} tbH={TITLE_H} />
+      <TitleBlock inp={inp} title="LONGITUDINAL SECTION B-B" drwNo="CS/DRG/02"
+        scale={drawingScaleLabel(worldL, dW, { worldMetres: maxEl - minEl, pageUnits: dH })} sheet="6" total="7" svgW={SVG_W} svgH={SVG_H} tbH={TITLE_H} />
     </svg>
   );
 }
@@ -437,14 +463,23 @@ function PlanViewSVG({ inp }: { inp: Inputs }) {
       <rect x={mx(xLA)} y={my(yTop)} width={(totL + 2 * ABUT_W) * hS} height={inp.deckWidth * vS} fill="none" stroke="#000" strokeWidth="2.5" />
 
       {(() => {
+        // Task 18 — true-north arrow rotated by the input bearing (clockwise
+        // from the drawing's vertical; 0 = north up).
         const nx = ML + dW - 30, ny = MT + 26;
+        const th = ((inp.northBearing_deg ?? 0) * Math.PI) / 180;
+        const rot = (px: number, py: number): [number, number] => [
+          nx + px * Math.cos(th) - py * Math.sin(th),
+          ny + px * Math.sin(th) + py * Math.cos(th),
+        ];
+        const pts = (...p: [number, number][]) => p.map(([x, y]) => rot(x, y).join(',')).join(' ');
         return (
           <g>
             <circle cx={nx} cy={ny} r={20} fill="none" stroke="#000" strokeWidth="1" />
-            <line x1={nx} y1={ny + 16} x2={nx} y2={ny - 16} stroke="#000" strokeWidth="1.5" />
-            <polygon points={`${nx},${ny - 16} ${nx - 8},${ny + 6} ${nx + 8},${ny + 6}`} fill="#000" />
-            <polygon points={`${nx},${ny + 16} ${nx - 8},${ny - 6} ${nx + 8},${ny - 6}`} fill="white" stroke="#000" strokeWidth="1" />
-            <text x={nx} y={ny - 21} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#000">N</text>
+            <line x1={rot(0, 16)[0]} y1={rot(0, 16)[1]} x2={rot(0, -16)[0]} y2={rot(0, -16)[1]} stroke="#000" strokeWidth="1.5" />
+            <polygon points={pts([0, -16], [-8, 6], [8, 6])} fill="#000" />
+            <polygon points={pts([0, 16], [-8, -6], [8, -6])} fill="white" stroke="#000" strokeWidth="1" />
+            <text x={rot(0, -21)[0]} y={rot(0, -21)[1]} textAnchor="middle" fontSize="13" fontWeight="bold" fill="#000">N</text>
+            <text x={nx} y={ny + 34} textAnchor="middle" fontSize="9" fill="#555">TRUE N {inp.northBearing_deg ?? 0}° CW</text>
           </g>
         );
       })()}
@@ -468,7 +503,8 @@ function PlanViewSVG({ inp }: { inp: Inputs }) {
         N_SPANS = {inp.numSpans}  |  N_VENTS = {inp.numVents}  |  VENT: {inp.ventWidth.toFixed(2)}m (W) × {inp.ventHeight.toFixed(2)}m (H)  |  TOTAL VENTWAY AREA = {(inp.numVents * inp.ventWidth * inp.ventHeight).toFixed(2)}m²
       </text>
 
-      <TitleBlock inp={inp} title="PLAN VIEW" drwNo="CS/DRG/03" scale="1:50" sheet="7" total="7" svgW={SVG_W} svgH={SVG_H} tbH={TITLE_H} />
+      <TitleBlock inp={inp} title="PLAN VIEW" drwNo="CS/DRG/03"
+        scale={drawingScaleLabel(worldL, dW, { worldMetres: worldW, pageUnits: dH })} sheet="7" total="7" svgW={SVG_W} svgH={SVG_H} tbH={TITLE_H} />
     </svg>
   );
 }
@@ -482,7 +518,7 @@ const TABS = [
 ];
 
 export default function DrawingsPage() {
-  const { inputs, results } = useCalculations();
+  const { inputs, results, updateInput } = useCalculations();
   const [tab, setTab] = useState('cs');
   const [exporting, setExporting] = useState(false);
 
@@ -523,6 +559,22 @@ export default function DrawingsPage() {
         ))}
       </div>
 
+      {tab === 'pv' && (
+        <div className="flex items-center gap-3 flex-wrap rounded-lg border border-border bg-muted/30 px-4 py-2.5">
+          <label htmlFor="north-bearing" className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+            True North Bearing
+          </label>
+          <input
+            id="north-bearing"
+            type="number"
+            value={inputs.northBearing_deg ?? 0}
+            onChange={(e) => updateInput('northBearing_deg', Number(e.target.value))}
+            className="w-24 px-2 py-1 text-sm border border-border rounded bg-background font-mono"
+          />
+          <span className="text-xs text-muted-foreground">° clockwise from drawing up (0° = north up)</span>
+        </div>
+      )}
+
       <div className="rounded-xl overflow-hidden border border-border shadow-xl">
         <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 flex items-center gap-3">
           <Layers className="w-4 h-4 text-slate-400 shrink-0" />
@@ -531,7 +583,7 @@ export default function DrawingsPage() {
               : tab === 'ls' ? 'DRG CS/DRG/02 — LONGITUDINAL SECTION B-B'
               : 'DRG CS/DRG/03 — PLAN VIEW'}
           </span>
-          <span className="ml-auto text-xs text-slate-400 font-mono">IRC SP:82-2008  |  Scale 1:50 (schematic)</span>
+          <span className="ml-auto text-xs text-slate-400 font-mono">IRC SP:82-2008  |  Scale: see title block</span>
         </div>
         <div className="bg-white overflow-x-auto">
           {tab === 'cs' && <CrossSectionSVG inp={inputs} res={results} />}

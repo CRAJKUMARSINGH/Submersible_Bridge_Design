@@ -1,0 +1,27 @@
+formula_id,domain,clause_reference,source_evidence,status
+Q_RATIONAL,Step 1 Discharge,"CWC (no IRC clause cited); Dickens Q = C*A^0.75",spec.md 14.4 row 1.1; TYPE_document.md L4790,SOURCE-SILENT
+Q_WEIR,Step 1 Discharge,Broad-crested weir (general) - no clause number printed,spec.md 14.4 row 1.2; TYPE_document.md L4798,GENERAL-ONLY
+Q_AREA_VELOCITY,Step 1 Discharge,"Continuity Q = A*V - IRC SP:82-2008 general",TYPE_document.md L4741; TYPE_document.md L19-21,GENERAL-ONLY
+Q_GOVERNING,Step 1 Discharge,Combination rule - PE ruling pending (Task 29),tasks.md Task 29,PENDING
+Q_SELECTED,Step 1 Discharge,Not a code formula (user override),calculations.tsx L351,NOT-APPLICABLE
+A_VENT,Step 2 Hydraulic,IRC SP:82-2008 Cl.5.1.3(ii)a,TYPE_document.md L4807-4808,EXACT
+B_EFFECTIVE,Step 2 Hydraulic,"Continuity B = Q/V - IRC SP:82-2008 general",calculations.tsx L355,GENERAL-ONLY
+A_RTL,Step 2 Hydraulic,IRC SP:82-2008 Cl.5.1.3(ii)a (unobstructed area),TYPE_document.md L4814-4815,EXACT
+A_HFL,Step 2 Hydraulic,IRC SP:82-2008 Cl.5.1.3(ii)a (unobstructed area),TYPE_document.md L4830-4831,EXACT
+OBS_RTL,Step 2 Hydraulic,IRC SP:82-2008 Cl.5.1.3(ii)a (>=30% vented),TYPE_document.md L4827-4828,EXACT
+OBS_HFL,Step 2 Hydraulic,IRC SP:82-2008 Cl.5.1.3(ii)a (<=30% obstruction),TYPE_document.md L4837-4839,EXACT
+V_HFL,Step 2 Hydraulic,"Continuity V = Q/A - IRC SP:82-2008 general",TYPE_document.md L4805,GENERAL-ONLY
+AFFLUX,Step 2 Hydraulic,"Orifice formula; coefficients IRC SP:13-2004 (sub-clause not printed)",engineering-decisions-e1-e20.csv E2; TYPE_document.md L4840-4908,GENERAL-ONLY
+LACEY_P,Step 2 Hydraulic,"Lacey 1930 P = 4.75*sqrt(Q) - no clause number printed",TYPE_document.md L4913,GENERAL-ONLY
+LACEY_R,Step 2 Hydraulic,IRC:5-1985 Cl.101.1.2 & Cl.110.1.4.2,engineering-decisions-e1-e20.csv E3; TYPE_document.md L4909-4920,EXACT
+SCOUR_MAX,Step 2 Hydraulic,IRC:5-1985 Cl.110.1.4.2,engineering-decisions-e1-e20.csv E3; TYPE_document.md L4916,EXACT
+FBL,Step 2 Hydraulic,IRC:5-1985 Cl.110.1.4.2,engineering-decisions-e1-e20.csv E7; TYPE_document.md L4918-4928,EXACT
+FOUNDATION_DEPTH,Step 2 Hydraulic,IRC:5-1985 Cl.110.1.4.2,engineering-decisions-e1-e20.csv E7; TYPE_document.md L4918-4928,EXACT
+W_SELF,Step 3 Structural,IRC:6-2000 Section II dead load (Cl.203) - not stamped in source,calculations.tsx L397,GENERAL-ONLY
+W_SILT,Step 3 Structural,IRC SP:82 Cl.7.11.3.4,spec.md 6.6 line 1385,EXACT
+W_LIVE,Step 3 Structural,IRC:6-2000 Cl.201.1 / Cl.207.1.3 & 207.4 / Cl.211,engineering-decisions-e1-e20.csv E1,EXACT
+W_TOTAL,Step 3 Structural,IRC:6-2000 Cl.202 (load combination),spec.md 6.8 line 1387-1392; calculations.tsx L422,GENERAL-ONLY
+F_DRAG,Step 3 Structural,"IRC SP:82-2008 drag/lift (no clause, no numeric Cd)",engineering-decisions-e1-e20.csv E5,GENERAL-ONLY
+F_DRAG_TOTAL,Step 3 Structural,"IRC SP:82-2008 drag/lift (no clause, no numeric Cd)",engineering-decisions-e1-e20.csv E5,GENERAL-ONLY
+F_UPLIFT,Step 3 Structural,IRC:6-2000 Cl.216.4,engineering-decisions-e1-e20.csv E16,EXACT
+F_ANCHOR,Step 3 Structural,"IRC SP:82-2007 (source cites code generally; no clause printed)",engineering-decisions-e1-e20.csv E9,SOURCE-SILENT

@@ -1,0 +1,13 @@
+combination_id,description,components,status,result_source,note
+C1,"DL + LL","dead load + live load",EVALUATED,stability.totalVertical,"Engine combines dead load, earth-pressure vertical component and live-load reaction into one stability resultant."
+C2,"DL + LL + WL (wind)","dead + live + wind",PARTIAL,transient.windOnDeck,"Wind forces are computed (deck + live-load) but not combined into a checked resultant."
+C3,"DL + LL + W (water current / drag)","dead + live + drag",PARTIAL,results.fDrag,"Drag per span is computed but not combined with the stability state."
+C4,"DL + buoyancy / uplift","dead + buoyancy",EVALUATED,uplift.fosAnchor,"Uplift check compares submerged dead weight against buoyancy (anchor FOS)."
+C5,"DL + LL + silt","dead + live + silt",PARTIAL,results.wSilt,"Silt load on deck is computed but not carried into a separate combination check."
+C6,"DL + LL + EQ (seismic)","dead + live + seismic",NOT-REQUIRED,-,"Site is Seismic Zone-I; seismic design not required (E6, IRC:6-2000 Cl.222.1)."
+C7,"DL + LL + braking / tractive","dead + live + braking",PARTIAL,transient.brakingForce,"Braking force is computed but not combined into a checked resultant."
+C8,"DL + LL + EP (earth pressure)","dead + live + active earth pressure",EVALUATED,earthPressure.totalThrust,"Coulomb earth pressure is computed and fed into the stability/bearing checks."
+C9,"DL + LL + WL + W","dead + live + wind + water current",NOT-EVALUATED,-,"No multi-transient combination state is produced."
+C10,"DL + LL + W + buoyancy","dead + live + water current + buoyancy",NOT-EVALUATED,-,"No combined water-current + buoyancy state is produced."
+C11,"DL + LL + EQ + water","dead + live + seismic + water",NOT-EVALUATED,-,"No seismic combination is produced (site exempt)."
+C12,"DL + LL submersible (inundation, Cl.202.3)","dead + live + buoyancy/drag/silt, no stress increase",NOT-EVALUATED,-,"The Cl.202.3 no-stress-increase inundation combination is not modelled as a discrete state."

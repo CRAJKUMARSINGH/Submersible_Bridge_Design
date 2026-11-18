@@ -2,6 +2,7 @@ import React from 'react';
 import { useCalculations, DEFAULT_GEOMETRY } from '../lib/calculations';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '../components/ui/components';
 import { downloadDesignPDF } from '../lib/pdf-export';
+import { downloadDesignWord } from '../lib/word-export';
 import { FileDown } from 'lucide-react';
 
 function SectionDiagram() {
@@ -120,6 +121,7 @@ function SectionDiagram() {
 export default function SummaryReport() {
   const { inputs, results } = useCalculations();
   const [exporting, setExporting] = React.useState(false);
+  const [exportingWord, setExportingWord] = React.useState(false);
   const V10_SIGNED_OFF = false;
 
   const handleExport = () => {
@@ -128,6 +130,12 @@ export default function SummaryReport() {
       try { downloadDesignPDF(inputs, results); }
       finally { setExporting(false); }
     }, 50);
+  };
+
+  const handleExportWord = async () => {
+    setExportingWord(true);
+    try { await downloadDesignWord(inputs, results); }
+    finally { setExportingWord(false); }
   };
 
   const allPass = results.passRTL && results.passHFL && results.passMinCarriageWidth_m && results.scourSafe && results.fAnchor <= 0;
@@ -143,14 +151,24 @@ export default function SummaryReport() {
           <p className="text-muted-foreground mt-1 text-sm">Live calculations and formula substitutions for the inputs currently modeled in this app.</p>
           <p className="text-muted-foreground mt-1 text-xs">Unmapped equations in the long prototype remain reference-only and are not recalculated from these inputs.</p>
         </div>
-        <button
-          onClick={handleExport}
-          disabled={exporting}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-all font-semibold text-sm disabled:opacity-60 shrink-0"
-        >
-          <FileDown className="w-4 h-4" />
-          {exporting ? 'Generating…' : 'Export 9-Sheet PDF'}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-all font-semibold text-sm disabled:opacity-60 shrink-0"
+          >
+            <FileDown className="w-4 h-4" />
+            {exporting ? 'Generating…' : 'Export 9-Sheet PDF'}
+          </button>
+          <button
+            onClick={handleExportWord}
+            disabled={exportingWord}
+            className="flex items-center gap-2 px-5 py-2.5 border border-primary text-primary rounded-md hover:bg-primary/5 transition-all font-semibold text-sm disabled:opacity-60 shrink-0"
+          >
+            <FileDown className="w-4 h-4" />
+            {exportingWord ? 'Generating…' : 'Export Word (.docx)'}
+          </button>
+        </div>
       </div>
 
       {/* Overall status banner */}

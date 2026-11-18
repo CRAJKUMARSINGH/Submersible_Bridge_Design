@@ -1,0 +1,48 @@
+{
+  "source": "E:\\Rajkumar\\Submersible_Bridge_Design\\attached_assets\\Type Design of submersible causeway.pdf",
+  "sourceSha256": "2c5cd4bdb210e6f0afeef9b633cc1f3b957a8a2d3711f9141a2b996d9d4c6ef4",
+  "pageCount": 169,
+  "inputs": {
+    "projectName": "B.T to the R/f KB Road to P.Bheemavaram",
+    "catchmentArea": 1.38,
+    "surplusWeirLength": 22.75,
+    "heightOfFallWeir": 0.45,
+    "streamAreaHFL": 11.74,
+    "meanVelocityHFL": 2.58,
+    "customDesignDischarge": 45.75,
+    "hfl": 6.235,
+    "gl": 3.965,
+    "rtl": 5.645,
+    "numVents": 3,
+    "ventWidth": 6,
+    "numSpans": 3,
+    "approachVelocity": 2.58,
+    "siltFactor": 2,
+    "deckSpan": 6,
+    "deckWidth": 6,
+    "deckThickness": 0.48,
+    "liveLoadType": "IRC Class A",
+    "waterDensity": 1000,
+    "concreteDensity": 2500,
+    "siltLoadDeck": 2.25,
+    "sbc_kN_m2": 147.15,
+    "backfillUnitWeight_kN_m3": 18
+  },
+  "extraVariables": {
+    "fck_pcc": 20,
+    "fck_vrcc": 25,
+    "fy": 415,
+    "reinforcementCover_mm": 50
+  },
+  "fieldCount": 28,
+  "warnings": [
+    "SOURCE-SILENT: streamName — not stated numerically in the reference PDF; left unset",
+    "SOURCE-SILENT: location — not stated numerically in the reference PDF; left unset",
+    "SOURCE-SILENT: date — not stated numerically in the reference PDF; left unset",
+    "SOURCE-SILENT: runoffCoefficient — not stated numerically in the reference PDF; left unset",
+    "SOURCE-SILENT: rainfallIntensity — not stated numerically in the reference PDF; left unset",
+    "SOURCE-SILENT: ventHeight — not stated numerically in the reference PDF; left unset",
+    "SOURCE-SILENT: cdVent — not stated numerically in the reference PDF; left unset",
+    "SOURCE-SILENT: dragCoefficient — not stated numerically in the reference PDF; left unset"
+  ]
+}

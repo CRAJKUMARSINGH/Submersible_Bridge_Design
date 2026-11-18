@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Inputs, ComputedResults } from './calculations';
-import { DEFAULT_GEOMETRY } from './calculations';
+import { DEFAULT_GEOMETRY, drawingScaleLabel, laceyScourProfileDepth } from './calculations';
 import { buildDesignFormulaTrace } from './design-formula-trace';
 
 const f = (n: number, d = 2) => n.toFixed(d);
@@ -135,7 +135,16 @@ function titleBlock(doc: jsPDF, inputs: Inputs, drwTitle: string, drwNo: string,
   doc.text('SCALE', rightX + rightW / 4, tbY + 4, { align: 'center' });
   doc.text('SHEET', rightX + rightW * 3 / 4, tbY + 4, { align: 'center' });
   doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(0);
-  doc.text(scale, rightX + rightW / 4, tbY + tbH / 2 + 2, { align: 'center' });
+  // Task 18 — scale may carry two lines ("1:X H" / "1:Y V") when the vertical
+  // scale is exaggerated relative to the horizontal.
+  const scaleLines = scale.split('\n');
+  const scaleLineH = 3.2;
+  doc.text(
+    scaleLines,
+    rightX + rightW / 4,
+    tbY + tbH / 2 + 2 - ((scaleLines.length - 1) * scaleLineH) / 2,
+    { align: 'center' },
+  );
   doc.setFontSize(10);
   doc.text(`${sheet}/${total}`, rightX + rightW * 3 / 4, tbY + tbH / 2 + 4, { align: 'center' });
 
@@ -267,7 +276,8 @@ function drawCrossSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   doc.text(`SCOUR ${f(res.maxScourDepth)}m`, ax + 1.5, (yGL + yFBL) / 2, { baseline: 'middle' });
   doc.setDrawColor(0);
 
-  titleBlock(doc, inp, 'CROSS SECTION AT A-A', 'CS/DRG/01', '1:50 (SCHEMATIC)', '5', '9');
+  titleBlock(doc, inp, 'CROSS SECTION AT A-A', 'CS/DRG/01',
+    drawingScaleLabel(worldW, dW, { worldMetres: elRange, pageUnits: dH }), '5', '9');
 }
 
 function drawLongSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
@@ -338,11 +348,34 @@ function drawLongSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   hatch(doc, mx(xLA), yDT, (totL + 2 * ABUT_W) * hS, yRTL - yDT, 4);
   doc.setLineWidth(0.8); doc.rect(mx(xLA), yDT, (totL + 2 * ABUT_W) * hS, yRTL - yDT);
 
-  const scx = mx((xLA + xRA + ABUT_W) / 2), dip = 0.35 * vS;
-  doc.setDrawColor(100, 75, 30); doc.setLineWidth(0.6);
-  doc.line(mx(xCS), yGL, scx, yGL + dip);
-  doc.line(scx, yGL + dip, mx(xCE), yGL);
-  doc.setDrawColor(0);
+  // Task 18 — Lacey scour profile replaces the former cosmetic dip. The solid
+  // curve is the computed normal scour D; the dashed curve is the maximum-scour
+  // envelope D_m (IRC:5-1985 Cl.110.1.4.2), which the foundation design uses.
+  const nProf = 24;
+  const lwNormal = 0.65, lwMax = 0.45;
+  const scourShape = (depth: number, dashed: boolean) => {
+    doc.setDrawColor(100, 75, 30);
+    doc.setLineWidth(dashed ? lwMax : lwNormal);
+    let px = mx(xCS), py = yGL;
+    for (let i = 1; i <= nProf; i++) {
+      const t = i / nProf;
+      const x = mx(xCS + t * (xCE - xCS));
+      const y = yGL + laceyScourProfileDepth(depth, t) * vS;
+      if (!dashed || i % 2 === 0) doc.line(px, py, x, y);
+      px = x; py = y;
+    }
+    doc.setDrawColor(0);
+  };
+  if (res.maxScourDepth > res.laceyScourDepth) scourShape(res.maxScourDepth, true);
+  scourShape(res.laceyScourDepth, false);
+  doc.setFontSize(4.5); doc.setTextColor(100, 75, 30);
+  doc.text(
+    `NORMAL SCOUR D = ${f(res.laceyScourDepth)}m (max D_m = ${f(res.maxScourDepth)}m)`,
+    mx(xCS + (xCE - xCS) / 2),
+    yGL + res.laceyScourDepth * vS + 3,
+    { align: 'center' },
+  );
+  doc.setTextColor(0);
 
   levelLine(doc, ML, ML + dW, yHFL, `HFL: ${f(inp.hfl)}m`, [30, 100, 200], true);
   levelLine(doc, ML, ML + dW, yGL, `GL: ${f(inp.gl)}m`, [40, 110, 40]);
@@ -376,7 +409,8 @@ function drawLongSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   vDim(doc, ML + dW + 8, yGL, yFBL, `SCOUR ${f(res.maxScourDepth)}m`);
   vDim(doc, mx(xLA) - 10, yDT, yRTL, `t=${f(inp.deckThickness, 3)}m`);
 
-  titleBlock(doc, inp, 'LONGITUDINAL SECTION B-B', 'CS/DRG/02', '1:50 (SCHEMATIC)', '6', '9');
+  titleBlock(doc, inp, 'LONGITUDINAL SECTION B-B', 'CS/DRG/02',
+    drawingScaleLabel(worldL, dW, { worldMetres: maxEl - minEl, pageUnits: dH }), '6', '9');
 }
 
 function drawPlanView(doc: jsPDF, inp: Inputs, res: ComputedResults) {
@@ -455,13 +489,23 @@ function drawPlanView(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   doc.setLineWidth(1); doc.setDrawColor(0);
   doc.rect(mx(xLA), my(yTop), (totL + 2 * ABUT_W) * hS, inp.deckWidth * vS);
 
+  // Task 18 — true-north arrow rotated by the input bearing, measured clockwise
+  // from the drawing's vertical (0 = north up).
   const nax = ML + dW - 22, nay = MT + 20;
+  const nTheta = ((inp.northBearing_deg ?? 0) * Math.PI) / 180;
+  const rotN = (px: number, py: number): [number, number] => [
+    nax + px * Math.cos(nTheta) - py * Math.sin(nTheta),
+    nay + px * Math.sin(nTheta) + py * Math.cos(nTheta),
+  ];
+  const nTip = rotN(0, -14), nTail = rotN(0, 14), nBarbL = rotN(-6, 6), nBarbR = rotN(6, 6);
   doc.setLineWidth(0.5); doc.setDrawColor(0);
-  doc.line(nax, nay + 14, nax, nay - 14);
-  doc.line(nax - 6, nay + 6, nax, nay - 14);
-  doc.line(nax + 6, nay + 6, nax, nay - 14);
+  doc.line(nTail[0], nTail[1], nTip[0], nTip[1]);
+  doc.line(nBarbL[0], nBarbL[1], nTip[0], nTip[1]);
+  doc.line(nBarbR[0], nBarbR[1], nTip[0], nTip[1]);
   doc.setFontSize(10); doc.setFont('helvetica', 'bold');
-  doc.text('N', nax, nay - 16, { align: 'center' });
+  doc.text('N', rotN(0, -18)[0], rotN(0, -18)[1], { align: 'center' });
+  doc.setFontSize(4.5); doc.setFont('helvetica', 'normal');
+  doc.text(`TRUE N ${f(inp.northBearing_deg ?? 0, 0)}° CW`, nax, nay + 20, { align: 'center' });
 
   const faY = my(-bankW / 2) - 8;
   doc.setDrawColor(30, 80, 200); doc.setLineWidth(0.6);
@@ -480,7 +524,8 @@ function drawPlanView(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   doc.text(`N_SPANS = ${inp.numSpans}  |  N_VENTS = ${inp.numVents}  |  VENT: ${f(inp.ventWidth)}m × ${f(inp.ventHeight)}m`,
     ML + dW / 2, H - TB - MB - 4, { align: 'center' });
 
-  titleBlock(doc, inp, 'PLAN VIEW', 'CS/DRG/03', '1:50 (SCHEMATIC)', '7', '9');
+  titleBlock(doc, inp, 'PLAN VIEW', 'CS/DRG/03',
+    drawingScaleLabel(worldL, dW, { worldMetres: worldW, pageUnits: dH }), '7', '9');
 }
 
 function addFormulaTraceSheet(

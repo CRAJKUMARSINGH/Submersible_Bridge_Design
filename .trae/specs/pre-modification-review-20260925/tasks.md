@@ -201,10 +201,18 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 9: PDF-to-Variable Extraction Pipeline (R8)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — `scripts/extract-pdf-vars.ts` reads the reference PDF and emits `Partial<Inputs>` JSON + warnings; V3 harness scores **27/27 = 100 %** against `data/golden-reference-set.csv`, rubric score 2)
 **Priority:** `medium`
 
-**Scope:**
+**Resolution:**
+- **Extractor** — `scripts/extract-pdf-vars.ts` uses `pdf-parse` v2 (`new PDFParse({ data, verbosity: 0 })` → `getText({})`) over the 169 pages of `Type Design of submersible causeway.pdf` and applies label→value heuristics (design-parameter block, area-velocity totals row, Dicken/surplus-weir block, ventway trial, material rows). Output: `data/extracted/pdf-extracted-inputs.json` with `inputs: Partial<Inputs>`, `extraVariables` (`fck_pcc`/`fck_vrcc`/`fy`/`reinforcementCover_mm` — recognized reference fields kept as module constants in the app), `fieldCount`, `sourceSha256`, and `warnings`.
+- **Extraction yield** — **28 fields** (24 `Inputs` + 4 extra) ≥ the 20-field TR floor. Source-silent fields (streamName, location, date, runoffCoefficient, rainfallIntensity, ventHeight, cdVent, dragCoefficient) are reported as `SOURCE-SILENT` warnings and left unset, never guessed.
+- **Unit conversions** match `defaultInputs`: unit weights kN/m³ → kg/m³ (×100), SBC t/m² → kN/m² (×9.81).
+- **V3 harness** — `scripts/v3-extraction-accuracy.test.ts` (Section 14.3): manual golden table vs automated extraction, numeric within 0.1 % relative / exact string otherwise, prints the side-by-side table, asserts ≥ 20 extracted fields and ≥ 95 % accuracy.
+
+**Evidence:** `npm run extract:pdf-vars` → 28 fields; `npm run test:v3-extraction` → **27/27 = 100 %**, rubric 2; `npm run typecheck` exit 0.
+
+**Scope (as delivered):**
 - Add `scripts/extract-pdf-vars.cjs` or `ts` using `pdf-parse` (already in devDependencies)
 - Heuristic/table extractor: page ranges → label/value pairs
 - Output to JSON matching Partial<Inputs> + warnings
@@ -219,21 +227,27 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 10: Word (.docx) Report Generator (R9, Proposed Outline Section 18)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — `src/lib/word-export.ts` + `scripts/v8-word-conformance.test.ts`)
 **Priority:** `high`
 
-**Scope:**
-- Add docx dependency (docx / office-js) — peer review library choice
-- Template-driven: map Section 18 outline (1.1 → 18.13) to docx section objects with heading levels
-- Populate: metadata, 3 design step tables, compliance, drawing placeholders (drawings to vector-embedded later in C.4)
-- V8 conformance check: verify all headings present in output
+**Scope (as delivered):**
+- Add docx dependency (docx / office-js) — peer review library choice → `docx@9.9.0` (already present in `package.json`).
+- Template-driven: map Section 18 outline (1.1 → 18.13) to docx section objects with heading levels → `WORD_TOP_LEVEL_SECTIONS` (13 Heading-1 blocks) drives `buildDesignDocument()`.
+- Populate: metadata, 3 design step tables, compliance, drawing placeholders (drawings to vector-embedded later in C.4) → all Step-1/2/3 + structural tables populated from `Inputs`/`ComputedResults`; Sheets 5–11 listed as placeholders.
+- V8 conformance check: verify all headings present in output → `scripts/v8-word-conformance.test.ts`.
+
+**Resolution / Evidence:**
+- `src/lib/word-export.ts` — `buildDesignDocument(inputs, results)` (docx `Document`), `buildDesignDocxBuffer()` (Node/`Packer.toBuffer`), `downloadDesignWord()` (browser/`Packer.toBlob`); reuses `COVER_DISCLAIMER_*` from `pdf-export.ts` so the mandatory §18.1 item 1.5 disclaimer is single-sourced. Outline blocks: Title Page, Sections 1–8, 10–12, Appendices (the source outline has no Section 9).
+- `scripts/v8-word-conformance.test.ts` — generates the .docx, reads `word/document.xml` back with a dependency-free central-directory ZIP reader (`node:zlib`), asserts 13 Heading-1 paragraphs in outline order and 34/34 Section-10 field values present.
+- UI: `Export Word (.docx)` button wired on the Summary page (`src/pages/summary.tsx`) beside the PDF export, closing the R9 "no Word output" submission-gate gap.
+- **Evidence:** `npm run test:v8-word` → 13/13 headings, 34/34 field values, rubric **2** (pass ≥ 1); `npm run typecheck` exit 0; `npm run build` exit 0 (2630 modules).
 
 **AC Coverage:** spec.md R9, Section 3 missing Word pipeline, Section 18 proposed outline
 
 **Test Requirements (TR):**
-- **RULE:** Generated .docx has 13 top-level sections (1. Title … 13. Appendices) with correct heading level 1
-- **RULE:** For each field in Section 10 Report-Field Inventory, corresponding docx XML paragraph contains the value (spot-check N≥20)
-- **RUBRIC:** Visual fidelity to outline. 0=sections unordered or missing 3+, 1=minor layout issues, 2=identical structure. Pass ≥1.
+- **RULE:** Generated .docx has 13 top-level sections (1. Title … 13. Appendices) with correct heading level 1 — PASS (13 Heading-1 paragraphs, outline order).
+- **RULE:** For each field in Section 10 Report-Field Inventory, corresponding docx XML paragraph contains the value (spot-check N≥20) — PASS (34 values, ≥20 required).
+- **RUBRIC:** Visual fidelity to outline. 0=sections unordered or missing 3+, 1=minor layout issues, 2=identical structure. Pass ≥1. → **2**.
 
 ---
 
@@ -336,8 +350,15 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Phase C.4 — DRAWING INTEGRITY
 
 ### Task 18: Scour Profile Shape + Schematic Scale Removal
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — shared `laceyScourProfileDepth()` + `drawingScaleLabel()` consumed by both the PDF and the on-screen drawings; new `northBearing_deg` input; 60/60 calc, 19/19 structural, 3/3 trace, 6/6 cdVent, 4/4 verbatim, V5 PASS, `npm run build` exit 0)
 **Priority:** `medium`
+
+**Resolution:**
+- **Scour profile** — the cosmetic dip (`0.35*vS` in PDF, `0.4*vS` in SVG) is replaced by the computed Lacey profile from the shared pure helper `laceyScourProfileDepth(D, t)` in `src/lib/calculations.tsx`. The Long Section now draws the normal-scour curve `D` solid and the maximum-scour envelope `D_m = 1.5 D` dashed (IRC:5-1985 Cl.110.1.4.2), both taken from `ComputedResults` — one shape for the PDF and the on-screen view.
+- **True drawing scale** — `drawingScaleLabel(worldMetres, pageUnits, vertical)` computes `1:N` from the drawn world size over the page length actually used. Where the vertical scale is exaggerated (these sections are), the title block reports both denominators (`1:X H` / `1:Y V`) instead of the former hardcoded `1:50 (SCHEMATIC)`. All three sheets (CS/DRG/01, 02, 03) in both the PDF and the SVG drawings now carry the computed value; `titleBlock`/`TitleBlock` render the two-line form.
+- **True-bearing north arrow** — new optional input `northBearing_deg` (default 0 = north up, clockwise from the drawing's vertical) rotated in both the PDF plan view and the on-screen plan SVG, with a `TRUE N <θ>° CW` annotation. Editable from the Plan View tab in `src/pages/drawings.tsx`.
+
+**Evidence:** `src/lib/calculations.tsx` (helpers + `Inputs.northBearing_deg` + default), `src/lib/pdf-export.ts` (titleBlock multi-line scale, `drawScourProfile` in `drawLongSection`, rotated north arrow in `drawPlanView`), `src/pages/drawings.tsx` (same three changes + bearing input control); `scripts/v5-geometry-single-source.test.ts` PASS.
 
 **Scope:**
 - Replace cosmetic dip `0.35*vS` in Long Section with actual Lacey-scour shape (function of laceyScourDepth + maxScourDepth)
@@ -349,7 +370,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Phase C.5 — V&V + INDEPENDENT REVIEW
 
 ### Task 19: Execute V1–V10 + Independent Reviewer Sign-Off
-**Status:** `pending`
+**Status:** `blocked` (2026-11-18 — implementer-side V1–V9 executed and `review.md` produced; **V10 independent PE sign-off BLOCKED** pending closure of NC-1…NC-8 → Tasks 28–35)
 **Priority:** `high` (final gate)
 
 **Scope:**
@@ -360,6 +381,15 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
   - Code-clause trace final audit
 - review.md artifact with pass/fail/blocked per checkpoint (per TRAE-spec-mode Review rules)
 - Any findings → materialize as pending tasks in this file BEFORE selecting next work
+
+**Resolution:**
+- **V1–V9 re-run in one consolidated self-verification pass.** Results: V1 unit **60/60**; V2 regression **25/25** (SHA-256 golden master, deterministic); V3 extraction **27/27 = 100 %**; V4 calculation **11/32 = 34.4 % → FAIL** (21 divergences); V5 drawing dimensional **PASS** (single-source geometry; CAD overlay BLOCKED — no reference DXF); V6 clause conformance **PARTIAL** (26/26 traceable, 12/26 = 46.2 % explicit, 22/26 = 84.6 % code-cited); V7 report completeness **41/41 = 100 %**; V8 Word conformance **13/13 headings + 34/34 fields**; V9 load combinations **3/11 = 27 % → FAIL**.
+- **Findings materialised BEFORE further work** (per the Task 19 scope rule): V4 → **Tasks 28–33**, V6 → **Task 34**, V9 → **Task 35**.
+- **V10 is BLOCKED.** The spec §14.5 deliverables cannot be signed while V4/V6/V9 are open — a PE hand-calc sign-off on a design set the app does not yet reproduce would be premature. No variance has been approved.
+
+**Evidence:** harnesses `scripts/v2-regression.test.ts` (+ `scripts/v2-golden-checksums.json`), `scripts/v6-clause-conformance.test.ts` (+ `data/clause-traceability-matrix.csv`), `scripts/v7-report-completeness.test.ts`, `scripts/v9-load-combinations.test.ts` (+ `data/load-combination-coverage.csv`); package.json scripts `test:v2-regression`, `test:v4`, `test:v6-clause`, `test:v7-report`, `test:v9-combos`. Full pass/fail matrix, evidence log, NC-1…NC-8 and the §14.5 checklist are in [`review.md`](file:///e:/Rajkumar/Submersible_Bridge_Design/.trae/specs/pre-modification-review-20260925/review.md).
+
+**Gate verdict:** **NOT PASSED** — V4 and V9 fail their criteria and V6 is partial. Task stays `blocked` until Tasks 28–35 are closed (or approved as variances) and an independent reviewer + qualified PE sign off.
 
 ---
 
@@ -522,3 +552,108 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 | R19 Anchors + thrust blocks | Task 17 |
 | Section 8.4 S7 schematic scale + scour cosmeitc | Task 18 |
 | Section 14 V1–V10 full V&V | Task 19 |
+
+---
+
+## Findings Materialized from Task 19 (V4 Calculation Correctness)
+
+**Harness:** `scripts/v4-calculation-correctness.test.ts` (`npm run test:v4`) — runs `computeResults()` on the golden inputs and diffs every `ComputedResults` field against `data/golden-reference-set.csv`.
+**Result (2026-11-18):** **11/32 reproducible rows = 34.4 %** (7 skipped NOT-STATED), **21 divergences**. The spec §14.1 V4 criterion is "exact match; zero tolerance on pass/fail", so the run **fails** — each divergence is materialized below rather than masked.
+
+**PASS (11):** RS-03 qVelocity 30.289, RS-06 designDischarge 45.750, RS-07 aVent 26.210, RS-13 passRTL, RS-17 alluvialPerimeter 32.128, RS-23 wSelf 338.550, RS-25 wLive 478.410, XTRA-06 buoyancy 145.800, XTRA-07 braking 47.841, XTRA-08 wind_deck 3.862, XTRA-09 wind_liveload 18.000.
+
+---
+
+### Task 28: Model Surveyed Channel Cross-Section (RS-08/09/10/11/12/14/15/16)
+**Status:** `pending`
+**Priority:** `high`
+**Depends On:** PE cross-section geometry (AUTOCAD areas are not expressible in the current `Inputs` schema)
+**Scope:** Reconcile the app's rectangular waterway model with the reference's surveyed cross-section. The reference derives every waterway/obstruction/afflux result from **graphically-measured AUTOCAD areas**, not from `Q / V`:
+
+| Ref | Value | Source | App now |
+|---|---|---|---|
+| effectiveWidth | 28.80 m | `L4845` "Linear water way L" | 17.733 (Q/V) |
+| aRTL | 66.53 m² | `L4815` (AUTOCAD, RTL→bed) | 29.791 |
+| aHFL | 79.33 m² | `L4831` (AUTOCAD, HFL→bed) | 40.253 |
+| pctObsRTL | 39.40 % | `L4827` (26.21 / 66.53) | 12.020 |
+| pctObsHFL | 29.07 % | `L4837` (26.21 / 90.28 via 56.27 flow area) | 34.887 |
+| passHFL | true | `L4839` | false |
+| velocityHFL | 2.58 m/s | `L4805` | 1.137 |
+| hAfflux | 0.131 m | `L524` (orifice) | 0.119 |
+
+**Root cause:** `src/lib/calculations.tsx` L357–360 computes `aRTL = (rtl−gl) × effectiveWidth` and `aHFL = (hfl−gl) × effectiveWidth`, i.e. a **rectangular prism**; the reference uses surveyed irregular sections (`L4833`: "Area available for flow in between HFL and RTL/PBL = 30.06 sqm"). `linearWaterway_m` is currently wired to scour only (`scourDischargeWidth()`, Task 26), not to `effectiveWidth` / waterway areas.
+**Proposed direction (needs PE approval):** either (a) add optional surveyed-area inputs `aRTL_m2` / `aHFL_m2` that override the rectangular model, or (b) apply `linearWaterway_m` to `effectiveWidth` and accept a residual on the areas. Do **not** invent section geometry.
+**Acceptance:** RS-08/09/10/11/12/14/15/16 reproduced within 0.1 % given the measured section, **or** the rows reclassified as NOT-REPRODUCIBLE with the missing input named.
+
+### Task 29: Additive vs Max Discharge Combination Rule (RS-04/RS-05)
+**Status:** `pending`
+**Priority:** `high`
+**Depends On:** PE ruling on the design-discharge combination rule
+**Scope:** The reference's governing method is **additive**: *"Stream design 30.28 + Surplus weir 15.47"* = **45.75 m³/s** (`L4792` + `L4802`, RS-04/RS-05 EXACT). The app takes **max()** of the three methods (`calculations.tsx` L345–348) → 30.29 m³/s, so its governing method reads "Area-Velocity". The app only matches the reference *total* when `customDesignDischarge` is supplied.
+**Acceptance:** a PE-confirmed combination rule implemented in `computeResults()` and mirrored in `design-formula-trace.ts`, reproducing Q_design = 45.75 with the correct `governingMethod` label — **or** the rule documented as a deliberate deviation with evidence.
+
+### Task 30: Deck Footprint for Silt / Uplift Loads (RS-24/RS-28)
+**Status:** `pending`
+**Priority:** `medium`
+**Scope:** The reference computes silt and uplift over a **6.8 m** deck footprint, not 6.0 m:
+- `wSilt` = 2.25 × **6.8** × 6.0 = **91.80 kN** (RS-24, COMPUTED from `L254`); app uses `deckSpan` 6.0 → 81.000.
+- `fUplift` = **195.48 kN** (RS-28, `L527`); app uses `deckWidth × deckSpan × deckThickness` (6×6×0.48) → 169.517.
+
+**Root cause:** `calculations.tsx` L398 (`wSilt`) and L425 (`fUplift`) use `deckSpan`; the app already carries `deckSlabLength` (default 6.8) which is used only for the Class-A UDL (L412). **Acceptance:** `wSilt` = 91.80 and `fUplift` = 195.48 reproduced, **or** the footprint discrepancy traced to the reference and documented.
+
+### Task 31: Reference-Internal Weir-Discharge Inconsistency (RS-02)
+**Status:** `pending`
+**Priority:** `medium`
+**Depends On:** PE clarification (may be a reference arithmetic error, not an app defect)
+**Scope:** The reference prints **Q₂ = 15.47 m³/s** (`L4802`) for the surplus weir, derived as "q = C·L·h^1.5 = 24.13 cusecs = 0.68 cumecs" per metre × 22.75 m (`L4796`–`L4802`). This is **not reproducible** from its own stated data: with L = 22.75 m (`IN-08`, EXACT) and h = 0.45 m (`IN-09`, EXACT), the clause-conformant IRC free-overflow form `Q = 1.705·L·h^1.5` gives **11.71 m³/s** (the app's value, RS-02 FAIL). Reproducing 15.47 would require an effective per-metre coefficient of ≈ 2.252, which matches neither 1.705 nor the "Cd = 4.10" noted at `L4801`.
+**Acceptance:** PE ruling — either the reference's L/h/Cd differ from `IN-08`/`IN-09` (update the inputs) or the app's clause-conformant 1.705 form stands and RS-02 is reclassified. **No coefficient change without evidence.**
+
+### Task 32: Scour / FBL Datum Reconciliation (RS-18/19/20/21/22)
+**Status:** `pending`
+**Priority:** `medium`
+**Depends On:** Task 26 residual (1.30 vs 1.33 factor) + PE confirmation of the design FBL
+**Scope:** Two distinct issues:
+1. **Scour rounding (RS-18/19):** app 1.725 / 2.587 vs ref 1.75 / 2.63 — the known ~1.5 % residual from the `L4912` 1.30-vs-1.33 factor discrepancy already tracked under Tasks 25/26; needs the PE ruling on 1.30 or 1.33.
+2. **Foundation datums (RS-20/21/22):** `fbl` = **2.315 m** (`L112`) and `recommendedDepth` = **3.83 m** (`L4920`) are **stated design datums** in the reference, not derived from `hfl − maxScourDepth`. The app derives `fbl = hfl − maxScourDepth` = 3.648 and `recommendedDepth = gl − fbl` = 0.317, making `scourSafe` false where the reference says true.
+**Acceptance:** the app either accepts the stated FBL/recommended-depth datums as inputs, or the derivation is confirmed against the reference's design-intent — reproducing RS-18/19/20/21/22 (within the agreed scour-factor tolerance) and RS-22 = true.
+
+### Task 33: Earth-Pressure Coefficient Rounding (XTRA-01…XTRA-05)
+**Status:** `pending`
+**Priority:** `low`
+**Scope:** `structural.ts` earth pressures deviate from the golden workbook by a uniform **≈ 0.5 %** — app `ka` = 0.3014 vs ref 0.30 (XTRA-01), giving `pa_base` 6.511 vs 6.48, `P` 70.314 vs 69.98, `Ph` 67.919 vs 67.60, `Pv` 18.199 vs 18.10. The pattern is consistent with the reference using a **rounded Ka = 0.30** while the app computes the Rankine value from the (unstated) φ input.
+**Acceptance:** confirm whether the source's 0.30 is a rounded presentation of the computed Ka (→ reclassify as within rounding tolerance) or a stated design coefficient to be adopted as an input. **No change to the earth-pressure derivation without evidence.**
+
+---
+
+## Findings Materialized from Task 19 (V6 / V9)
+
+### Task 34: Stamp Explicit Clause IDs on Un-stamped Formula Trace Rows (V6 finding)
+**Status:** `pending`
+**Priority:** `medium`
+**Depends On:** PE clause supply for the source-silent items
+**Scope:** V6 (`npm run test:v6-clause`) confirms structural completeness — all **26** traced formulas are mapped in [`data/clause-traceability-matrix.csv`](file:///e:/Rajkumar/Submersible_Bridge_Design/data/clause-traceability-matrix.csv) and all **20** decisions E1–E20 carry a `code_clause` — but the spec ideal *"every formula has a clause ID"* is only partly met:
+
+| Status | Count | Formulas |
+|---|---|---|
+| EXACT (explicit clause no.) | 12 | A_VENT, A_RTL, A_HFL, OBS_RTL, OBS_HFL, LACEY_R, SCOUR_MAX, FBL, FOUNDATION_DEPTH, W_SILT, W_LIVE, F_UPLIFT |
+| GENERAL-ONLY (code named, no clause) | 10 | Q_WEIR, Q_AREA_VELOCITY, B_EFFECTIVE, V_HFL, AFFLUX, LACEY_P, W_SELF, W_TOTAL, F_DRAG, F_DRAG_TOTAL |
+| SOURCE-SILENT | 2 | Q_RATIONAL, F_ANCHOR |
+| PENDING (PE ruling) | 1 | Q_GOVERNING |
+| NOT-APPLICABLE | 1 | Q_SELECTED |
+
+Explicit-clause rate = **12/26 = 46.2 %**; code-cited rate (EXACT+GENERAL) = **22/26 = 84.6 %**.
+**Acceptance:** raise the explicit-clause rate (or the code-cited rate) by stamping clause numbers that are **present in the evidence** — AFFLUX → IRC SP:13-2004 orifice sub-clause, LACEY_P → Lacey 1930, W_SELF → IRC:6-2000 dead-load clause, Q_WEIR → broad-crested weir clause. Source-silent items stay flagged as **PE to supply**; nothing is stamped without evidence.
+
+### Task 35: Implement the IRC 6:2000 Cl.202 Load-Combination Matrix (V9 finding)
+**Status:** `pending`
+**Priority:** `high`
+**Scope:** V9 (`npm run test:v9-combos`) shows the engine does **not** enumerate the Cl.202 combination set. Applying [`data/load-combination-coverage.csv`](file:///e:/Rajkumar/Submersible_Bridge_Design/data/load-combination-coverage.csv) against the live `StructuralResults`: **3/11 required combinations fully evaluated = 27 %** (criterion ≥10/12).
+
+- EVALUATED (3): C1 DL+LL (`stability.totalVertical`), C4 DL+buoyancy (`uplift.fosAnchor`), C8 DL+LL+EP (`earthPressure.totalThrust`).
+- PARTIAL (4): C2 wind, C3 drag, C5 silt, C7 braking — the constituent force is computed (`transient.*`, `results.fDrag`, `results.wSilt`) but not combined into a checked resultant.
+- NOT-EVALUATED (4): C9, C10, C11, C12 (incl. the Cl.202.3 inundation no-stress-increase combination).
+- NOT-REQUIRED (1): C6 seismic (Zone-I exempt, E6).
+
+**Acceptance:** implement a discrete combination state per Cl.202 (each returning its own resultant + limit check) so ≥10/12 are evaluated with results; surface them in the report (Word Section 6 / PDF Sheet 4) and re-run `test:v9-combos`. Note the current Word Section 6.8 narrative already claims "10–12 combination sub-tables" — that claim must be made true or removed.
+
+---
