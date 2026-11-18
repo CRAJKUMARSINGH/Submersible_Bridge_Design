@@ -120,7 +120,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 5: Rename QA Rubric and Add Report Disclaimer (R7)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — cover disclaimer block per §18.1-1.5 drawn from exported `COVER_DISCLAIMER_*` constants; footer disclaimer verified on all 9 sheets; summary red V10 banner confirmed; QA output relabelled "Report Structural Completeness Score"; new `scripts/t5-report-disclaimer.test.ts` 4/4 PASS; 60/60 calc, 19/19 structural, 3/3 trace, 4/4 verbatim, V5 PASS, `npm run build` exit 0)
 **Priority:** `high`
 
 **Scope:**
