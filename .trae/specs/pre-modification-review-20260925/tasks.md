@@ -404,7 +404,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 - **Bearing false PASS (DEF-004/DEF-006)** — `bearingSafe` now requires full contact: `bearingSafe = noTension && pMax ≤ SBC` (`src/lib/structural.ts` L462); the SBC warning only fires when contact is full. Regression test **ST-19** added.
 
 **BLOCKED pending qualified PE review (deliberately NOT changed):**
-- **E3 Lacey coefficient** — code uses the classic Lacey form `0.473·(Q/f)^⅓`; the reference (L4915) uses `1.34·(q²/f)^⅓` with q = discharge per metre width (1.75 m vs the code's 1.34 m for the reference case).
+- **E3 Lacey coefficient** — **CLOSED 2026-11-18 by Task 25**: the reference form `1.34·(q²/f)^⅓` (q = discharge per metre width, `TYPE_document.md` L4915) has been adopted in place of the classic `0.473·(Q/f)^⅓`.
 - **E11 design method** — source is working-stress (M20 σ_cc = 5, σ_bt = −2.8 N/mm², IRC:6-2000 Cl.202.3); `structural.ts` reinforcement uses limit-state IS456 (1.5 factor). Methods must not be switched unilaterally.
 
 **Verification:** `npm run typecheck` exit 0; tests 58/58 + 19/19 + 3/3 + 2/2 + 1/1 + 4/4.
@@ -426,7 +426,29 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 
 **Not done (per bundle rules — requires explicit approval):** no commit, no push, no deletion.
 
-**Carried-forward blockers (unchanged):** E3 Lacey normal-scour coefficient; E11 WSD-vs-LSM method; E2/E9/E10 clause-number stamping.
+**Carried-forward blockers (E3 Lacey coefficient closed 2026-11-18 by Task 25):** E11 WSD-vs-LSM method; E2/E9/E10 clause-number stamping.
+
+---
+
+### Task 25: Adopt Reference Lacey Normal-Scour Form (E3 coefficient closure)
+**Status:** `completed` (2026-11-18 — reference form adopted across all mirrors; 80/80 tests green)
+**Priority:** `high`
+**Scope:** Close the Task 23/24 blocker *"E3 Lacey normal-scour coefficient"* — replace the classic Lacey form `0.473·(Q/f)^⅓` with the reference form `D = 1.34·(q²/f)^⅓` (with `q` = discharge per metre width, and the +30 % foundation-design discharge of IRC:5-1985 Cl.101.1.2), then `D_m = 1.5·D` (Cl.110.1.4.2).
+
+**Source evidence:** `TYPE_document.md` L4910–L4918 — "the design discharge should be increased by 30% … the discharge for design of foundations = 1.30 × Design Discharge = 60.85 cumecs"; "Discharge per metre width of foundations = q = 2.113"; "Normal scour depth D = 1.34(q²/f)^⅓ = 1.75 m"; "Maximum scour depth D_m = 1.5 × D = 2.63 m".
+
+**Changes (all mirrors in lockstep):**
+- `src/lib/calculations.tsx` — `laceyScourDepth = 1.34·(q²/f)^⅓`, `q = 1.30·Q / B_eff`.
+- `scripts/src/generate-sample-pdf.ts` — same derivation.
+- `scripts/calculations.test.ts` — `calcLaceyScourDepth` now takes `q`; new `calcFdnDischargePerMetreWidth()`; S2-15/16/17 rewritten.
+- `src/lib/design-formula-trace.ts` + `scripts/design-formula-trace.test.ts` — trace equation/substitution updated.
+- `src/pages/step2-hydraulic.tsx` — UI formula text `1.27 × R` → `1.5 × D`.
+- `src/lib/pdf-export.ts` — sheet-3 formula-table rows corrected.
+- `data/engineering-decisions-e1-e20.csv` — E3 row rewritten (BLOCKED note → FIXED with caveat).
+
+**Verification:** `npm run typecheck` exit 0; calculation tests 58/58; structural tests 19/19; formula-trace 3/3.
+
+**Residual (documented, not a defect):** `data/golden-reference-set.csv` RS-18 = 1.75 m / RS-19 = 2.63 m are derived in the reference from a **measured linear waterway of 28.80 m** (`L4845`); the app derives the scour width from `B_eff = Q / V` and has no linear-waterway input, so absolute values differ although the form and clauses are identical. Tracked as Task 26.
 
 ---
 

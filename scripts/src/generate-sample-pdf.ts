@@ -86,7 +86,10 @@ const hAfflux      = (aVent > 0 && aHFL > aVent)
   ? (Math.pow(velocityHFL, 2) / 17.88 + 0.015) * (Math.pow(aHFL / aVent, 2) - 1)
   : 0;
 const laceyPerimeter  = 4.75 * Math.sqrt(designDischarge);
-const laceyScourDepth = 0.473 * Math.pow(designDischarge / inputs.siltFactor, 1 / 3);
+// E3: D = 1.34 × (q²/f)^(1/3) with q = 1.30 × Q / B_eff (IRC:5-1985 Cl.101.1.2 / Cl.110.1.4.2)
+const qFdnPerMetreWidth = effectiveWidth > 0 ? (1.30 * designDischarge) / effectiveWidth : 0;
+const sfScour         = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
+const laceyScourDepth = 1.34 * Math.pow((qFdnPerMetreWidth * qFdnPerMetreWidth) / sfScour, 1 / 3);
 const maxScourDepth   = 1.5 * laceyScourDepth; // E3: max scour = 1.5 × normal (IRC:5-1985 Cl.110.1.4.2)
 const fbl             = inputs.hfl - maxScourDepth;
 const recommendedDepth = inputs.gl - fbl;

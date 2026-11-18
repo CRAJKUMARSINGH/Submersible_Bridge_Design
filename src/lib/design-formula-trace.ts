@@ -23,6 +23,9 @@ const n = (value: number, digits = 3) => Number.isFinite(value) ? value.toFixed(
 export function buildDesignFormulaTrace(inputs: Inputs, results: ComputedResults): DesignFormulaTraceRow[] {
   const appVelocity = inputs.approachVelocity > 0 ? inputs.approachVelocity : 0.01;
   const siltFactor = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
+  // E3: discharge per metre width in the foundation-design regime
+  // q = 1.30 × Q / B_eff (IRC:5-1985 Cl.101.1.2 — design discharge +30% for foundations).
+  const laceyQ = results.effectiveWidth > 0 ? (1.30 * results.designDischarge) / results.effectiveWidth : 0;
   const dischargeRef = 'Prototype discharge section, lines 8105–8213 (method/coefficient differences must be reviewed)';
   const hydraulicRef = 'Prototype hydraulic narrative, lines 58–69 and 742–821';
   const structuralRef = 'Prototype load/design narrative, lines 79–84 and 824 onward';
@@ -118,14 +121,14 @@ export function buildDesignFormulaTrace(inputs: Inputs, results: ComputedResults
     },
     {
       id: 'LACEY_R', section: 'Step 2 — Hydraulic',
-      equation: 'R = 0.473 × (Q / f)^1/3',
-      substitution: `0.473 × (${n(results.designDischarge)} / ${n(siltFactor)})^1/3`,
+      equation: 'D = 1.34 × (q² / f)^(1/3) with q = 1.30 × Q / B_eff',
+      substitution: `1.34 × (${n(laceyQ)}² / ${n(siltFactor)})^1/3, q = 1.30 × ${n(results.designDischarge)} / ${n(results.effectiveWidth)}`,
       result: n(results.laceyScourDepth), unit: 'm', prototypeReference: hydraulicRef,
     },
     {
       id: 'SCOUR_MAX', section: 'Step 2 — Hydraulic',
-      equation: 'D_max = 1.27 × R',
-      substitution: `1.27 × ${n(results.laceyScourDepth)}`,
+      equation: 'D_max = 1.5 × D',
+      substitution: `1.5 × ${n(results.laceyScourDepth)}`,
       result: n(results.maxScourDepth), unit: 'm', prototypeReference: hydraulicRef,
     },
     {

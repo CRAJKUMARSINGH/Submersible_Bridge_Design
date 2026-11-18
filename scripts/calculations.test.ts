@@ -105,9 +105,16 @@ export function calcLaceyPerimeter(Q: number): number {
   return 4.75 * Math.sqrt(Q);
 }
 
-export function calcLaceyScourDepth(Q: number, siltFactor: number): number {
+// E3: Lacey normal scour depth in the reference form D = 1.34 × (q² / f)^(1/3),
+// where q = discharge per metre width (foundation design discharge / waterway width).
+export function calcLaceyScourDepth(qPerMetreWidth: number, siltFactor: number): number {
   const sf = siltFactor > 0 ? siltFactor : 0.1;
-  return 0.473 * Math.pow(Q / sf, 1 / 3);
+  return 1.34 * Math.pow((qPerMetreWidth * qPerMetreWidth) / sf, 1 / 3);
+}
+
+// E3: q = 1.30 × Q / B_eff (IRC:5-1985 Cl.101.1.2 — +30% design discharge for foundations).
+export function calcFdnDischargePerMetreWidth(Q: number, effectiveWidth: number): number {
+  return effectiveWidth > 0 ? (1.30 * Q) / effectiveWidth : 0;
 }
 
 export function calcStep2(inputs: {
@@ -145,8 +152,9 @@ export function calcStep2(inputs: {
   const hAfflux = calcHAfflux(velocityHFL, aVent, aHFL);
 
   const laceyPerimeter = calcLaceyPerimeter(designDischarge);
-  const laceyScourDepth = calcLaceyScourDepth(designDischarge, inputs.siltFactor);
-  const maxScourDepth = 1.5 * laceyScourDepth; // E3: max scour = 1.5 × normal (IRC:5-1985)
+  const qFdnPerMetreWidth = calcFdnDischargePerMetreWidth(designDischarge, effectiveWidth);
+  const laceyScourDepth = calcLaceyScourDepth(qFdnPerMetreWidth, inputs.siltFactor);
+  const maxScourDepth = 1.5 * laceyScourDepth; // E3: max scour = 1.5 × normal (IRC:5-1985 Cl.110.1.4.2)
   const fbl = inputs.hfl - maxScourDepth;
   const recommendedDepth = inputs.gl - fbl;
   const scourSafe = fbl < inputs.gl - 0.5;
@@ -411,21 +419,21 @@ test("S2-14 Lacey P Q=0 → 0 (no NaN)", () => {
   assertExact(calcLaceyPerimeter(0), 0);
 });
 
-test("S2-15 Lacey R Q=100 f=1.0 → ≈2.195", () => {
-  const R = calcLaceyScourDepth(100, 1.0);
-  assertApprox(R, 0.473 * Math.pow(100, 1 / 3), 1e-3);
+test("S2-15 Lacey D q=2.0 f=1.0 → 1.34*(q²/f)^(1/3) ≈ 2.127", () => {
+  const D = calcLaceyScourDepth(2.0, 1.0);
+  assertApprox(D, 1.34 * Math.pow((2.0 * 2.0) / 1.0, 1 / 3), 1e-3);
 });
 
-test("S2-16 Lacey R f=0.5 same Q → R larger vs f=1", () => {
-  const Rhalf = calcLaceyScourDepth(100, 0.5);
-  const Rone = calcLaceyScourDepth(100, 1.0);
-  assertTrue(Rhalf > Rone);
+test("S2-16 Lacey D f=0.5 same q → D larger vs f=1", () => {
+  const Dhalf = calcLaceyScourDepth(2.0, 0.5);
+  const Done = calcLaceyScourDepth(2.0, 1.0);
+  assertTrue(Dhalf > Done);
 });
 
-test("S2-17 Lacey R f=1.5 same Q → R smaller vs f=1", () => {
-  const Rbig = calcLaceyScourDepth(100, 1.5);
-  const Rone = calcLaceyScourDepth(100, 1.0);
-  assertTrue(Rbig < Rone);
+test("S2-17 Lacey D f=1.5 same q → D smaller vs f=1", () => {
+  const Dbig = calcLaceyScourDepth(2.0, 1.5);
+  const Done = calcLaceyScourDepth(2.0, 1.0);
+  assertTrue(Dbig < Done);
 });
 
 test("S2-18 D_max = 1.5*R, R=2 → 3.0 exact (max scour = 1.5× normal, IRC:5-1985)", () => {

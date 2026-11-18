@@ -288,12 +288,19 @@ export function computeResults(inputs: Inputs): ComputedResults {
 
   const laceyPerimeter = 4.75 * Math.sqrt(designDischarge);
   const sf = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
-  const laceyScourDepth = 0.473 * Math.pow(designDischarge / sf, 1 / 3);
-  // E3: maximum scour depth = 1.5 × normal scour (straight reach, IRC:5-1985
-  // Cl.110.1.4.2) — source TYPE_document.md L4916 "Maximum scour depth D_m = 1.5 × D
-  // = 2.63 m". The former 1.27 constant is the D/S cut-off factor (a different quantity).
-  // NOTE (open, PE review pending): the normal-scour coefficient above still uses the
-  // classic Lacey form 0.473·(Q/f)^(1/3); the reference (L4915) uses 1.34·(q²/f)^(1/3).
+  // E3 (IRC:5-1985 Cl.101.1.2 + Cl.110.1.4.2): normal scour depth in the reference
+  // Lacey form. The design discharge is increased by 30% for foundation / protection
+  // design (Cl.101.1.2), giving the discharge per metre width
+  //   q = 1.30 × Q / B_eff        (B_eff = effectiveWidth, the app's waterway width)
+  // and the normal / maximum scour depths (source TYPE_document.md L4915–L4916):
+  //   D = 1.34 × (q² / f)^(1/3)        D_m = 1.5 × D
+  // The former 1.27 constant on D_m is the D/S cut-off factor (a different quantity).
+  // Caveat: the reference derives q from a measured linear waterway (28.80 m); this app
+  // has no such input and uses effectiveWidth = Q / V, so absolute scour values will
+  // differ from the reference worked example even though the form is identical.
+  const foundationDischarge = 1.30 * designDischarge;
+  const qFdnPerMetreWidth = effectiveWidth > 0 ? foundationDischarge / effectiveWidth : 0;
+  const laceyScourDepth = 1.34 * Math.pow((qFdnPerMetreWidth * qFdnPerMetreWidth) / sf, 1 / 3);
   const maxScourDepth = 1.5 * laceyScourDepth;
   const fbl = inputs.hfl - maxScourDepth;
   const recommendedDepth = inputs.gl - fbl;

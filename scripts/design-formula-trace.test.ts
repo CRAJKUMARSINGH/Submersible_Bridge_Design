@@ -21,8 +21,10 @@ const sampleResults: ComputedResults = {
   velocityHFL: 0.48,
   hAfflux: 0.008,
   laceyPerimeter: 53.106,
-  laceyScourDepth: 2.36,
-  maxScourDepth: 2.997,
+  // E3: q = 1.30 × 125 / 104.167 = 1.560; D = 1.34 × (1.560²/1)^(1/3) = 1.802;
+  //     D_max = 1.5 × 1.802 = 2.703 (f = defaultInputs.siltFactor = 1.0).
+  laceyScourDepth: 1.802,
+  maxScourDepth: 2.703,
   fbl: 99.503,
   recommendedDepth: 0.497,
   scourSafe: false,

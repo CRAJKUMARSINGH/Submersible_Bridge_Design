@@ -5,6 +5,9 @@ import { Card, CardHeader, CardTitle, CardContent, Input, Label, FormulaTrace, B
 export default function Step2Hydraulic() {
   const { inputs, updateInput, results } = useCalculations();
 
+  // E3: discharge per metre width in the foundation-design regime, q = 1.30 × Q / B_eff
+  const laceyQ = results.effectiveWidth > 0 ? (1.30 * results.designDischarge) / results.effectiveWidth : 0;
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
@@ -203,12 +206,12 @@ export default function Step2Hydraulic() {
                   <FormulaTrace expression={`P = 4.75 × √Q = 4.75 × √${results.designDischarge.toFixed(2)}`} result={results.laceyPerimeter} unit="m" />
                 </div>
                 <div>
-                  <Label>Normal Scour Depth R</Label>
-                  <FormulaTrace expression={`0.473 × (Q/f)^(1/3) = 0.473 × (${results.designDischarge.toFixed(2)}/${inputs.siltFactor})^0.333`} result={results.laceyScourDepth} unit="m" />
+                  <Label>Normal Scour Depth D</Label>
+                  <FormulaTrace expression={`1.34 × (q²/f)^(1/3), q = 1.30Q/B_eff = ${laceyQ.toFixed(3)}`} result={results.laceyScourDepth} unit="m" />
                 </div>
                 <div>
                   <Label>Max Scour Depth D_max</Label>
-                  <FormulaTrace expression={`1.27 × R = 1.27 × ${results.laceyScourDepth.toFixed(3)}`} result={results.maxScourDepth} unit="m" />
+                  <FormulaTrace expression={`1.5 × D = 1.5 × ${results.laceyScourDepth.toFixed(3)}`} result={results.maxScourDepth} unit="m" />
                 </div>
                 <div>
                   <Label>Foundation Bottom Level (FBL)</Label>
