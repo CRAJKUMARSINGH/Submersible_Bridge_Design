@@ -1,0 +1,996 @@
+{
+  "id": "2e669819-7b87-40b1-ae6a-af35cc9762cd",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.computed_results": {
+      "name": "computed_results",
+      "schema": "",
+      "columns": {
+        "cr_id": {
+          "name": "cr_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "design_set_id": {
+          "name": "design_set_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calc_engine_version": {
+          "name": "calc_engine_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calc_timestamp": {
+          "name": "calc_timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "results_hash": {
+          "name": "results_hash",
+          "type": "char(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "q_rational": {
+          "name": "q_rational",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "q_weir": {
+          "name": "q_weir",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "q_velocity": {
+          "name": "q_velocity",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "q_design": {
+          "name": "q_design",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "governing_method": {
+          "name": "governing_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "design_discharge": {
+          "name": "design_discharge",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "a_vent": {
+          "name": "a_vent",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "effective_width": {
+          "name": "effective_width",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "a_rtl": {
+          "name": "a_rtl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "a_hfl": {
+          "name": "a_hfl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pct_obs_rtl": {
+          "name": "pct_obs_rtl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pct_obs_hfl": {
+          "name": "pct_obs_hfl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pass_rtl": {
+          "name": "pass_rtl",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pass_hfl": {
+          "name": "pass_hfl",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "velocity_hfl": {
+          "name": "velocity_hfl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "h_afflux": {
+          "name": "h_afflux",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lacey_perimeter": {
+          "name": "lacey_perimeter",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lacey_scour_depth": {
+          "name": "lacey_scour_depth",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_scour_depth": {
+          "name": "max_scour_depth",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fbl": {
+          "name": "fbl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "recommended_depth": {
+          "name": "recommended_depth",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scour_safe": {
+          "name": "scour_safe",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_self": {
+          "name": "w_self",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_self_deck": {
+          "name": "w_self_deck",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_self_dirtwall": {
+          "name": "w_self_dirtwall",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_self_wearingcoat": {
+          "name": "w_self_wearingcoat",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_self_abutment_total": {
+          "name": "w_self_abutment_total",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_silt": {
+          "name": "w_silt",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_live_total": {
+          "name": "w_live_total",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_live_per_span": {
+          "name": "w_live_per_span",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_impact": {
+          "name": "w_impact",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_braking_kN": {
+          "name": "w_braking_kN",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "w_wind_kN": {
+          "name": "w_wind_kN",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "f_drag_per_span": {
+          "name": "f_drag_per_span",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "f_uplift_per_span": {
+          "name": "f_uplift_per_span",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "f_anchor_required_kN": {
+          "name": "f_anchor_required_kN",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "f_drag_total": {
+          "name": "f_drag_total",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "p_active_earth_kN": {
+          "name": "p_active_earth_kN",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "p_passive_earth_kN": {
+          "name": "p_passive_earth_kN",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sliding_fos": {
+          "name": "sliding_fos",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "overturning_fos": {
+          "name": "overturning_fos",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bearing_pressure_max_kPa": {
+          "name": "bearing_pressure_max_kPa",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bearing_ecc_m": {
+          "name": "bearing_ecc_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anchor_count_required": {
+          "name": "anchor_count_required",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anchor_dia_mm": {
+          "name": "anchor_dia_mm",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reinforcement_ast_mm2_per_m": {
+          "name": "reinforcement_ast_mm2_per_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "min_reinforcement_satisfied": {
+          "name": "min_reinforcement_satisfied",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "computed_results_design_set_id_design_set_design_set_id_fk": {
+          "name": "computed_results_design_set_id_design_set_design_set_id_fk",
+          "tableFrom": "computed_results",
+          "tableTo": "design_set",
+          "columnsFrom": [
+            "design_set_id"
+          ],
+          "columnsTo": [
+            "design_set_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "computed_results_design_set_id_unique": {
+          "name": "computed_results_design_set_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "design_set_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.design_set": {
+      "name": "design_set",
+      "schema": "",
+      "columns": {
+        "design_set_id": {
+          "name": "design_set_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "set_label": {
+          "name": "set_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_baseline": {
+          "name": "is_baseline",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "superseded_by": {
+          "name": "superseded_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_by": {
+          "name": "reviewed_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_at": {
+          "name": "reviewed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hfl": {
+          "name": "hfl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ofl": {
+          "name": "ofl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lbl": {
+          "name": "lbl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gl": {
+          "name": "gl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rtl": {
+          "name": "rtl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bottom_deck": {
+          "name": "bottom_deck",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "catchment_area": {
+          "name": "catchment_area",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "runoff_coeff": {
+          "name": "runoff_coeff",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rainfall_intensity": {
+          "name": "rainfall_intensity",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "surplus_weir_length": {
+          "name": "surplus_weir_length",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weir_head": {
+          "name": "weir_head",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stream_area_hfl": {
+          "name": "stream_area_hfl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mean_vel_hfl": {
+          "name": "mean_vel_hfl",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "q_design_override": {
+          "name": "q_design_override",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_vents": {
+          "name": "num_vents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vent_width": {
+          "name": "vent_width",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vent_height": {
+          "name": "vent_height",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approach_vel": {
+          "name": "approach_vel",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lacey_silt_f": {
+          "name": "lacey_silt_f",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cd_vent": {
+          "name": "cd_vent",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deck_width": {
+          "name": "deck_width",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "carriage_width": {
+          "name": "carriage_width",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deck_span": {
+          "name": "deck_span",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deck_thickness": {
+          "name": "deck_thickness",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "num_spans": {
+          "name": "num_spans",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "live_load_class": {
+          "name": "live_load_class",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "water_density": {
+          "name": "water_density",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "concrete_density": {
+          "name": "concrete_density",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "drag_coefficient": {
+          "name": "drag_coefficient",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "silt_load_deck": {
+          "name": "silt_load_deck",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sbc_kN_m2": {
+          "name": "sbc_kN_m2",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "backfill_phi_deg": {
+          "name": "backfill_phi_deg",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "backfill_beta_deg": {
+          "name": "backfill_beta_deg",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wall_friction_delta": {
+          "name": "wall_friction_delta",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "surcharge_h_m": {
+          "name": "surcharge_h_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fck_vrcc_Mpa": {
+          "name": "fck_vrcc_Mpa",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fck_pcc_Mpa": {
+          "name": "fck_pcc_Mpa",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fy_Mpa": {
+          "name": "fy_Mpa",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover_mm": {
+          "name": "cover_mm",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gamma_rc_kN_m3": {
+          "name": "gamma_rc_kN_m3",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gamma_pc_kN_m3": {
+          "name": "gamma_pc_kN_m3",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gamma_backfill_kN_m3": {
+          "name": "gamma_backfill_kN_m3",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gamma_w_kN_m3": {
+          "name": "gamma_w_kN_m3",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pier_width_m": {
+          "name": "pier_width_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "abut_top_width_m": {
+          "name": "abut_top_width_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "abut_bot_width_m": {
+          "name": "abut_bot_width_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "footing_ext_m": {
+          "name": "footing_ext_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approach_length_m": {
+          "name": "approach_length_m",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bearing_type": {
+          "name": "bearing_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bearing_stiffness": {
+          "name": "bearing_stiffness",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "design_set_project_id_project_project_id_fk": {
+          "name": "design_set_project_id_project_project_id_fk",
+          "tableFrom": "design_set",
+          "tableTo": "project",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "project_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "design_set_superseded_by_design_set_design_set_id_fk": {
+          "name": "design_set_superseded_by_design_set_design_set_id_fk",
+          "tableFrom": "design_set",
+          "tableTo": "design_set",
+          "columnsFrom": [
+            "superseded_by"
+          ],
+          "columnsTo": [
+            "design_set_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.project": {
+      "name": "project",
+      "schema": "",
+      "columns": {
+        "project_id": {
+          "name": "project_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stream_name": {
+          "name": "stream_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "design_date": {
+          "name": "design_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "design_code_edition": {
+          "name": "design_code_edition",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "revision_number": {
+          "name": "revision_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.report_artifact": {
+      "name": "report_artifact",
+      "schema": "",
+      "columns": {
+        "artifact_id": {
+          "name": "artifact_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "design_set_id": {
+          "name": "design_set_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "artifact_type": {
+          "name": "artifact_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_path": {
+          "name": "file_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_hash_sha256": {
+          "name": "file_hash_sha256",
+          "type": "char(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "generated_at": {
+          "name": "generated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "generator_version": {
+          "name": "generator_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qa_score_json": {
+          "name": "qa_score_json",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "report_artifact_design_set_id_design_set_design_set_id_fk": {
+          "name": "report_artifact_design_set_id_design_set_design_set_id_fk",
+          "tableFrom": "report_artifact",
+          "tableTo": "design_set",
+          "columnsFrom": [
+            "design_set_id"
+          ],
+          "columnsTo": [
+            "design_set_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.verification_check": {
+      "name": "verification_check",
+      "schema": "",
+      "columns": {
+        "check_id": {
+          "name": "check_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "design_set_id": {
+          "name": "design_set_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "check_type": {
+          "name": "check_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "check_ref": {
+          "name": "check_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
+        },
+        "actual_value": {
+          "name": "actual_value",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expected_value": {
+          "name": "expected_value",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_by": {
+          "name": "verified_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verified_at": {
+          "name": "verified_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "evidence_path": {
+          "name": "evidence_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "discrepancy_note": {
+          "name": "discrepancy_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "verification_check_design_set_id_design_set_design_set_id_fk": {
+          "name": "verification_check_design_set_id_design_set_design_set_id_fk",
+          "tableFrom": "verification_check",
+          "tableTo": "design_set",
+          "columnsFrom": [
+            "design_set_id"
+          ],
+          "columnsTo": [
+            "design_set_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

@@ -163,7 +163,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Phase C.2 — FOUNDATION (Schema, V&V, PDF parser, Word)
 
 ### Task 7: Implement Proposed DB Schema (Section 12)
-**Status:** `pending`
+**Status:** `completed`
 **Priority:** `high`
 
 **Scope:**
