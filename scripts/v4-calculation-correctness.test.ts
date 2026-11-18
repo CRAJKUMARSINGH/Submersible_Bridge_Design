@@ -36,6 +36,10 @@ const goldenInputs: Inputs = { ...defaultInputs, ...extracted.inputs };
 goldenInputs.linearWaterway_m = 28.80;
 // IN-18 is NOT-STATED; the only stated constraint is the total vented area (26.21 m², L4825).
 goldenInputs.ventHeight = 26.21 / (goldenInputs.numVents * goldenInputs.ventWidth);
+// Task 32 — RS-20 / RS-21 are stated design datums in the reference, not derivations
+// (foundation bottom level L112 = 2.315 m; recommended foundation depth L4920 = 3.83 m).
+goldenInputs.fbl_m = 2.315;
+goldenInputs.recommendedDepth_m = 3.83;
 
 const results = computeResults(goldenInputs);
 const s = results.structural;

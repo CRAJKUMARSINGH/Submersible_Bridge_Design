@@ -383,7 +383,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 - Any findings → materialize as pending tasks in this file BEFORE selecting next work
 
 **Resolution:**
-- **V1–V9 re-run in one consolidated self-verification pass.** Results: V1 unit **60/60**; V2 regression **25/25** (SHA-256 golden master, deterministic); V3 extraction **27/27 = 100 %**; V4 calculation **11/32 = 34.4 % → FAIL** (21 divergences); V5 drawing dimensional **PASS** (single-source geometry; CAD overlay BLOCKED — no reference DXF); V6 clause conformance **PARTIAL** (26/26 traceable, **14/26 = 53.8 %** explicit — raised by Task 34 — 22/26 = 84.6 % code-cited; residual un-printed clauses are PE to supply); V7 report completeness **41/41 = 100 %**; V8 Word conformance **13/13 headings + 34/34 fields**; V9 load combinations **3/11 = 27 % → FAIL** (**since closed by Task 35** — discrete Cl.202 engine, re-run **10/10 = 100 %**).
+- **V1–V9 re-run in one consolidated self-verification pass.** Results: V1 unit **60/60**; V2 regression **25/25** (SHA-256 golden master, deterministic); V3 extraction **27/27 = 100 %**; V4 calculation **14/32 = 43.8 % → FAIL** (18 divergences — RS-20/21/22 closed by Task 32; the rest are the open Tasks 28/29/30/31/33 findings); V5 drawing dimensional **PASS** (single-source geometry; CAD overlay BLOCKED — no reference DXF); V6 clause conformance **PARTIAL** (26/26 traceable, **14/26 = 53.8 %** explicit — raised by Task 34 — 22/26 = 84.6 % code-cited; residual un-printed clauses are PE to supply); V7 report completeness **41/41 = 100 %**; V8 Word conformance **13/13 headings + 34/34 fields**; V9 load combinations **3/11 = 27 % → FAIL** (**since closed by Task 35** — discrete Cl.202 engine, re-run **10/10 = 100 %**).
 - **Findings materialised BEFORE further work** (per the Task 19 scope rule): V4 → **Tasks 28–33**, V6 → **Task 34**, V9 → **Task 35**.
 - **V10 is BLOCKED.** The spec §14.5 deliverables cannot be signed while V4 and V6 are open — a PE hand-calc sign-off on a design set the app does not yet reproduce would be premature. V9 was closed by Task 35. No variance has been approved.
 
@@ -558,16 +558,18 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Findings Materialized from Task 19 (V4 Calculation Correctness)
 
 **Harness:** `scripts/v4-calculation-correctness.test.ts` (`npm run test:v4`) — runs `computeResults()` on the golden inputs and diffs every `ComputedResults` field against `data/golden-reference-set.csv`.
-**Result (2026-11-18):** **11/32 reproducible rows = 34.4 %** (7 skipped NOT-STATED), **21 divergences**. The spec §14.1 V4 criterion is "exact match; zero tolerance on pass/fail", so the run **fails** — each divergence is materialized below rather than masked.
+**Result (2026-11-19):** **14/32 reproducible rows = 43.8 %** (7 skipped NOT-STATED), **18 divergences** (was 11/32 = 34.4 % / 21 after Task 32 closed RS-20/21/22). The spec §14.1 V4 criterion is "exact match; zero tolerance on pass/fail", so the run **fails** — each remaining divergence is materialized below rather than masked.
 
-**PASS (11):** RS-03 qVelocity 30.289, RS-06 designDischarge 45.750, RS-07 aVent 26.210, RS-13 passRTL, RS-17 alluvialPerimeter 32.128, RS-23 wSelf 338.550, RS-25 wLive 478.410, XTRA-06 buoyancy 145.800, XTRA-07 braking 47.841, XTRA-08 wind_deck 3.862, XTRA-09 wind_liveload 18.000.
+**PASS (14):** RS-03 qVelocity 30.289, RS-06 designDischarge 45.750, RS-07 aVent 26.210, RS-13 passRTL, RS-17 alluvialPerimeter 32.128, **RS-20 fbl 2.315**, **RS-21 recommendedDepth 3.83**, **RS-22 scourSafe true**, RS-23 wSelf 338.550, RS-25 wLive 478.410, XTRA-06 buoyancy 145.800, XTRA-07 braking 47.841, XTRA-08 wind_deck 3.862, XTRA-09 wind_liveload 18.000.
+
+**FAIL (remaining, each a materialized finding):** RS-02 qWeir (Task 31); RS-08/09/10/11/12/14/15/16 waterway + afflux (Task 28); RS-18/19 scour depth (Task 32 issue 1 — PE factor ruling); RS-24 wSilt + RS-28 fUplift (Task 30); XTRA-01…XTRA-05 earth pressure (Task 33).
 
 ---
 
 ### Task 28: Model Surveyed Channel Cross-Section (RS-08/09/10/11/12/14/15/16)
 **Status:** `pending`
 **Priority:** `high`
-**Depends On:** PE cross-section geometry (AUTOCAD areas are not expressible in the current `Inputs` schema)
+**Depends On:** PE cross-section geometry (AUTOCAD areas are not expressible in the current `Inputs` schema) — **PE decision P-1** (brief below)
 **Scope:** Reconcile the app's rectangular waterway model with the reference's surveyed cross-section. The reference derives every waterway/obstruction/afflux result from **graphically-measured AUTOCAD areas**, not from `Q / V`:
 
 | Ref | Value | Source | App now |
@@ -588,13 +590,14 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ### Task 29: Additive vs Max Discharge Combination Rule (RS-04/RS-05)
 **Status:** `pending`
 **Priority:** `high`
-**Depends On:** PE ruling on the design-discharge combination rule
+**Depends On:** PE ruling on the design-discharge combination rule — **PE decision P-2** (brief below)
 **Scope:** The reference's governing method is **additive**: *"Stream design 30.28 + Surplus weir 15.47"* = **45.75 m³/s** (`L4792` + `L4802`, RS-04/RS-05 EXACT). The app takes **max()** of the three methods (`calculations.tsx` L345–348) → 30.29 m³/s, so its governing method reads "Area-Velocity". The app only matches the reference *total* when `customDesignDischarge` is supplied.
 **Acceptance:** a PE-confirmed combination rule implemented in `computeResults()` and mirrored in `design-formula-trace.ts`, reproducing Q_design = 45.75 with the correct `governingMethod` label — **or** the rule documented as a deliberate deviation with evidence.
 
 ### Task 30: Deck Footprint for Silt / Uplift Loads (RS-24/RS-28)
 **Status:** `pending`
 **Priority:** `medium`
+**Depends On:** PE footprint confirmation — **PE decision P-3** (brief below)
 **Scope:** The reference computes silt and uplift over a **6.8 m** deck footprint, not 6.0 m:
 - `wSilt` = 2.25 × **6.8** × 6.0 = **91.80 kN** (RS-24, COMPUTED from `L254`); app uses `deckSpan` 6.0 → 81.000.
 - `fUplift` = **195.48 kN** (RS-28, `L527`); app uses `deckWidth × deckSpan × deckThickness` (6×6×0.48) → 169.517.
@@ -604,12 +607,12 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ### Task 31: Reference-Internal Weir-Discharge Inconsistency (RS-02)
 **Status:** `pending`
 **Priority:** `medium`
-**Depends On:** PE clarification (may be a reference arithmetic error, not an app defect)
+**Depends On:** PE clarification (may be a reference arithmetic error, not an app defect) — **PE decision P-4** (brief below)
 **Scope:** The reference prints **Q₂ = 15.47 m³/s** (`L4802`) for the surplus weir, derived as "q = C·L·h^1.5 = 24.13 cusecs = 0.68 cumecs" per metre × 22.75 m (`L4796`–`L4802`). This is **not reproducible** from its own stated data: with L = 22.75 m (`IN-08`, EXACT) and h = 0.45 m (`IN-09`, EXACT), the clause-conformant IRC free-overflow form `Q = 1.705·L·h^1.5` gives **11.71 m³/s** (the app's value, RS-02 FAIL). Reproducing 15.47 would require an effective per-metre coefficient of ≈ 2.252, which matches neither 1.705 nor the "Cd = 4.10" noted at `L4801`.
 **Acceptance:** PE ruling — either the reference's L/h/Cd differ from `IN-08`/`IN-09` (update the inputs) or the app's clause-conformant 1.705 form stands and RS-02 is reclassified. **No coefficient change without evidence.**
 
 ### Task 32: Scour / FBL Datum Reconciliation (RS-18/19/20/21/22)
-**Status:** `pending`
+**Status:** `in_progress` (2026-11-19 — issue 2 **closed**: stated-datum input path implemented, RS-20/21/22 PASS; issue 1 **blocked** on the PE 1.30-vs-1.33 factor ruling, shared with Tasks 25/26)
 **Priority:** `medium`
 **Depends On:** Task 26 residual (1.30 vs 1.33 factor) + PE confirmation of the design FBL
 **Scope:** Two distinct issues:
@@ -617,11 +620,37 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 2. **Foundation datums (RS-20/21/22):** `fbl` = **2.315 m** (`L112`) and `recommendedDepth` = **3.83 m** (`L4920`) are **stated design datums** in the reference, not derived from `hfl − maxScourDepth`. The app derives `fbl = hfl − maxScourDepth` = 3.648 and `recommendedDepth = gl − fbl` = 0.317, making `scourSafe` false where the reference says true.
 **Acceptance:** the app either accepts the stated FBL/recommended-depth datums as inputs, or the derivation is confirmed against the reference's design-intent — reproducing RS-18/19/20/21/22 (within the agreed scour-factor tolerance) and RS-22 = true.
 
+**Resolution (2026-11-19) — issue 2 (foundation datums) CLOSED:**
+- **Input path (acceptance option 1).** `Inputs` gains two optional stated datums — `fbl_m` and `recommendedDepth_m` — resolved by two new exported helpers `statedOrDerivedFbl()` / `statedOrDerivedFoundationDepth()` in [calculations.tsx](file:///e:/Rajkumar/Submersible_Bridge_Design/src/lib/calculations.tsx#L306-L329): a stated datum (> 0) overrides the derivation; blank falls back to `HFL − D_max` / `GL − FBL` exactly as before. No existing value changes when the fields are absent.
+- **Mirrors.** `spreadsheet-import.ts` registers both fields (Step 2, unit m, aliases `fbl`/`foundation_bottom_level` and `recommended_depth`/`foundation_depth`/`d_foundation`); [step2-hydraulic.tsx](file:///e:/Rajkumar/Submersible_Bridge_Design/src/pages/step2-hydraulic.tsx) adds the two optional inputs (placeholder shows the live derived value, Reset clears to derived) and switches the FBL / foundation-depth display to "stated datum" when supplied; `design-formula-trace.ts` and the PDF §2B scour table label the row "Stated design datum" instead of the equation when the datum is supplied.
+- **V4 harness.** `scripts/v4-calculation-correctness.test.ts` feeds the reference datums (`fbl_m = 2.315`, `recommendedDepth_m = 3.83`); **RS-20 fbl, RS-21 recommendedDepth, RS-22 scourSafe now PASS** → V4 **14/32 = 43.8 %** (was 11/32).
+- **Issue 1 remains open.** RS-18/19 need the `q = 1.30Q/L` vs `1.33Q/L` ruling (below); the app keeps the clause-cited 1.30 (IRC:5-1985 Cl.101.1.2) pending the PE decision — the residual is consistent with `(1.33/1.30)^(2/3) = 1.0154 ≈ 1.75/1.725`. **No factor change without evidence (SO-2).**
+
+**Evidence:** `npm run test:v4` → RS-20/21/22 PASS, reproducible rows 14/32; `npm run test:v2-regression` 25/25 unchanged (fields default `undefined`, canonical hash unaffected); `npm run typecheck` exit 0; unit/structural/cdVent/v5/v3/v6/v7/v8/v9/verbatim/t5/t6/formula-trace all PASS; `npm run build` exit 0.
+
 ### Task 33: Earth-Pressure Coefficient Rounding (XTRA-01…XTRA-05)
 **Status:** `pending`
 **Priority:** `low`
+**Depends On:** PE coefficient confirmation — **PE decision P-6** (brief below)
 **Scope:** `structural.ts` earth pressures deviate from the golden workbook by a uniform **≈ 0.5 %** — app `ka` = 0.3014 vs ref 0.30 (XTRA-01), giving `pa_base` 6.511 vs 6.48, `P` 70.314 vs 69.98, `Ph` 67.919 vs 67.60, `Pv` 18.199 vs 18.10. The pattern is consistent with the reference using a **rounded Ka = 0.30** while the app computes the Rankine value from the (unstated) φ input.
 **Acceptance:** confirm whether the source's 0.30 is a rounded presentation of the computed Ka (→ reclassify as within rounding tolerance) or a stated design coefficient to be adopted as an input. **No change to the earth-pressure derivation without evidence.**
+
+---
+
+## PE-Ruling Brief — Tasks 28–33 (the six open V4 divergences)
+
+**Why this brief exists.** V4 stands at **14/32 = 43.8 %** with **18 divergences**, all of which are one of the six findings below. Under standing order **SO-2** no coefficient, formula or clause number may be changed/stamped/inferred unless it is literally present in [`data/extracted/TYPE_document.md`](file:///e:/Rajkumar/Submersible_Bridge_Design/data/extracted/TYPE_document.md). Each finding therefore needs **exactly one PE decision** — recorded with a clause/line reference — before the affected code path may move. Task 32 issue 2 was the one part that could be resolved without a ruling (the reference's stated datums are *accepted as inputs*, not inferred); everything else is listed here.
+
+| ID | Task | Decision needed | Options | Source evidence in the document | V4 rows unblocked |
+|---|---|---|---|---|---|
+| **P-1** | 28 | Is the surveyed (graphically-measured AUTOCAD) cross-section the design authority, or is the app's rectangular `Q/V` waterway model acceptable? | (a) add optional measured-area inputs `aRTL_m2` / `aHFL_m2` that override the rectangular prism; (b) apply `linearWaterway_m` to `effectiveWidth` and accept a residual on the areas; (c) reclassify the rows NOT-REPRODUCIBLE naming the missing input | `L4845` (L = 28.80 m), `L4815` (aRTL 66.53 m²), `L4831` (aHFL 79.33 m²), `L4833` ("Area available for flow between HFL and RTL/PBL = 30.06 sqm"), `L4805` (V_HFL 2.58) | RS-08, RS-09, RS-10, RS-11, RS-12, RS-14, RS-15, RS-16 |
+| **P-2** | 29 | Is the design discharge **additive** (stream + surplus weir) or the **max()** of the three methods? | (a) implement the additive rule as the governing method (source-cited); (b) keep `max()` and document it as a deliberate deviation | `L4792` ("Stream design 30.28") + `L4802` ("Surplus weir 15.47") ⇒ 45.75 m³/s | RS-04, RS-05 |
+| **P-3** | 30 | Which deck footprint applies to silt and uplift — the **6.8 m** slab length or the **6.0 m** span? | (a) adopt 6.8 m (`deckSlabLength`) for `wSilt` / `fUplift`; (b) confirm 6.0 m is intended and document the reference's 6.8 m | `L254` (wSilt = 2.25 × 6.8 × 6.0 = 91.80), `L527` (fUplift 195.48) | RS-24, RS-28 |
+| **P-4** | 31 | Is the reference's surplus-weir Q₂ = 15.47 m³/s a **reference arithmetic error**, or does it use different L / h / Cd than `IN-08`/`IN-09`? | (a) supply the actual L / h / Cd so the 15.47 is reproducible; (b) keep the clause-conformant `Q = 1.705·L·h^1.5` (11.71 m³/s) and reclassify RS-02 | `L4796`–`L4802` (per-metre q = 24.13 cusecs, × 22.75 m), `L4801` ("Cd = 4.10") | RS-02 |
+| **P-5** | 32 | Is the foundation-design discharge factor **1.30** (IRC:5-1985 Cl.101.1.2) or **1.33** (the reference's stated value)? | (a) adopt 1.33 as a source-cited input; (b) keep 1.30 and record the ~1.5 % residual as an approved variance | `L4912` (stated factor), cf. `L4915` | RS-18, RS-19 |
+| **P-6** | 33 | Is the reference's **Ka = 0.30** a rounded presentation of the computed Rankine Ka (0.3014), or a stated design coefficient to be adopted? | (a) adopt Ka = 0.30 as an input; (b) reclassify XTRA-01…05 as within rounding tolerance (no code change) | Reference §8 earth-pressure page (stated Ka = 0.30; φ input unstated) | XTRA-01, XTRA-02, XTRA-03, XTRA-04, XTRA-05 |
+
+**How to close this brief.** A single PE response per row (option + clause/line reference) either (i) authorises a specific code change, or (ii) approves a documented variance so the V4 row is reclassified. Until a row is answered, the affected path stays frozen per SO-2. **P-5 and P-6 are the lowest-effort closures** (a yes/no + reference); **P-1 and P-2 are the highest-impact** (they unblock 10 of the 18 remaining V4 rows between them).
 
 ---
 

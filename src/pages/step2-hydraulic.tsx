@@ -141,6 +141,46 @@ export default function Step2Hydraulic() {
                   Measured waterway between banks (source L4845 = 28.80m). Used for scour q = 1.30Q/L; blank → B_eff = Q/V.
                 </p>
               </div>
+              <div className="space-y-2">
+                <Label>Foundation Bottom Level FBL (m) — optional</Label>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="number" step="0.01"
+                    placeholder={`auto (FBL = HFL − D_max = ${(inputs.hfl - results.maxScourDepth).toFixed(3)})`}
+                    value={inputs.fbl_m ?? ""}
+                    onChange={e => updateInput("fbl_m", e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                  {inputs.fbl_m != null && (
+                    <button
+                      onClick={() => updateInput("fbl_m", undefined)}
+                      className="text-xs text-muted-foreground hover:text-foreground underline whitespace-nowrap px-2"
+                    >Reset</button>
+                  )}
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Stated design datum (source L112 = 2.315m); overrides the derived HFL − D_max when supplied.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Recommended Foundation Depth (m) — optional</Label>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="number" step="0.01"
+                    placeholder={`auto (GL − FBL = ${(inputs.gl - results.fbl).toFixed(3)})`}
+                    value={inputs.recommendedDepth_m ?? ""}
+                    onChange={e => updateInput("recommendedDepth_m", e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                  {inputs.recommendedDepth_m != null && (
+                    <button
+                      onClick={() => updateInput("recommendedDepth_m", undefined)}
+                      className="text-xs text-muted-foreground hover:text-foreground underline whitespace-nowrap px-2"
+                    >Reset</button>
+                  )}
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Stated design datum (source L4920 = 3.83m); overrides the derived GL − FBL when supplied.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -237,7 +277,11 @@ export default function Step2Hydraulic() {
                 </div>
                 <div>
                   <Label>Foundation Bottom Level (FBL)</Label>
-                  <FormulaTrace expression={`HFL − D_max = ${inputs.hfl} − ${results.maxScourDepth.toFixed(3)}`} result={results.fbl} unit="m" />
+                  <FormulaTrace
+                    expression={inputs.fbl_m != null
+                      ? `stated FBL datum = ${inputs.fbl_m.toFixed(3)}`
+                      : `HFL − D_max = ${inputs.hfl} − ${results.maxScourDepth.toFixed(3)}`}
+                    result={results.fbl} unit="m" />
                 </div>
               </div>
 
@@ -245,7 +289,11 @@ export default function Step2Hydraulic() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-foreground text-sm">Foundation depth below GL</Label>
-                    <p className="text-[10px] text-muted-foreground font-mono mt-0.5">GL − FBL = {inputs.gl} − {results.fbl.toFixed(3)}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                      {inputs.recommendedDepth_m != null
+                        ? `stated depth datum = ${inputs.recommendedDepth_m.toFixed(3)} m`
+                        : `GL − FBL = ${inputs.gl} − ${results.fbl.toFixed(3)}`}
+                    </p>
                   </div>
                   <div className="text-right">
                     <span className="text-2xl font-bold font-mono text-primary">{results.recommendedDepth.toFixed(2)}</span>

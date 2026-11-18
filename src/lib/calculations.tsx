@@ -51,6 +51,14 @@ export type Inputs = {
   // back to the computed effective width B_eff = Q / V_approach.
   linearWaterway_m?: number;
 
+  // Task 32 — stated foundation datums. The reference records the Foundation
+  // Bottom Level and the recommended foundation depth as design datums
+  // (TYPE_document.md L112 FBL = 2.315 m; L4920 D_foundation = 3.83 m) rather
+  // than deriving them from HFL − D_max / GL − FBL. Optional: when blank the app
+  // falls back to its own derivation.
+  fbl_m?: number;
+  recommendedDepth_m?: number;
+
   // Step 3
   deckWidth: number;
   deckSpan: number;
@@ -296,6 +304,31 @@ export function laceyNormalScourDepth(qPerMetreWidth: number, siltFactor: number
 }
 
 /**
+ * Task 32 — foundation bottom level. A stated FBL design datum
+ * (TYPE_document.md L112 = 2.315 m) takes precedence over the derived
+ * HFL − D_max; when blank the app derives it as before.
+ */
+export function statedOrDerivedFbl(
+  inputs: Pick<Inputs, 'fbl_m' | 'hfl'>,
+  maxScourDepth: number,
+): number {
+  const stated = inputs.fbl_m ?? 0;
+  return stated > 0 ? stated : inputs.hfl - maxScourDepth;
+}
+
+/**
+ * Task 32 — recommended foundation depth. A stated datum (TYPE_document.md
+ * L4920 = 3.83 m) takes precedence over the derived GL − FBL.
+ */
+export function statedOrDerivedFoundationDepth(
+  inputs: Pick<Inputs, 'recommendedDepth_m' | 'gl'>,
+  fbl: number,
+): number {
+  const stated = inputs.recommendedDepth_m ?? 0;
+  return stated > 0 ? stated : inputs.gl - fbl;
+}
+
+/**
  * Task 18 — Lacey scour profile across the waterway. Returns the scour depth
  * (m) at a normalised position t ∈ [0, 1]: zero at the banks, D_normal at
  * mid-stream, with the parabolic Lacey shape. Shared by the on-screen and the
@@ -387,8 +420,10 @@ export function computeResults(inputs: Inputs): ComputedResults {
   const qFdnPerMetreWidth = foundationQPerMetreWidth(designDischarge, scourWidth);
   const laceyScourDepth = laceyNormalScourDepth(qFdnPerMetreWidth, inputs.siltFactor);
   const maxScourDepth = 1.5 * laceyScourDepth;
-  const fbl = inputs.hfl - maxScourDepth;
-  const recommendedDepth = inputs.gl - fbl;
+  // Task 32: a stated FBL / foundation-depth datum (reference L112 / L4920)
+  // overrides the derivation; blank → the app derives as before.
+  const fbl = statedOrDerivedFbl(inputs, maxScourDepth);
+  const recommendedDepth = statedOrDerivedFoundationDepth(inputs, fbl);
   const scourSafe = fbl < (inputs.gl - 0.5);
   const passMinCarriageWidth_m = inputs.carriageWidth_m >= 6.0;
   const minCarriageWidthNote = inputs.carriageWidth_m < 6.0 ? `FAIL: Carriageway ${inputs.carriageWidth_m.toFixed(3)}m < 6.0m (IRC SP:82-2008 Cl.6.4.2(vi))` : `PASS: ${inputs.carriageWidth_m.toFixed(3)}m ≥ 6.0m minimum`;

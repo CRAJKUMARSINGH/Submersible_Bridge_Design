@@ -29,6 +29,9 @@ export function buildDesignFormulaTrace(inputs: Inputs, results: ComputedResults
   // when supplied, otherwise the computed effective width Q / V.
   const scourWidth = scourDischargeWidth(inputs, results.effectiveWidth);
   const laceyQ = foundationQPerMetreWidth(results.designDischarge, scourWidth);
+  // Task 32: reflect a stated FBL / foundation-depth datum in the trace.
+  const statedFbl = (inputs.fbl_m ?? 0) > 0;
+  const statedDepth = (inputs.recommendedDepth_m ?? 0) > 0;
   const dischargeRef = 'Prototype discharge section, lines 8105–8213 (method/coefficient differences must be reviewed)';
   const hydraulicRef = 'Prototype hydraulic narrative, lines 58–69 and 742–821';
   const structuralRef = 'Prototype load/design narrative, lines 79–84 and 824 onward';
@@ -136,14 +139,18 @@ export function buildDesignFormulaTrace(inputs: Inputs, results: ComputedResults
     },
     {
       id: 'FBL', section: 'Step 2 — Hydraulic',
-      equation: 'FBL = HFL − D_max',
-      substitution: `${n(inputs.hfl)} − ${n(results.maxScourDepth)}`,
+      equation: statedFbl ? 'FBL = stated design datum (L112)' : 'FBL = HFL − D_max',
+      substitution: statedFbl
+        ? `stated FBL = ${n(inputs.fbl_m ?? 0)}`
+        : `${n(inputs.hfl)} − ${n(results.maxScourDepth)}`,
       result: n(results.fbl), unit: 'm', prototypeReference: hydraulicRef,
     },
     {
       id: 'FOUNDATION_DEPTH', section: 'Step 2 — Hydraulic',
-      equation: 'D_foundation = GL − FBL',
-      substitution: `${n(inputs.gl)} − ${n(results.fbl)}`,
+      equation: statedDepth ? 'D_foundation = stated design datum (L4920)' : 'D_foundation = GL − FBL',
+      substitution: statedDepth
+        ? `stated D_foundation = ${n(inputs.recommendedDepth_m ?? 0)}`
+        : `${n(inputs.gl)} − ${n(results.fbl)}`,
       result: n(results.recommendedDepth), unit: 'm', prototypeReference: hydraulicRef,
     },
     {

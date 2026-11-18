@@ -145,3 +145,49 @@ Timezone: Asia/Shanghai.
 - Changes **not committed** — awaiting user instruction.
 
 ---
+
+## 2026-11-19 01:20 — Session: Task 32 (stated foundation datums) + PE-ruling brief
+
+**User request**
+- "BOTH A AND B" — (a) collect the PE rulings needed for Tasks 28–33, and (b) scope/implement Task 32's
+  stated-datum-input path.
+
+**Actions taken**
+1. Reconnaissance: re-read Task 32 scope, the `Inputs`/`ComputedResults` types, the V4 harness, the golden
+   set, the Task-26 `linearWaterway_m` pattern (UI + spreadsheet import), and the FBL/FOUNDATION_DEPTH
+   trace rows.
+2. **Part B — Task 32 issue 2 (datums) implemented (acceptance option 1: accept the stated datums as inputs).**
+   - `Inputs` gains optional `fbl_m` / `recommendedDepth_m`; new helpers `statedOrDerivedFbl()` /
+     `statedOrDerivedFoundationDepth()` (stated > 0 overrides; blank ⇒ derived, unchanged).
+   - Mirrored in `spreadsheet-import.ts` (2 fields), `step2-hydraulic.tsx` (2 optional inputs + conditional
+     derived display), `design-formula-trace.ts` (rows label "stated design datum"), and the PDF §2B scour table.
+   - V4 harness now feeds the reference datums (2.315 m / 3.83 m).
+3. **Part A — PE-ruling brief** consolidated in `tasks.md`: one decision table (P-1…P-6) mapping Tasks 28–33
+   to the exact question, options, source evidence and the V4 rows each unblocks. Cross-linked from each task's
+   `Depends On`.
+4. Refreshed the V4 findings header in the tracker (11/32 = 34.4 % → **14/32 = 43.8 %**).
+
+**Files modified**
+- `src/lib/calculations.tsx` — optional datums + 2 helpers + compute override.
+- `src/lib/design-formula-trace.ts` — conditional FBL / FOUNDATION_DEPTH rows.
+- `src/lib/spreadsheet-import.ts` — 2 field definitions.
+- `src/pages/step2-hydraulic.tsx` — 2 optional inputs + conditional display.
+- `src/lib/pdf-export.ts` — §2B FBL/D_fdn formula cells conditional.
+- `scripts/v4-calculation-correctness.test.ts` — feeds the stated datums.
+- `.trae/specs/pre-modification-review-20260925/tasks.md` — Task 32 resolution + PE-ruling brief + refreshed counts.
+- `creat.md` — this refresh.
+
+**Verification**
+- `npm run test:v4` → **RS-20 fbl, RS-21 recommendedDepth, RS-22 scourSafe PASS**; reproducible rows **14/32
+  = 43.8 %** (was 11/32). Remaining 18 divergences = the open Tasks 28/29/30/31/33 findings + Task 32 issue 1.
+- `npm run test:v2-regression` → **25/25** unchanged (new fields default `undefined`; canonical hash unaffected).
+- `npm run typecheck` exit 0; `test:unit`, `test:structural`, `test:cdvent`, `test:v5-geometry`,
+  `test:t5-disclaimer`, `test:t6-inputs`, `test:formula-trace`, `test:v3-extraction`, `test:v6-clause`,
+  `test:v7-report`, `test:v8-word`, `test:v9-combos`, `test:verbatim` → all exit 0.
+- `npm run build` exit 0.
+
+**Blockers / next step**
+- Task 32 **issue 1** (RS-18/19) stays open — needs PE decision **P-5** (1.30 vs 1.33 factor).
+- Tasks 28/29/30/31/33 all await their PE decision (P-1/P-2/P-3/P-4/P-6). Task 19 stays `blocked`.
+- Next step: put the P-1…P-6 brief in front of the PE for the six rulings.
+
