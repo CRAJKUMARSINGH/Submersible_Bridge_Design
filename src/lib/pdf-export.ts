@@ -814,7 +814,7 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults): jsPDF
     body: [
       ['Ventway obstruction @ RTL', `${f(results.pctObsRTL, 1)}%`, '< 70% (IRC SP:82-2008)', results.passRTL ? 'PASS' : 'FAIL'],
       ['Ventway obstruction @ HFL', `${f(results.pctObsHFL, 1)}%`, '< 30% (IRC SP:82-2008)', results.passHFL ? 'PASS' : 'FAIL'],
-      ['Min carriageway width', `${f(inputs.carriageWidth_m, 3)}m`, '≥ 6.0m (IRC SP:82-2008 Cl.6.4.2(vi))', results.passMinCarriageWidth_m ? 'PASS' : 'FAIL'],
+      ['Min carriageway width', `${f(inputs.carriageWidth_m, 3)}m`, '>= 6.0m (IRC SP:82-2008 Cl.6.4.2(vi))', results.passMinCarriageWidth_m ? 'PASS' : 'FAIL'],
       ['Foundation depth vs scour', `${f(results.recommendedDepth, 2)}m below GL`, '> 0.5m below max scour', results.scourSafe ? 'SAFE' : 'REVIEW'],
       ['Deck uplift resistance', results.fAnchor > 0 ? 'Anchors needed' : 'Self-weight adequate', 'W_self > F_uplift', results.fAnchor <= 0 ? 'SAFE' : 'ANCHORS REQD'],
     ],

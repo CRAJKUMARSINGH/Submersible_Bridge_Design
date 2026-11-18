@@ -140,7 +140,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 6: Extend Inputs Enum and Add Missing Variables (M3, Section 6 N1–N6)
-**Status:** `pending`
+**Status:** `completed`
 **Priority:** `high`
 
 **Scope:**
