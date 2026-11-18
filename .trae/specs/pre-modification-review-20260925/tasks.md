@@ -452,6 +452,29 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 
 ---
 
+### Task 26: Optional Linear-Waterway Input — Golden-Reference Scour Reproduction
+**Status:** `completed` (2026-11-18 — new `linearWaterway_m` input + shared pure helpers; 60/60 calc tests green)
+**Priority:** `medium`
+**Scope:** Close the Task 25 residual. The reference takes the scour discharge intensity `q` from the **measured linear waterway** read off the cross-section (`TYPE_document.md` L4845, `L = 28.80 m`, used at L4914 as "Discharge per metre width of foundations = q = 2.113"). Add an optional input so the app can use it instead of the computed `B_eff = Q / V`.
+
+**Changes:**
+- `src/lib/calculations.tsx` — `Inputs.linearWaterway_m?: number`; new exported pure helpers `scourDischargeWidth()`, `foundationQPerMetreWidth()`, `laceyNormalScourDepth()` (single source of truth — no drift between UI, trace, and CLI harnesses).
+- `src/lib/design-formula-trace.ts` — trace uses the shared helpers (widened `q` substitution).
+- `src/pages/step2-hydraulic.tsx` — "Linear Waterway L (m) — optional" field in the Scour Parameters card (blank → `B_eff = Q/V`); formula trace shows the width actually used.
+- `scripts/src/generate-sample-pdf.ts` — mirror derivation.
+- `src/lib/spreadsheet-import.ts` — `linearWaterway_m` field definition + aliases (`linear_waterway`, `lww`, `waterway_width`).
+- `src/lib/pdf-export.ts` — sheet-3 row: `q = 1.30Q/L (L = linear waterway)`.
+- `scripts/calculations.test.ts` — new **S2-23** (golden reproduction) + **S2-24** (L overrides `B_eff`; zero-width guard).
+- `data/engineering-decisions-e1-e20.csv` — E3 row updated with the linear-waterway model and the residual source discrepancy.
+
+**Golden reproduction (Q = 45.75, L = 28.80, f = 2.00):** `q = 2.0651` → `D = 1.7247 m`, `D_m = 2.5871 m` vs reference **1.75 / 2.63 m** → reproduced to within **2 %**.
+
+**Residual evidence discrepancy (not a code defect):** `L4912` states a 1.30 multiplier, but its own printed foundation discharge of **60.85 cumecs implies 1.33×** (45.75 × 1.30 = 59.475). The app implements the clause-conformant **1.30** factor per IRC:5-1985 Cl.101.1.2, so its absolute scour sits ~1.5 % below the reference's printed values. **PE confirmation requested: 1.30 or 1.33?**
+
+**Verification:** `npm run typecheck` exit 0; calculation tests **60/60**; structural 19/19; formula-trace 3/3; verbatim-renderer 4/4; `npm run build` exit 0.
+
+---
+
 ## AC → Task Cross-Reference Summary
 
 | Spec AC (rule/rubric type) | Tasks Covering |

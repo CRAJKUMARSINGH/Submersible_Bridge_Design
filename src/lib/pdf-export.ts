@@ -704,7 +704,7 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults): jsPDF
       ["Afflux (Molesworth's formula - indicative)", 'h_f', '(V²/17.88+0.015)×((A_HFL/A_vent)²-1)', f(results.hAfflux, 4), 'm'],
       ['Lacey Regime Perimeter', 'P', '4.75 × √Q', f(results.laceyPerimeter, 3), 'm'],
       ['Lacey Silt Factor', 'f', 'Site data (fine sand≈0.6, coarse≈1.5)', f(inputs.siltFactor, 2), '—'],
-      ['Lacey Normal Scour Depth', 'D', '1.34 × (q²/f)^(1/3), q = 1.30Q/B_eff', f(results.laceyScourDepth, 3), 'm'],
+      ['Lacey Normal Scour Depth', 'D', '1.34 × (q²/f)^(1/3), q = 1.30Q/L (L = linear waterway)', f(results.laceyScourDepth, 3), 'm'],
       ['Maximum Scour Depth', 'D_max', '1.5 × D (IRC:5-1985 Cl.110.1.4.2)', f(results.maxScourDepth, 3), 'm'],
       ['Foundation Bottom Level', 'FBL', 'HFL − D_max', f(results.fbl, 3), 'm'],
       ['Foundation Depth below GL', 'D_fdn', 'GL − FBL', f(results.recommendedDepth, 3), 'm'],

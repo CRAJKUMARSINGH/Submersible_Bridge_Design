@@ -1,4 +1,5 @@
 import type { ComputedResults, Inputs } from './calculations';
+import { foundationQPerMetreWidth, scourDischargeWidth } from './calculations';
 
 export type FormulaTraceSection = 'Step 1 — Discharge' | 'Step 2 — Hydraulic' | 'Step 3 — Structural';
 
@@ -23,9 +24,11 @@ const n = (value: number, digits = 3) => Number.isFinite(value) ? value.toFixed(
 export function buildDesignFormulaTrace(inputs: Inputs, results: ComputedResults): DesignFormulaTraceRow[] {
   const appVelocity = inputs.approachVelocity > 0 ? inputs.approachVelocity : 0.01;
   const siltFactor = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
-  // E3: discharge per metre width in the foundation-design regime
-  // q = 1.30 × Q / B_eff (IRC:5-1985 Cl.101.1.2 — design discharge +30% for foundations).
-  const laceyQ = results.effectiveWidth > 0 ? (1.30 * results.designDischarge) / results.effectiveWidth : 0;
+  // E3 / Task 26: discharge per metre width in the foundation-design regime,
+  // q = 1.30 × Q / B (IRC:5-1985 Cl.101.1.2). B is the measured linear waterway
+  // when supplied, otherwise the computed effective width Q / V.
+  const scourWidth = scourDischargeWidth(inputs, results.effectiveWidth);
+  const laceyQ = foundationQPerMetreWidth(results.designDischarge, scourWidth);
   const dischargeRef = 'Prototype discharge section, lines 8105–8213 (method/coefficient differences must be reviewed)';
   const hydraulicRef = 'Prototype hydraulic narrative, lines 58–69 and 742–821';
   const structuralRef = 'Prototype load/design narrative, lines 79–84 and 824 onward';

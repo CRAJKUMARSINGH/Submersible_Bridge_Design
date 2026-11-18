@@ -317,7 +317,7 @@ test("S1-12 customDesignDischarge=null → auto = same as S1-02 sample", () => {
 });
 
 // ============================================================
-// STEP 2 TESTS — 22 tests (S2-01 … S2-22)
+// STEP 2 TESTS — 24 tests (S2-01 … S2-24)
 // ============================================================
 
 test("S2-01 aVent N=3 b=2.0 hv=1.5 → 9.0 exact (Bridge-01)", () => {
@@ -466,6 +466,42 @@ test("S2-22 velocityHFL Q=10 aHFL=5 → 2.0 exact", () => {
   const aHFL = 5, Q = 10;
   const v = aHFL > 0 ? Q / aHFL : 0;
   assertExact(v, 2.0);
+});
+
+// Task 26 — golden reference reproduction. The reference derives q from the MEASURED
+// linear waterway L = 28.80 m (TYPE_document.md L4845), not from B_eff = Q/V:
+//   Q = 45.75 m³/s (L4804), f = 2.00 (L4913), foundation Q = 1.30 × Q (Cl.101.1.2)
+//   q = 1.30 × 45.75 / 28.80 = 2.0651 m³/s/m
+//   D = 1.34 × (q²/f)^(1/3) = 1.7247 m   (reference prints 1.75 m)
+//   D_max = 1.5 × D = 2.5871 m           (reference prints 2.63 m)
+// The 1.5% delta is the SOURCE's own internal inconsistency: L4912 states a 1.30
+// multiplier but its printed 60.85 cumecs implies 1.33 (45.75 × 1.30 = 59.475).
+// The app implements the clause-conformant 1.30 factor, so it lands 1.5% below the
+// reference's printed values — a documented evidence discrepancy, not a defect.
+test("S2-23 golden reference scour: L=28.80 m → D=1.7247, D_max=2.5871 (within 2% of ref 1.75/2.63)", () => {
+  const Q = 45.75, L = 28.80, f = 2.00;
+  const q = calcFdnDischargePerMetreWidth(Q, L);
+  assertApprox(q, 2.06510, 1e-5);
+
+  const D = calcLaceyScourDepth(q, f);
+  assertApprox(D, 1.72474, 1e-4);
+  const Dmax = 1.5 * D;
+  assertApprox(Dmax, 2.58710, 1e-4);
+
+  // Reference printed values (RS-18 / RS-19) reproduced to within 2%.
+  assertTrue(Math.abs(D - 1.75) / 1.75 < 0.02);
+  assertTrue(Math.abs(Dmax - 2.63) / 2.63 < 0.02);
+});
+
+test("S2-24 golden scour: supplying L overrides B_eff; blank L falls back to B_eff = Q/V", () => {
+  const Q = 45.75, V = 2.58;
+  const bEff = Q / V; // 17.7326
+  const withL = calcFdnDischargePerMetreWidth(Q, 28.80);
+  const withBEff = calcFdnDischargePerMetreWidth(Q, bEff);
+  assertTrue(withL < withBEff); // larger width → smaller discharge intensity
+  assertApprox(withBEff, (1.30 * Q) / bEff, 1e-9);
+  // Zero width guard → 0, no NaN
+  assertExact(calcFdnDischargePerMetreWidth(Q, 0), 0);
 });
 
 // ============================================================
@@ -648,7 +684,7 @@ test("S3-24 scourSafe boolean branch 2 (via calcStep2 integrated)", () => {
 // ============================================================
 // BUMPER TESTS (ensure 58+ total count exactly)
 // ============================================================
-// Current count: 12 + 22 + 24 = 58 → exactly the target.
+// Current count: 12 + 24 + 24 = 60 (S2-23/S2-24 added by Task 26) → ≥ the 58 target.
 
 // ============================================================
 // FOOTER — summary + exit code

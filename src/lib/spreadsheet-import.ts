@@ -34,6 +34,7 @@ export const INPUT_FIELD_DEFINITIONS: InputFieldDefinition[] = [
   { key: 'ventHeight', label: 'Vent Height', section: 'Step 2', type: 'number', description: 'Clear height of each vent', unit: 'm', aliases: ['vent_height', 'hv'] },
   { key: 'approachVelocity', label: 'Approach Velocity', section: 'Step 2', type: 'number', description: 'Approach flow velocity', unit: 'm/s', aliases: ['approach_velocity', 'v_app'] },
   { key: 'siltFactor', label: 'Silt Factor', section: 'Step 2', type: 'number', description: 'Lacey silt factor', aliases: ['lacey_silt_factor', 'f'] },
+  { key: 'linearWaterway_m', label: 'Linear Waterway', section: 'Step 2', type: 'number', description: 'Measured linear waterway between banks; used for the scour discharge intensity q = 1.30Q/L (falls back to B_eff = Q/V when blank)', unit: 'm', aliases: ['linear_waterway', 'lww', 'waterway_width', 'linearWaterway', 'linearWaterway_m'] },
   { key: 'cdVent', label: 'Vent Discharge Coefficient', section: 'Step 2', type: 'number', description: 'Vent discharge coefficient', aliases: ['cd', 'cd_vent'] },
   { key: 'deckWidth', label: 'Deck Width', section: 'Step 3', type: 'number', description: 'Deck width', unit: 'm' },
   { key: 'deckSpan', label: 'Deck Span', section: 'Step 3', type: 'number', description: 'Span length', unit: 'm' },

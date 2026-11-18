@@ -86,8 +86,11 @@ const hAfflux      = (aVent > 0 && aHFL > aVent)
   ? (Math.pow(velocityHFL, 2) / 17.88 + 0.015) * (Math.pow(aHFL / aVent, 2) - 1)
   : 0;
 const laceyPerimeter  = 4.75 * Math.sqrt(designDischarge);
-// E3: D = 1.34 × (q²/f)^(1/3) with q = 1.30 × Q / B_eff (IRC:5-1985 Cl.101.1.2 / Cl.110.1.4.2)
-const qFdnPerMetreWidth = effectiveWidth > 0 ? (1.30 * designDischarge) / effectiveWidth : 0;
+// E3 / Task 26: D = 1.34 × (q²/f)^(1/3) with q = 1.30 × Q / B, B = measured linear
+// waterway when supplied, else B_eff = Q/V (IRC:5-1985 Cl.101.1.2 / Cl.110.1.4.2)
+const lwwSupplied = (inputs as { linearWaterway_m?: number }).linearWaterway_m;
+const scourWidth      = lwwSupplied && lwwSupplied > 0 ? lwwSupplied : effectiveWidth;
+const qFdnPerMetreWidth = scourWidth > 0 ? (1.30 * designDischarge) / scourWidth : 0;
 const sfScour         = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
 const laceyScourDepth = 1.34 * Math.pow((qFdnPerMetreWidth * qFdnPerMetreWidth) / sfScour, 1 / 3);
 const maxScourDepth   = 1.5 * laceyScourDepth; // E3: max scour = 1.5 × normal (IRC:5-1985 Cl.110.1.4.2)

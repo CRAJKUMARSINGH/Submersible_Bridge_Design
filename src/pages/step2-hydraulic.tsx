@@ -1,12 +1,14 @@
 import React from 'react';
-import { useCalculations } from '../lib/calculations';
+import { useCalculations, foundationQPerMetreWidth, scourDischargeWidth } from '../lib/calculations';
 import { Card, CardHeader, CardTitle, CardContent, Input, Label, FormulaTrace, Badge } from '../components/ui/components';
 
 export default function Step2Hydraulic() {
   const { inputs, updateInput, results } = useCalculations();
 
-  // E3: discharge per metre width in the foundation-design regime, q = 1.30 × Q / B_eff
-  const laceyQ = results.effectiveWidth > 0 ? (1.30 * results.designDischarge) / results.effectiveWidth : 0;
+  // E3 / Task 26: discharge per metre width in the foundation-design regime,
+  // q = 1.30 × Q / B (IRC:5-1985 Cl.101.1.2). B = measured linear waterway when supplied.
+  const scourWidth = scourDischargeWidth(inputs, results.effectiveWidth);
+  const laceyQ = foundationQPerMetreWidth(results.designDischarge, scourWidth);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -119,6 +121,26 @@ export default function Step2Hydraulic() {
                 <Input type="number" step="0.05" min="0.1" max="3" value={inputs.siltFactor} onChange={e => updateInput("siltFactor", Number(e.target.value))} />
                 <p className="text-[10px] text-muted-foreground">f = 0.6 fine | 1.0 medium | 1.5 coarse sand</p>
               </div>
+              <div className="space-y-2">
+                <Label>Linear Waterway L (m) — optional</Label>
+                <div className="flex gap-2 items-center">
+                  <Input
+                    type="number" step="0.1" min="0"
+                    placeholder={`auto (B_eff = ${results.effectiveWidth.toFixed(2)})`}
+                    value={inputs.linearWaterway_m ?? ""}
+                    onChange={e => updateInput("linearWaterway_m", e.target.value === "" ? undefined : Number(e.target.value))}
+                  />
+                  {inputs.linearWaterway_m != null && (
+                    <button
+                      onClick={() => updateInput("linearWaterway_m", undefined)}
+                      className="text-xs text-muted-foreground hover:text-foreground underline whitespace-nowrap px-2"
+                    >Reset</button>
+                  )}
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Measured waterway between banks (source L4845 = 28.80m). Used for scour q = 1.30Q/L; blank → B_eff = Q/V.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -207,7 +229,7 @@ export default function Step2Hydraulic() {
                 </div>
                 <div>
                   <Label>Normal Scour Depth D</Label>
-                  <FormulaTrace expression={`1.34 × (q²/f)^(1/3), q = 1.30Q/B_eff = ${laceyQ.toFixed(3)}`} result={results.laceyScourDepth} unit="m" />
+                  <FormulaTrace expression={`1.34 × (q²/f)^(1/3), q = 1.30Q/B = ${laceyQ.toFixed(3)} (B = ${scourWidth.toFixed(2)}m)`} result={results.laceyScourDepth} unit="m" />
                 </div>
                 <div>
                   <Label>Max Scour Depth D_max</Label>

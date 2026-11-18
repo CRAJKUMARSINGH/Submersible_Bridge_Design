@@ -45,6 +45,11 @@ export type Inputs = {
   approachVelocity: number;
   siltFactor: number;
   cdVent: number;
+  // Task 26 / E3 — measured linear waterway. The reference derives the scour
+  // discharge intensity q from the linear waterway read off the cross-section
+  // (TYPE_document.md L4845, L = 28.80 m). Optional: when absent the app falls
+  // back to the computed effective width B_eff = Q / V_approach.
+  linearWaterway_m?: number;
 
   // Step 3
   deckWidth: number;
@@ -245,6 +250,38 @@ export type Geometry = typeof DEFAULT_GEOMETRY;
 const CalculationsContext = createContext<CalculationsContextType | null>(null);
 
 /**
+ * Task 26 / E3 — width used to convert the design discharge into the foundation
+ * discharge intensity q. The reference reads the linear waterway off the
+ * cross-section (TYPE_document.md L4845, L = 28.80 m); when the user has not
+ * supplied it we fall back to the computed effective width B_eff = Q / V.
+ */
+export function scourDischargeWidth(
+  inputs: Pick<Inputs, 'linearWaterway_m'>,
+  effectiveWidth: number,
+): number {
+  const lww = inputs.linearWaterway_m ?? 0;
+  return lww > 0 ? lww : effectiveWidth;
+}
+
+/**
+ * Task 25 / E3 — foundation-design discharge intensity per metre width,
+ * q = 1.30 × Q / B (IRC:5-1985 Cl.101.1.2: the design discharge is increased by
+ * 30 % to ensure an adequate margin for foundations and protection works).
+ */
+export function foundationQPerMetreWidth(designDischarge: number, width: number): number {
+  return width > 0 ? (1.30 * designDischarge) / width : 0;
+}
+
+/**
+ * Task 25 / E3 — Lacey normal scour depth in the reference form
+ * D = 1.34 × (q² / f)^(1/3) (TYPE_document.md L4915).
+ */
+export function laceyNormalScourDepth(qPerMetreWidth: number, siltFactor: number): number {
+  const sf = siltFactor > 0 ? siltFactor : 0.1;
+  return 1.34 * Math.pow((qPerMetreWidth * qPerMetreWidth) / sf, 1 / 3);
+}
+
+/**
  * Pure computation core — single source of truth for all derived results.
  * Deliberately free of React so the UI, unit tests and head-less CLI harnesses
  * (e.g. scripts/generate-11span-gad.ts) all share one implementation and can
@@ -287,20 +324,19 @@ export function computeResults(inputs: Inputs): ComputedResults {
   }
 
   const laceyPerimeter = 4.75 * Math.sqrt(designDischarge);
-  const sf = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
   // E3 (IRC:5-1985 Cl.101.1.2 + Cl.110.1.4.2): normal scour depth in the reference
   // Lacey form. The design discharge is increased by 30% for foundation / protection
   // design (Cl.101.1.2), giving the discharge per metre width
-  //   q = 1.30 × Q / B_eff        (B_eff = effectiveWidth, the app's waterway width)
+  //   q = 1.30 × Q / B          (B = measured linear waterway when supplied,
+  //                              otherwise the computed effective width Q / V)
   // and the normal / maximum scour depths (source TYPE_document.md L4915–L4916):
   //   D = 1.34 × (q² / f)^(1/3)        D_m = 1.5 × D
   // The former 1.27 constant on D_m is the D/S cut-off factor (a different quantity).
-  // Caveat: the reference derives q from a measured linear waterway (28.80 m); this app
-  // has no such input and uses effectiveWidth = Q / V, so absolute scour values will
-  // differ from the reference worked example even though the form is identical.
-  const foundationDischarge = 1.30 * designDischarge;
-  const qFdnPerMetreWidth = effectiveWidth > 0 ? foundationDischarge / effectiveWidth : 0;
-  const laceyScourDepth = 1.34 * Math.pow((qFdnPerMetreWidth * qFdnPerMetreWidth) / sf, 1 / 3);
+  // Task 26: the reference reads B from the cross-section (L4845, L = 28.80 m) —
+  // supplying `linearWaterway_m` reproduces the hand-calculated golden set.
+  const scourWidth = scourDischargeWidth(inputs, effectiveWidth);
+  const qFdnPerMetreWidth = foundationQPerMetreWidth(designDischarge, scourWidth);
+  const laceyScourDepth = laceyNormalScourDepth(qFdnPerMetreWidth, inputs.siltFactor);
   const maxScourDepth = 1.5 * laceyScourDepth;
   const fbl = inputs.hfl - maxScourDepth;
   const recommendedDepth = inputs.gl - fbl;
