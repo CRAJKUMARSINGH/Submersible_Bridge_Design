@@ -229,6 +229,21 @@ test('ST-18 Missing optional fields fall back to safe defaults', () => {
 });
 
 // ============================================================
+// DEFECT REGRESSION — DEF-004 / DEF-006 (bearing false PASS)
+// ============================================================
+
+test('ST-19 Bearing: a base in tension is never reported safe even if p_max ≤ SBC', () => {
+  // Force a very narrow base with an effectively unlimited SBC: p_max is then well
+  // within SBC, but 6e/b ≫ 1 (partial contact). Before the guard this reported PASS.
+  const tensionInputs: Inputs = { ...inputs, foundationWidth_m: 0.2, sbc_kN_m2: 1e9 };
+  const r = computeStructural(tensionInputs, hydraulic).bearing;
+  assertTrue(r.sixEOverB >= 1, `6e/b must be ≥ 1 (got ${r.sixEOverB})`);
+  assertFalse(r.noTension, 'partial contact ⇒ noTension false');
+  assertTrue(r.pMax <= r.sbc, 'p_max is within the (unlimited) SBC');
+  assertFalse(r.bearingSafe, 'tension ⇒ bearingSafe must be false (DEF-004/DEF-006)');
+});
+
+// ============================================================
 // FOOTER — summary + exit code
 // ============================================================
 console.log('');

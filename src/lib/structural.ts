@@ -456,7 +456,10 @@ export function computeStructural(inputs: Inputs, hydraulic: ComputedResults): S
   const bearingRaw = bearingPressure(totalVertical, foundationArea, foundationEccentricity, foundationWidth);
   const sbc = inputs.sbc_kN_m2;
   const noTension = bearingRaw.sixEOverB < NO_TENSION_LIMIT;
-  const bearingSafe = bearingRaw.pMax <= sbc;
+  // DEF-004/DEF-006: a base in tension (6e/b ≥ 1, i.e. e > b/6) invalidates the
+  // full-contact p = (P/A)(1 ± 6e/b) assumption, so it must NOT be reported as a PASS
+  // even when the (extrapolated) p_max happens to fall within the SBC.
+  const bearingSafe = noTension && bearingRaw.pMax <= sbc;
   const sbcUtilisation = sbc > 0 ? (bearingRaw.pMax / sbc) * 100 : 0;
 
   const bearing: BearingResults = {
@@ -594,7 +597,7 @@ export function computeStructural(inputs: Inputs, hydraulic: ComputedResults): S
       `Bearing: 6e/b = ${bearing.sixEOverB.toFixed(3)} ≥ 1 — tension in the base (IRC:78-2000 Cl.706.3.3.1).`,
     );
   }
-  if (!bearingSafe) {
+  if (!bearingSafe && noTension) {
     warnings.push(
       `Bearing: p_max ${bearing.pMax.toFixed(1)} kN/m² exceeds SBC ${sbc.toFixed(1)} kN/m² (${sbcUtilisation.toFixed(0)}% utilisation).`,
     );

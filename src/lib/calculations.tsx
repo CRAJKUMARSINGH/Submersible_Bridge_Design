@@ -289,7 +289,12 @@ export function computeResults(inputs: Inputs): ComputedResults {
   const laceyPerimeter = 4.75 * Math.sqrt(designDischarge);
   const sf = inputs.siltFactor > 0 ? inputs.siltFactor : 0.1;
   const laceyScourDepth = 0.473 * Math.pow(designDischarge / sf, 1 / 3);
-  const maxScourDepth = 1.27 * laceyScourDepth;
+  // E3: maximum scour depth = 1.5 × normal scour (straight reach, IRC:5-1985
+  // Cl.110.1.4.2) — source TYPE_document.md L4916 "Maximum scour depth D_m = 1.5 × D
+  // = 2.63 m". The former 1.27 constant is the D/S cut-off factor (a different quantity).
+  // NOTE (open, PE review pending): the normal-scour coefficient above still uses the
+  // classic Lacey form 0.473·(Q/f)^(1/3); the reference (L4915) uses 1.34·(q²/f)^(1/3).
+  const maxScourDepth = 1.5 * laceyScourDepth;
   const fbl = inputs.hfl - maxScourDepth;
   const recommendedDepth = inputs.gl - fbl;
   const scourSafe = fbl < (inputs.gl - 0.5);

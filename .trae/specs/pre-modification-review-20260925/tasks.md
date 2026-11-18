@@ -76,8 +76,10 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Phase C.1 — REPAIR (Data bugs + safety flags)
 
 ### Task 3: Fix cdVent 4.1 Data Error in 25-set CSV (R2 / M6)
-**Status:** `pending` (T21 re-audit 2026-11-18: premise unsupported — see note; validator + CSV audit still to do)
+**Status:** `completed (re-scoped)` (2026-11-18 — premise not reproducible; validator + boundary tests + full CSV scan completed)
 **Priority:** `high`
+
+**Closure evidence (2026-11-18):** `test-variables-25-sets.csv` scan → **25 rows, all `cdVent = 0.9`, 0 rows outside `[0.6, 1.1]`, 0 rows equal to `4.1`**. The reported "sets 02/03/08/11/14/19/21 = 4.1" does not exist in the file of record, so no value change is warranted. The stray `4.10` in the source is the surplus-weir discharge coefficient, not `cdVent`. Validator present in `src/lib/spreadsheet-import.ts` L136–141 (warn-only, `[0.6, 1.1]`); `scripts/cdVent-validator.test.ts` expanded with boundary/negative cases (c) 0.6, (d) 1.1 accepted; (e) 0.59, (f) 1.11 warned → 6/6 passing.
 
 **Re-audit note (T21, 2026-11-18):** `test-variables-25-sets.csv` shows **cdVent = 0.9 for all 25 sets** — no set carries 4.1. The "sets 02/03/08/11/14/19/21 = 4.1" premise is therefore **not confirmed** by the file of record. The stray `4.10` in the source document is the surplus-weir discharge coefficient (not a cdVent). Recommend re-scoping this task to: add the `cdVent ∈ [0.6, 1.1]` validator and a fresh scan of all 25 sets before any value is changed.
 
@@ -389,6 +391,42 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 **Scope:** Model separate grades — fck_PCC = 20 (M20), fck_VRCC = 25 (M25), fy = 415 (Fe415). M15 appears only in bearing-pressure tables; do not use for design checks.
 
 **Resolution:** The grade split was already modeled in Task 15 — `FCK_VRCC = 25`, `FCK_PCC = 20`, `STEEL_FY = 415` in `src/lib/structural.ts`. Task 22 adds the explicit E18 note that **M15 appears only in the source bearing-pressure tables and is not used for any design check** (design uses M20 PCC / M25 VRCC). No M15 constant exists in the design code path.
+
+---
+
+### Task 23: Apply Consolidated Patch (CODE-JUNCTION 2026-11-18) — evidence fixes + residual BLOCKED items
+**Status:** `completed` (2026-11-18 — evidence-backed fixes applied; two items flagged BLOCKED pending PE review)
+**Priority:** `medium`
+**Scope:** Apply the `CODE-JUNCTION/Submersible_Bridge_Design_Consolidated_Patch` bundle (a guidance/reference patch, not a git diff), limited to evidence-backed corrections.
+
+**Applied (source-explicit):**
+- **E3 scour multiplier** — `maxScourDepth` 1.27 → **1.5 × normal scour** (source `TYPE_document.md` L4916 "Maximum scour depth D_m = 1.5 × D = 2.63 m"; IRC:5-1985 Cl.110.1.4.2). Fixed in `src/lib/calculations.tsx` L297, `scripts/src/generate-sample-pdf.ts` L90, `scripts/calculations.test.ts` (mirror + S2-18/S2-19). The former 1.27 is the D/S cut-off factor — a different quantity.
+- **Bearing false PASS (DEF-004/DEF-006)** — `bearingSafe` now requires full contact: `bearingSafe = noTension && pMax ≤ SBC` (`src/lib/structural.ts` L462); the SBC warning only fires when contact is full. Regression test **ST-19** added.
+
+**BLOCKED pending qualified PE review (deliberately NOT changed):**
+- **E3 Lacey coefficient** — code uses the classic Lacey form `0.473·(Q/f)^⅓`; the reference (L4915) uses `1.34·(q²/f)^⅓` with q = discharge per metre width (1.75 m vs the code's 1.34 m for the reference case).
+- **E11 design method** — source is working-stress (M20 σ_cc = 5, σ_bt = −2.8 N/mm², IRC:6-2000 Cl.202.3); `structural.ts` reinforcement uses limit-state IS456 (1.5 factor). Methods must not be switched unilaterally.
+
+**Verification:** `npm run typecheck` exit 0; tests 58/58 + 19/19 + 3/3 + 2/2 + 1/1 + 4/4.
+
+---
+
+### Task 24: Apply Consolidated Patch v2 (CODE-JUNCTION 2026-11-18) — verification + Task 3 closure
+**Status:** `completed` (2026-11-18 — audit + report produced; no commit/push/delete)
+**Priority:** `medium`
+**Scope:** Apply `CODE-JUNCTION/Submersible_Bridge_Design_Consolidated_Patch_v2` (a review/implementation instruction bundle, not a git diff).
+
+**Executed:**
+- **Baseline independently verified** — HEAD `c5faa6f`, branch `main → origin/main`, remote `CRAJKUMARSINGH/Submersible_Bridge_Design.git`; reported SHAs `a887bc6` / `ace181e` / `c5faa6f` all present.
+- **Task 3 closed (re-scoped)** — CSV scan + validator boundary/negative tests; see Task 3 above.
+- **Tasks 9/10/18/19 dispositioned** — retrieved exact wording from this tracker; left `pending`/`blocked on approval` (large features: PDF extraction pipeline, Word generator, scour-profile drawing, V1–V10 gate) rather than implemented without scope approval.
+- **Independent C.3 re-verification** — bearing false-PASS guard (`structural.ts` L462) + ST-19; suites re-run green.
+- **Release gates logged** — `npm run typecheck` exit 0; calculation 58/58, structural 19/19, formula-trace 3/3, cdVent 6/6, geometry-single-source PASS, verbatim-renderer 4/4; `npm run build` exit 0 (Vite, `✓ built in 1m 24s`).
+- **Report produced** — [`docs/audit/POST_C5FAA6F_VERIFICATION.md`](file:///e:/Rajkumar/Submersible_Bridge_Design/docs/audit/POST_C5FAA6F_VERIFICATION.md) with gate table, task/defect dispositions, blockers, and a proposed change/deletion list (approval required).
+
+**Not done (per bundle rules — requires explicit approval):** no commit, no push, no deletion.
+
+**Carried-forward blockers (unchanged):** E3 Lacey normal-scour coefficient; E11 WSD-vs-LSM method; E2/E9/E10 clause-number stamping.
 
 ---
 

@@ -68,6 +68,60 @@ testCase('(b) cdVent = 4.1 → validator produces exactly 1 range warning', () =
   return { pass: true, message: '' };
 });
 
+testCase('(c) cdVent = 0.6 (lower bound) → validator passes (no warning)', () => {
+  const rows: string[][] = [['cdVent', '0.6']];
+  const result = parseVariableTable(rows);
+  const cdVentWarnings = result.warnings.filter((w) => w.includes('cdVent'));
+
+  if (result.patch.cdVent !== 0.6) {
+    return { pass: false, message: `Expected cdVent=0.6 in patch, got ${result.patch.cdVent}` };
+  }
+  if (cdVentWarnings.length !== 0) {
+    return { pass: false, message: `Expected 0 cdVent warnings at lower bound, got ${cdVentWarnings.length}: ${cdVentWarnings.join('; ')}` };
+  }
+  return { pass: true, message: '' };
+});
+
+testCase('(d) cdVent = 1.1 (upper bound) → validator passes (no warning)', () => {
+  const rows: string[][] = [['cdVent', '1.1']];
+  const result = parseVariableTable(rows);
+  const cdVentWarnings = result.warnings.filter((w) => w.includes('cdVent'));
+
+  if (result.patch.cdVent !== 1.1) {
+    return { pass: false, message: `Expected cdVent=1.1 in patch, got ${result.patch.cdVent}` };
+  }
+  if (cdVentWarnings.length !== 0) {
+    return { pass: false, message: `Expected 0 cdVent warnings at upper bound, got ${cdVentWarnings.length}: ${cdVentWarnings.join('; ')}` };
+  }
+  return { pass: true, message: '' };
+});
+
+testCase('(e) cdVent = 0.59 (just below lower bound) → exactly 1 range warning', () => {
+  const rows: string[][] = [['cdVent', '0.59']];
+  const result = parseVariableTable(rows);
+  const rangeWarnings = result.warnings.filter((w) =>
+    w.includes('out of allowed range [0.6, 1.1]'),
+  );
+
+  if (rangeWarnings.length !== 1) {
+    return { pass: false, message: `Expected exactly 1 range warning for 0.59, got ${rangeWarnings.length}: ${result.warnings.join('; ')}` };
+  }
+  return { pass: true, message: '' };
+});
+
+testCase('(f) cdVent = 1.11 (just above upper bound) → exactly 1 range warning', () => {
+  const rows: string[][] = [['cdVent', '1.11']];
+  const result = parseVariableTable(rows);
+  const rangeWarnings = result.warnings.filter((w) =>
+    w.includes('out of allowed range [0.6, 1.1]'),
+  );
+
+  if (rangeWarnings.length !== 1) {
+    return { pass: false, message: `Expected exactly 1 range warning for 1.11, got ${rangeWarnings.length}: ${result.warnings.join('; ')}` };
+  }
+  return { pass: true, message: '' };
+});
+
 console.log('');
 if (allPassed) {
   console.log('ALL TESTS PASSED');

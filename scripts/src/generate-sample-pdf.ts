@@ -87,7 +87,7 @@ const hAfflux      = (aVent > 0 && aHFL > aVent)
   : 0;
 const laceyPerimeter  = 4.75 * Math.sqrt(designDischarge);
 const laceyScourDepth = 0.473 * Math.pow(designDischarge / inputs.siltFactor, 1 / 3);
-const maxScourDepth   = 1.27 * laceyScourDepth;
+const maxScourDepth   = 1.5 * laceyScourDepth; // E3: max scour = 1.5 × normal (IRC:5-1985 Cl.110.1.4.2)
 const fbl             = inputs.hfl - maxScourDepth;
 const recommendedDepth = inputs.gl - fbl;
 const scourSafe       = fbl < (inputs.gl - 0.5);

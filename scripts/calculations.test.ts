@@ -146,7 +146,7 @@ export function calcStep2(inputs: {
 
   const laceyPerimeter = calcLaceyPerimeter(designDischarge);
   const laceyScourDepth = calcLaceyScourDepth(designDischarge, inputs.siltFactor);
-  const maxScourDepth = 1.27 * laceyScourDepth;
+  const maxScourDepth = 1.5 * laceyScourDepth; // E3: max scour = 1.5 × normal (IRC:5-1985)
   const fbl = inputs.hfl - maxScourDepth;
   const recommendedDepth = inputs.gl - fbl;
   const scourSafe = fbl < inputs.gl - 0.5;
@@ -428,13 +428,13 @@ test("S2-17 Lacey R f=1.5 same Q → R smaller vs f=1", () => {
   assertTrue(Rbig < Rone);
 });
 
-test("S2-18 D_max = 1.27*R, R=2 → 2.54 exact", () => {
-  assertExact(1.27 * 2, 2.54);
+test("S2-18 D_max = 1.5*R, R=2 → 3.0 exact (max scour = 1.5× normal, IRC:5-1985)", () => {
+  assertExact(1.5 * 2, 3.0);
 });
 
-test("S2-19 FBL = hfl - D_max; hfl=10 D_max=2.54 → FBL=7.46", () => {
-  const fbl = 10 - 2.54;
-  assertApprox(fbl, 7.46, 1e-9);
+test("S2-19 FBL = hfl - D_max; hfl=10 D_max=3.0 → FBL=7.0", () => {
+  const fbl = 10 - 3.0;
+  assertApprox(fbl, 7.0, 1e-9);
 });
 
 test("S2-20 scourSafe branch: FBL < GL-0.5 → true, else false", () => {
