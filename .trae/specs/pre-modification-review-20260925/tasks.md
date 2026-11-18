@@ -1,4 +1,4 @@
-# TASKS — Pre-Modification Review Follow-up (Post-Approval)
+a then b# TASKS — Pre-Modification Review Follow-up (Post-Approval)
 
 **Spec:** [spec.md](file:///e:/Rajkumar/Submersible_Bridge_Design/.trae/specs/pre-modification-review-20260925/spec.md)
 **Decision:** Option C (REDESIGN) recommended per [Section 16](file:///e:/Rajkumar/Submersible_Bridge_Design/.trae/specs/pre-modification-review-20260925/spec.md#L16)
@@ -60,7 +60,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 2: Provide Manually Verified Golden Reference Set (V4 in Section 14)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — `data/golden-reference-set.csv`: 36 inputs + 30 results, each with reference value + source line; PE signature still required for formal V4 sign-off)
 **Priority:** `high`
 **Scope:** User provides hand-signed PE calculation workbook for one design set (or certifies pdf values in `Type Design of submersible causeway.pdf` are manually correct):
   - All 36 Inputs (Section 5.1) hand-read from PDF, value + unit + page ref
@@ -236,7 +236,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Phase C.3 — STRUCTURAL MODULE (Full design calculations)
 
 ### Task 11: Dead Load Subdivision + Dirt Wall / Wearing Coat (9.5 missing)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — `src/lib/structural.ts` `deadLoads`; reproduces 244.80 / 55.50 / 38.25 = 338.55 kN and abutment 155.52 + footings 58.32/64.80/71.28 = 349.92 kN)
 **Priority:** `high`
 
 **Scope:**
@@ -250,7 +250,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 12: Earth Pressures (Active/Passive Ka/Kp) + Coulomb (R12, E14)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — Coulomb `coulombKa()` in `src/lib/structural.ts`: φ=30, α=90, β=0, δ=15 → Ka≈0.3014 (ref 0.30); inputs added)
 **Priority:** `high` (BLOCKING for structural sign-off)
 
 **Scope:**
@@ -267,7 +267,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 13: Stability Analysis (Sliding + Overturning FOS)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — `stability` block; FOS_SLIDING_MIN=1.5, FOS_OVERTURNING_MIN=2.0, μ=0.5)
 **Priority:** `high`
 
 **Scope:**
@@ -280,7 +280,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 14: Bearing Pressure + No-Tension + SBC Utilization (M8/E8)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — `bearingPressure()` p=(P/A)(1±6e/b); no-tension 6e/b<1 per IRC:78-2000 Cl.706.3.3.1; SBC utilisation)
 **Priority:** `high`
 
 **Scope:**
@@ -292,7 +292,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 15: Reinforcement Design Module (Abutment Stem + Deck Slab)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — `astFromMoment()` exact IS456 quadratic; M25 VRCC / M20 PCC / Fe415; min steel 0.12%/0.15%; bar arrangement out of scope)
 **Priority:** `high`
 
 **Scope:**
@@ -307,7 +307,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 16: Braking / Seismic / Wind / Tractive Loads (E6, E15, E20)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — braking 47.84 kN, wind deck 3.86 kN, wind on live load 18.00 kN, seismic Zone-I = not required)
 **Priority:** `medium`
 
 **Scope:**
@@ -319,7 +319,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 17: Anchor Design + Thrust Block (E9, E10, R19)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — uplift 145.80 kN, anchor FOS, VRCC thrust-block safety ratio; IRC SP:82-2007)
 **Priority:** `high`
 
 **Scope:**

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 import engineeringInputs from './engineering_inputs.json';
+import { computeStructural, type StructuralResults } from './structural';
 
 // Helper to get traced input value
 const getTraceableInput = (id: string, fallback: number) => {
@@ -57,6 +58,44 @@ export type Inputs = {
   siltLoadDeck: number;
   sbc_kN_m2: number;
   d_LBL_depth_m: number;
+
+  // ─── Step 3 (C.3 structural design — Tasks 11–17) ──────────────────────────
+  // All new fields are optional so existing Inputs literals keep compiling;
+  // computeStructural() applies the same fallbacks when a field is absent.
+  // Geometry of the abutment / footing assembly (TYPE_document.md §I).
+  deckSlabLength?: number;
+  wearingCoatThickness?: number;
+  dirtWallArea_m2?: number;
+  substructureUnitWeight_kN_m3?: number;
+  abutmentSectionArea_m2?: number;
+  footingThickness_m?: number;
+  footing1Width_m?: number;
+  footing2Width_m?: number;
+  footing3Width_m?: number;
+  abutmentHeight_m?: number;
+  abutmentTopWidth_m?: number;
+  abutmentBottomWidth_m?: number;
+  foundationWidth_m?: number;
+  foundationLength_m?: number;
+
+  // Task 12 — Coulomb earth pressure parameters (TYPE_document.md §8).
+  backfillPhi?: number;
+  wallAngleAlpha?: number;
+  backfillSlopeBeta?: number;
+  wallFrictionDelta?: number;
+  surchargeHeightH3_m?: number;
+  backfillUnitWeight_kN_m3?: number;
+
+  // Task 16 — accidental / transient loads (IRC:6-2000 Cl.212/214/222).
+  brakingLiveLoad_kN?: number;
+  brakingHeight_m?: number;
+  windPressureDeck_kg_m2?: number;
+  deckExposedHeight_m?: number;
+  deckExposedBreadth_m?: number;
+  windPerforationFactor?: number;
+  windLivePressure_kg_m?: number;
+  windLiveHeight_m?: number;
+  seismicZone?: string;
 };
 
 export type ComputedResults = {
@@ -101,6 +140,9 @@ export type ComputedResults = {
   fUplift: number;
   fAnchor: number;
   fDragTotal: number;
+
+  // Step 3 — C.3 structural design (Tasks 11–17).
+  structural: StructuralResults;
 };
 
 export type CalculationsContextType = {
@@ -151,6 +193,42 @@ export const defaultInputs: Inputs = {
   siltLoadDeck: 1.2,
   sbc_kN_m2: 98,
   d_LBL_depth_m: 2.0,
+
+  // ─── Step 3 (C.3 structural design — Tasks 11–17) ──────────────────────────
+  // Preliminarily-assumed abutment / footing section (TYPE_document.md §I).
+  deckSlabLength: 6.8,
+  wearingCoatThickness: 0.075,
+  dirtWallArea_m2: 0.37,
+  substructureUnitWeight_kN_m3: 24,
+  abutmentSectionArea_m2: 1.08,
+  footingThickness_m: 0.3,
+  footing1Width_m: 1.35,
+  footing2Width_m: 1.5,
+  footing3Width_m: 1.65,
+  abutmentHeight_m: 1.2,
+  abutmentTopWidth_m: 0.75,
+  abutmentBottomWidth_m: 1.05,
+  foundationWidth_m: 1.65,
+  foundationLength_m: 6.0,
+
+  // Coulomb earth-pressure parameters (TYPE_document.md §8): φ=30°, α=90°, β=0°, δ=15°.
+  backfillPhi: 30,
+  wallAngleAlpha: 90,
+  backfillSlopeBeta: 0,
+  wallFrictionDelta: 15,
+  surchargeHeightH3_m: 1.2,
+  backfillUnitWeight_kN_m3: 18,
+
+  // Accidental / transient loads (IRC:6-2000 Cl.212/214/222).
+  brakingLiveLoad_kN: 478.41,
+  brakingHeight_m: 1.2,
+  windPressureDeck_kg_m2: 59.48,
+  deckExposedHeight_m: 1.755,
+  deckExposedBreadth_m: 7.4,
+  windPerforationFactor: 0.5,
+  windLivePressure_kg_m: 300,
+  windLiveHeight_m: 1.5,
+  seismicZone: "I",
 };
 
 export const DEFAULT_GEOMETRY = {
@@ -247,7 +325,7 @@ export function computeResults(inputs: Inputs): ComputedResults {
     sanityWarnings.push(minCarriageWidthNote);
   }
 
-  return {
+  const hydraulic: Omit<ComputedResults, 'structural'> = {
     qRational, qWeir, qVelocity, qDesign, governingMethod,
     designDischarge, aVent, effectiveWidth, aRTL, aHFL,
     pctObsRTL, pctObsHFL, passRTL, passHFL,
@@ -257,6 +335,14 @@ export function computeResults(inputs: Inputs): ComputedResults {
     wSelf, wSilt, wLive, totalVerticalLoad,
     fDrag, fUplift, fAnchor, fDragTotal,
   };
+
+  // ─── STEP 3 (C.3) — structural design, Tasks 11–17 ────────────────────────
+  // Pure, additive extension: consumes the hydraulic results above and returns
+  // the dead-load / earth-pressure / stability / bearing / reinforcement /
+  // transient / uplift checks. No existing field is altered.
+  const structural = computeStructural(inputs, hydraulic as ComputedResults);
+
+  return { ...hydraulic, structural };
 }
 
 export function CalculationsProvider({ children }: { children: ReactNode }) {

@@ -1,0 +1,77 @@
+id,category,key,unit,reference_value,source_evidence,status
+IN-01,metadata,projectName,-,B.T to the R/f KB Road to P.Bheemavaram,TYPE_document.md L2,EXACT
+IN-02,metadata,streamName,-,(not stated),- ,NOT-STATED
+IN-03,metadata,location,-,(not stated),- ,NOT-STATED
+IN-04,metadata,date,-,(not stated),- ,NOT-STATED
+IN-05,step1_discharge,catchmentArea,km2,1.38,"L4789",EXACT
+IN-06,step1_discharge,runoffCoefficient,-,(Dickens C unspecified),L4790,NOT-STATED
+IN-07,step1_discharge,rainfallIntensity,mm/hr,(not stated),- ,NOT-STATED
+IN-08,step1_discharge,surplusWeirLength,m,22.75,L4796,EXACT
+IN-09,step1_discharge,heightOfFallWeir,m,0.45,L4794,EXACT
+IN-10,step1_discharge,streamAreaHFL,m2,11.74,L4738,EXACT
+IN-11,step1_discharge,meanVelocityHFL,m/s,2.58,L4740,EXACT
+IN-12,step2_hydraulic,customDesignDischarge,m3/s,null,L4792,EXACT
+IN-13,step2_hydraulic,hfl,m,6.235,L111,EXACT
+IN-14,step2_hydraulic,gl,m,3.965,L110,EXACT
+IN-15,step2_hydraulic,rtl,m,5.645,L109,EXACT
+IN-16,step2_hydraulic,numVents,-,3,L4817,EXACT
+IN-17,step2_hydraulic,ventWidth,m,6.00,L4817,EXACT
+IN-18,step2_hydraulic,ventHeight,m,(not directly stated; vented area = 26.21 m2 total),L4825,NOT-STATED
+IN-19,step2_hydraulic,approachVelocity,m/s,2.58,L4805,EXACT
+IN-20,step2_hydraulic,siltFactor,-,2.00,L4913,EXACT
+IN-21,step2_hydraulic,cdVent,-,4.10,L4801,EXACT
+IN-22,step3_structural,deckWidth,m,6.00,L51,EXACT
+IN-23,step3_structural,deckSpan,m,6.00,L48,EXACT
+IN-24,step3_structural,deckThickness,m,0.480,L52,EXACT
+IN-25,step3_structural,numSpans,-,3,L4817,EXACT
+IN-26,step3_structural,liveLoadType,-,IRC Class A,L230,EXACT
+IN-27,step3_structural,waterDensity,kg/m3,1000 (10 kN/m3),L100,EXACT
+IN-28,step3_structural,concreteDensity,kg/m3,2500 (25 kN/m3 RCC),L93,EXACT
+IN-29,step3_structural,dragCoefficient,-,4.10,L4801,EXACT
+IN-30,step3_structural,siltLoadDeck,kN/m2,2.25,L254,EXACT
+IN-31,step3_structural,sbc_kN_m2,kN/m2,147.15 (15 t/m2),L113,EXACT
+IN-32,step3_structural,fck_pcc,N/mm2,20,L114,EXACT
+IN-33,step3_structural,fck_vrcc,N/mm2,25,L116,EXACT
+IN-34,step3_structural,fy,N/mm2,415,L118,EXACT
+IN-35,step3_structural,reinforcementCover_mm,mm,50,L121,EXACT
+IN-36,step3_structural,backfillUnitWeight_kN_m3,kN/m3,18,L98,EXACT
+RS-01,step1_result,qRational,m3/s,21.65,L4790,EXACT
+RS-02,step1_result,qWeir,m3/s,15.47,L4802,EXACT
+RS-03,step1_result,qVelocity,m3/s,30.28,L4741,EXACT
+RS-04,step1_result,qDesign,m3/s,45.75,L4804,EXACT
+RS-05,step1_result,governingMethod,-,Stream design 30.28 + Surplus weir 15.47,L4792+L4802,EXACT
+RS-06,step2_result,designDischarge,m3/s,45.75,L4804,EXACT
+RS-07,step2_result,aVent,m2,26.21,L4825,EXACT
+RS-08,step2_result,effectiveWidth,m,28.80,L4845,EXACT
+RS-09,step2_result,aRTL,m2,66.53,L4815,EXACT
+RS-10,step2_result,aHFL,m2,79.33,L4831,EXACT
+RS-11,step2_result,pctObsRTL,%,39.40 (vented area),L4827,EXACT
+RS-12,step2_result,pctObsHFL,%,29.07 (obstruction),L4837,EXACT
+RS-13,step2_result,passRTL,bool,true (>30%),L4828,EXACT
+RS-14,step2_result,passHFL,bool,true (<30%),L4839,EXACT
+RS-15,step2_result,velocityHFL,m/s,2.58,L4805,EXACT
+RS-16,step2_result,hAfflux,m,0.131,L524,EXACT
+RS-17,step2_result,alluvialPerimeter_m,m,32.13 (P = 4.75*sqrt(Q)),L4913,COMPUTED
+RS-18,step2_result,laceyScourDepth,m,1.75,L4915,EXACT
+RS-19,step2_result,maxScourDepth,m,2.63,L4916,EXACT
+RS-20,step2_result,fbl,m,2.315,L112,EXACT
+RS-21,step2_result,recommendedDepth,m,3.83,L4920,EXACT
+RS-22,step2_result,scourSafe,bool,true,L4918,EXACT
+RS-23,step3_result,wSelf,kN,338.55,L155,EXACT
+RS-24,step3_result,wSilt,kN,91.80 (2.25 x 6.8 x 6.0),computed from L254,COMPUTED
+RS-25,step3_result,wLive,kN,478.41,L280,EXACT
+RS-26,step3_result,totalVerticalLoad,kN,1088.35 (Load Envelope-I),L542,EXACT
+RS-27,step3_result,fDrag,kN,(not stated numerically in reference),- ,NOT-STATED
+RS-28,step3_result,fUplift,kN,195.48 (uplift on deck slab),L527,EXACT
+RS-29,step3_result,fAnchor,kN,(not stated numerically in reference),- ,NOT-STATED
+RS-30,step3_result,fDragTotal,kN,(not stated numerically in reference),- ,NOT-STATED
+XTRA-01,structural,ka_active,-,0.30 (Coulomb: phi=30 alpha=90 beta=0 delta=15),L422,EXACT
+XTRA-02,structural,pa_base_kN_m2,kN/m2,6.48,L425,EXACT
+XTRA-03,structural,earthPressure_P_kN,kN,69.98,L453,EXACT
+XTRA-04,structural,earthPressure_Ph_kN,kN,67.60,L454,EXACT
+XTRA-05,structural,earthPressure_Pv_kN,kN,18.10,L456,EXACT
+XTRA-06,structural,buoyancy_kN,kN,145.80 (14.58 m3 x 10),L403,EXACT
+XTRA-07,structural,braking_kN,kN,47.84 (20% LL x 50%),L388,EXACT
+XTRA-08,structural,wind_deck_kN,kN,3.86 (59.48 kg/m2 x 50%),L359,EXACT
+XTRA-09,structural,wind_liveload_kN,kN,18.00 (300 kg/m),L363,EXACT
+XTRA-10,structural,seismic,-,NOT REQUIRED (Zone-I),L460,EXACT
