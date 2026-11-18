@@ -9,6 +9,7 @@
     "build": "vite build --config vite.config.ts",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "node --import tsx ./scripts/calculations.test.ts",
     "generate-169": "tsx ./scripts/generate-169-page-design.ts",
     "generate-copycat": "tsx ./scripts/generate-sample-copycat.ts",
     "extract:prototype-equations": "node ./scripts/extract-prototype-equations.mjs",

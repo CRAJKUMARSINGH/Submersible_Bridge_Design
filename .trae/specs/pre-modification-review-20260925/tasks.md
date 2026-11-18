@@ -182,7 +182,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 8: V1 Unit Tests for All Current Calculations (Section 9.1–9.3 + 58 tests outlined)
-**Status:** `pending`
+**Status:** `completed`
 **Priority:** `high`
 
 **Scope:**
