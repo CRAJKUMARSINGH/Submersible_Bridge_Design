@@ -110,3 +110,38 @@ Timezone: Asia/Shanghai.
 - Changes **not committed** — awaiting user instruction.
 
 ---
+
+## 2026-11-19 00:45 — Session: Task 34 (stamp explicit clause IDs, V6 finding)
+
+**User request**
+- "takeo" (take on) the offered next unblocked code task — **Task 34**, raise the V6 explicit-clause rate.
+
+**Actions taken**
+1. Read the V6 harness (`scripts/v6-clause-conformance.test.ts`) and the matrix
+   (`data/clause-traceability-matrix.csv`) to learn the stamping mechanics (Layer 2 rate is reported,
+   not gated).
+2. Searched the evidence document (`data/extracted/TYPE_document.md`) for clause numbers printed near
+   each GENERAL-ONLY formula.
+3. Stamped the **2** rows whose clause number is literally printed — **Q_WEIR** → `IRC SP:13-2004
+   Cl.15.2` (broad-crested weir, `L4888-4891`) and **W_TOTAL** → `IRC:6-2000 Cl.202.3`
+   (submersible load combination, `L148`).
+4. Declined the other 3 suggested stamps (**AFFLUX**, **LACEY_P**, **W_SELF**) — the source prints
+   **no** clause number for them (SO-2: no evidence ⇒ no change).
+5. Updated the tracker: Task 34 → `completed`; Task 19 V6 line refreshed (46.2 % → 53.8 %).
+
+**Files modified**
+- `data/clause-traceability-matrix.csv` — Q_WEIR + W_TOTAL → EXACT.
+- `.trae/specs/pre-modification-review-20260925/tasks.md` — Task 34 closed; Task 19 V6 note.
+- `creat.md` — this refresh.
+
+**Verification**
+- `npm run test:v6-clause` → **EXACT 14, GENERAL-ONLY 8, SOURCE-SILENT 2, PENDING 1, NOT-APPLICABLE 1**;
+  explicit **14/26 = 53.8 %** (was 46.2 %), code-cited **22/26 = 84.6 %** → PASS.
+
+**Blockers / next step**
+- Residual V6 rows (8 GENERAL-ONLY + 2 SOURCE-SILENT + 1 PENDING) need a **PE-supplied clause number**;
+  none may be inferred.
+- Task 19 stays `blocked` (V4 fail + V6 partial remain).
+- Changes **not committed** — awaiting user instruction.
+
+---

@@ -383,7 +383,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 - Any findings → materialize as pending tasks in this file BEFORE selecting next work
 
 **Resolution:**
-- **V1–V9 re-run in one consolidated self-verification pass.** Results: V1 unit **60/60**; V2 regression **25/25** (SHA-256 golden master, deterministic); V3 extraction **27/27 = 100 %**; V4 calculation **11/32 = 34.4 % → FAIL** (21 divergences); V5 drawing dimensional **PASS** (single-source geometry; CAD overlay BLOCKED — no reference DXF); V6 clause conformance **PARTIAL** (26/26 traceable, 12/26 = 46.2 % explicit, 22/26 = 84.6 % code-cited); V7 report completeness **41/41 = 100 %**; V8 Word conformance **13/13 headings + 34/34 fields**; V9 load combinations **3/11 = 27 % → FAIL** (**since closed by Task 35** — discrete Cl.202 engine, re-run **10/10 = 100 %**).
+- **V1–V9 re-run in one consolidated self-verification pass.** Results: V1 unit **60/60**; V2 regression **25/25** (SHA-256 golden master, deterministic); V3 extraction **27/27 = 100 %**; V4 calculation **11/32 = 34.4 % → FAIL** (21 divergences); V5 drawing dimensional **PASS** (single-source geometry; CAD overlay BLOCKED — no reference DXF); V6 clause conformance **PARTIAL** (26/26 traceable, **14/26 = 53.8 %** explicit — raised by Task 34 — 22/26 = 84.6 % code-cited; residual un-printed clauses are PE to supply); V7 report completeness **41/41 = 100 %**; V8 Word conformance **13/13 headings + 34/34 fields**; V9 load combinations **3/11 = 27 % → FAIL** (**since closed by Task 35** — discrete Cl.202 engine, re-run **10/10 = 100 %**).
 - **Findings materialised BEFORE further work** (per the Task 19 scope rule): V4 → **Tasks 28–33**, V6 → **Task 34**, V9 → **Task 35**.
 - **V10 is BLOCKED.** The spec §14.5 deliverables cannot be signed while V4 and V6 are open — a PE hand-calc sign-off on a design set the app does not yet reproduce would be premature. V9 was closed by Task 35. No variance has been approved.
 
@@ -628,21 +628,33 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Findings Materialized from Task 19 (V6 / V9)
 
 ### Task 34: Stamp Explicit Clause IDs on Un-stamped Formula Trace Rows (V6 finding)
-**Status:** `pending`
+**Status:** `completed` (2026-11-19 — every clause number **present in the source** is now stamped; explicit-clause rate **12/26 = 46.2 % → 14/26 = 53.8 %**; the residual carries no printed clause and stays flagged for PE supply)
 **Priority:** `medium`
-**Depends On:** PE clause supply for the source-silent items
+**Depends On:** PE clause supply for the source-silent / un-printed items (residual only)
 **Scope:** V6 (`npm run test:v6-clause`) confirms structural completeness — all **26** traced formulas are mapped in [`data/clause-traceability-matrix.csv`](file:///e:/Rajkumar/Submersible_Bridge_Design/data/clause-traceability-matrix.csv) and all **20** decisions E1–E20 carry a `code_clause` — but the spec ideal *"every formula has a clause ID"* is only partly met:
 
-| Status | Count | Formulas |
-|---|---|---|
-| EXACT (explicit clause no.) | 12 | A_VENT, A_RTL, A_HFL, OBS_RTL, OBS_HFL, LACEY_R, SCOUR_MAX, FBL, FOUNDATION_DEPTH, W_SILT, W_LIVE, F_UPLIFT |
-| GENERAL-ONLY (code named, no clause) | 10 | Q_WEIR, Q_AREA_VELOCITY, B_EFFECTIVE, V_HFL, AFFLUX, LACEY_P, W_SELF, W_TOTAL, F_DRAG, F_DRAG_TOTAL |
-| SOURCE-SILENT | 2 | Q_RATIONAL, F_ANCHOR |
-| PENDING (PE ruling) | 1 | Q_GOVERNING |
-| NOT-APPLICABLE | 1 | Q_SELECTED |
+| Status | Before | After | Formulas (after) |
+|---|---|---|---|
+| EXACT (explicit clause no.) | 12 | **14** | Q_WEIR, A_VENT, A_RTL, A_HFL, OBS_RTL, OBS_HFL, LACEY_R, SCOUR_MAX, FBL, FOUNDATION_DEPTH, W_SILT, W_LIVE, W_TOTAL, F_UPLIFT |
+| GENERAL-ONLY (code named, no clause) | 10 | **8** | Q_AREA_VELOCITY, B_EFFECTIVE, V_HFL, AFFLUX, LACEY_P, W_SELF, F_DRAG, F_DRAG_TOTAL |
+| SOURCE-SILENT | 2 | 2 | Q_RATIONAL, F_ANCHOR |
+| PENDING (PE ruling) | 1 | 1 | Q_GOVERNING |
+| NOT-APPLICABLE | 1 | 1 | Q_SELECTED |
 
-Explicit-clause rate = **12/26 = 46.2 %**; code-cited rate (EXACT+GENERAL) = **22/26 = 84.6 %**.
+Explicit-clause rate = **14/26 = 53.8 %** (was 46.2 %); code-cited rate (EXACT+GENERAL) = **22/26 = 84.6 %** (unchanged).
 **Acceptance:** raise the explicit-clause rate (or the code-cited rate) by stamping clause numbers that are **present in the evidence** — AFFLUX → IRC SP:13-2004 orifice sub-clause, LACEY_P → Lacey 1930, W_SELF → IRC:6-2000 dead-load clause, Q_WEIR → broad-crested weir clause. Source-silent items stay flagged as **PE to supply**; nothing is stamped without evidence.
+
+**Resolution (2026-11-19):**
+- **Stamped (2)** — clause number literally printed in the source:
+  - **Q_WEIR** → `IRC SP:13-2004 Cl.15.2` — the source applies the broad-crested weir form `Q = 1.706·C_W·L·H^1.5` and cites *“clause 15.2 of IRC SP:13-2004”* for `C_W = 0.94` (`TYPE_document.md` L4888-4891); the app's `Q = 1.705·Lw·Hw^1.5` is the same form.
+  - **W_TOTAL** → `IRC:6-2000 Cl.202.3` — the source's only load-combination clause, printed for the submersible loading combination (`L148`); not in the original candidate list, added because it is evidence-present.
+- **Could NOT be stamped (3 of the 4 suggested) — no clause printed in the source (SO-2: no evidence ⇒ no change):**
+  - **AFFLUX** — the source cites IRC SP:13-2004 for the orifice-form coefficients `C_o`, `e` **without a sub-clause number** (`L4860-4862`); the app's afflux is the Molesworth form, which carries no IRC clause. Stays GENERAL-ONLY.
+  - **LACEY_P** — the source names Lacey's silt factor (`L4913`) but **never prints `P = 4.75√Q` nor any clause**; the app formula is textbook Lacey. “Lacey 1930” would be an external citation, not source evidence. Stays GENERAL-ONLY.
+  - **W_SELF** — dead load is listed under IRC:6-2000 generally (`L124`, `L151-155`) with **no clause number**; IRC:6-2000 Cl.203 is simply *not* printed in the source. Stays GENERAL-ONLY.
+- The residual (8 GENERAL-ONLY + 2 SOURCE-SILENT + 1 PENDING) can only be closed by a **PE-supplied clause number**; none may be inferred.
+
+**Evidence:** `npm run test:v6-clause` → **EXACT 14, GENERAL-ONLY 8, SOURCE-SILENT 2, PENDING 1, NOT-APPLICABLE 1**; explicit **14/26 = 53.8 %**, code-cited **22/26 = 84.6 %** → PASS (all 26 mapped, E1–E20 stamped).
 
 ### Task 35: Implement the IRC 6:2000 Cl.202 Load-Combination Matrix (V9 finding)
 **Status:** `completed` (2026-11-19 — discrete Cl.202 combination engine + Word §6.8 table; V9 **10/10 = 100 %**, criterion ≥10/12 met)
