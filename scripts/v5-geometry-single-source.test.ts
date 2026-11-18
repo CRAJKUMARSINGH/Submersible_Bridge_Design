@@ -150,6 +150,45 @@ function main() {
     if (fpHits.length > 5) notes.push(`  ... +${fpHits.length - 5} more`);
   }
 
+  console.log('(c) Single-source consumption in the three drawing views + summary preview:');
+  const views: { file: string; keys: string[] }[] = [
+    {
+      file: '../src/pages/drawings.tsx',
+      keys: ['ABUT_W_M', 'PIER_W_M', 'FEXT_M', 'APP_M', 'PMARG_M', 'BANK_MULT', 'ELEV_MARGIN_M'],
+    },
+    {
+      file: '../src/pages/summary.tsx',
+      keys: ['ABUT_W_M', 'PIER_W_M', 'FEXT_M', 'ELEV_MARGIN_M'],
+    },
+  ];
+  for (const v of views) {
+    const p = resolve(__dirname, v.file);
+    const vsrc = readFileSync(p, 'utf8');
+    const name = v.file.split('/').pop();
+    if (!/import\s*\{[^}]*DEFAULT_GEOMETRY[^}]*\}\s*from\s*['"][^'"]*calculations['"]/.test(vsrc)) {
+      console.error(`  FAIL: ${name} does not import DEFAULT_GEOMETRY from calculations.`);
+      passed = false;
+    }
+    for (const k of v.keys) {
+      const ref = new RegExp(`DEFAULT_GEOMETRY\\.${k}\\b`);
+      if (!ref.test(vsrc)) {
+        console.error(`  FAIL: ${name} does not reference DEFAULT_GEOMETRY.${k}.`);
+        passed = false;
+      }
+    }
+    // No re-declared geometry literal that would shadow / diverge from the object.
+    const hardcoded = vsrc.match(/\b(?:ABUT_W|ABUT|PIER_W|PIER|FEXT)\b\s*(?::[^=]*)?=\s*\d+(?:\.\d+)?\b/g);
+    if (hardcoded) {
+      const offenders = hardcoded.filter(s => !/DEFAULT_GEOMETRY\./.test(s));
+      if (offenders.length > 0) {
+        console.error(`  FAIL: ${name} hardcodes geometry literals instead of the single source:`);
+        for (const o of offenders) console.error(`      ${o.trim()}`);
+        passed = false;
+      }
+    }
+  }
+  if (passed) console.log('  PASS: CS A-A / LS B-B / Plan + summary preview all consume DEFAULT_GEOMETRY (single source).');
+
   console.log();
   for (const n of notes) console.log(n);
   console.log();

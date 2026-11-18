@@ -236,6 +236,11 @@ export const defaultInputs: Inputs = {
   seismicZone: "I",
 };
 
+/**
+ * Task 4 / V5 — SINGLE SOURCE for every drawn geometric constant (metres).
+ * Consumed by all three views (CS A-A, LS B-B, Plan) in both the on-screen React
+ * drawings and the PDF export, so a dimension can never disagree between views.
+ */
 export const DEFAULT_GEOMETRY = {
   PIER_W_M: 0.4,
   ABUT_W_M: 0.8,
@@ -243,6 +248,8 @@ export const DEFAULT_GEOMETRY = {
   APP_M: 3.0,
   PMARG_M: 2.0,
   BANK_MULT: 1.6,
+  /** Elevation padding (m) added above / below the drawn extreme levels. */
+  ELEV_MARGIN_M: 0.8,
 } as const;
 
 export type Geometry = typeof DEFAULT_GEOMETRY;

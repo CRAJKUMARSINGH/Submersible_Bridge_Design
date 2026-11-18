@@ -161,8 +161,8 @@ function drawCrossSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   const totW = 2 * ABUT_W + nPiers * PIER_W + inp.numVents * inp.ventWidth;
   const deckTop = inp.rtl + inp.deckThickness;
 
-  const minEl = res.fbl - DEFAULT_GEOMETRY.ABUT_W_M;
-  const maxEl = Math.max(inp.hfl, deckTop) + DEFAULT_GEOMETRY.ABUT_W_M;
+  const minEl = res.fbl - DEFAULT_GEOMETRY.ELEV_MARGIN_M;
+  const maxEl = Math.max(inp.hfl, deckTop) + DEFAULT_GEOMETRY.ELEV_MARGIN_M;
   const elRange = maxEl - minEl;
 
   const ML = 30, MR = 18, MT = 14, TB = 36;
@@ -267,7 +267,7 @@ function drawLongSection(doc: jsPDF, inp: Inputs, res: ComputedResults) {
   const totL = inp.numSpans * inp.deckSpan;
   const worldL = totL + 2 * ABUT_W + 2 * APP;
   const deckTop = inp.rtl + inp.deckThickness;
-  const minEl = res.fbl - DEFAULT_GEOMETRY.ABUT_W_M, maxEl = Math.max(inp.hfl, deckTop) + DEFAULT_GEOMETRY.ABUT_W_M;
+  const minEl = res.fbl - DEFAULT_GEOMETRY.ELEV_MARGIN_M, maxEl = Math.max(inp.hfl, deckTop) + DEFAULT_GEOMETRY.ELEV_MARGIN_M;
 
   const ML = 30, MR = 18, MT = 14, TB = 36;
   const dW = W - ML - MR, dH = H - MT - TB;

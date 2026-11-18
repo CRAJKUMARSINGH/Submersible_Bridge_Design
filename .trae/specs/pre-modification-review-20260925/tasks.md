@@ -101,7 +101,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ---
 
 ### Task 4: Standardize ABUT_W and Geometry Constants (R5 / Section 8.4 Defects)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — single exported `DEFAULT_GEOMETRY` consumed by CS A-A / LS B-B / Plan + PDF sheets + summary preview; divergent `ABUT_W=0.6` (CS), `PMARG=1.6` (Plan) and Summary pixel literals removed; V5 single-source test PASS; 60/60 calc, 19/19 structural, 3/3 trace, 4/4 verbatim, `npm run build` exit 0)
 **Priority:** `high`
 
 **Scope:**

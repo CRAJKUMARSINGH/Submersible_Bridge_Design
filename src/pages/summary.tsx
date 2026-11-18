@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCalculations } from '../lib/calculations';
+import { useCalculations, DEFAULT_GEOMETRY } from '../lib/calculations';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '../components/ui/components';
 import { downloadDesignPDF } from '../lib/pdf-export';
 import { FileDown } from 'lucide-react';
@@ -8,8 +8,8 @@ function SectionDiagram() {
   const { inputs, results } = useCalculations();
 
   const deckTop = inputs.rtl + inputs.deckThickness;
-  const maxEl = Math.max(deckTop, inputs.hfl) + 0.6;
-  const minEl = results.fbl - 1.2;
+  const maxEl = Math.max(deckTop, inputs.hfl) + DEFAULT_GEOMETRY.ELEV_MARGIN_M;
+  const minEl = results.fbl - DEFAULT_GEOMETRY.ELEV_MARGIN_M;
   const range = maxEl - minEl;
 
   const w = 800, h = 280;
@@ -25,8 +25,13 @@ function SectionDiagram() {
   const yGL = gY(inputs.gl);
   const yFBL = gY(results.fbl);
 
-  // simplified cross-section: 2 abutments + N-1 piers
-  const ABUT = 18, PIER = 8, FEXT = 10;
+  // Simplified cross-section preview: 2 abutments + (N-1) piers. Screen widths are
+  // derived from the single geometry source (DEFAULT_GEOMETRY) so this preview
+  // cannot drift from the CS A-A / LS B-B / Plan views (Task 4 / V5).
+  const SS = 22.5;                                  // preview screen scale (px per metre)
+  const ABUT = DEFAULT_GEOMETRY.ABUT_W_M * SS;      // 0.8 m abutment
+  const PIER = DEFAULT_GEOMETRY.PIER_W_M * SS;      // 0.4 m pier
+  const FEXT = DEFAULT_GEOMETRY.FEXT_M * SS;        // 0.4 m footing extension
   const nPiers = inputs.numVents - 1;
   const ventPx = (dW - 2 * ABUT - nPiers * PIER) / inputs.numVents;
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCalculations } from '../lib/calculations';
+import { useCalculations, DEFAULT_GEOMETRY } from '../lib/calculations';
 import type { Inputs, ComputedResults } from '../lib/calculations';
 import { downloadDesignPDF } from '../lib/pdf-export';
 import { FileDown, Layers } from 'lucide-react';
@@ -110,13 +110,13 @@ function TitleBlock({ inp, title, drwNo, scale, sheet, total, svgW, svgH, tbH = 
 // ─── CROSS SECTION A-A ────────────────────────────────────────────────────────
 
 function CrossSectionSVG({ inp, res }: { inp: Inputs; res: ComputedResults }) {
-  const PIER_W = 0.4, ABUT_W = 0.6, FEXT = 0.4;
+  const PIER_W = DEFAULT_GEOMETRY.PIER_W_M, ABUT_W = DEFAULT_GEOMETRY.ABUT_W_M, FEXT = DEFAULT_GEOMETRY.FEXT_M;
   const nPiers = inp.numVents - 1;
   const totW = 2 * ABUT_W + nPiers * PIER_W + inp.numVents * inp.ventWidth;
   const deckTop = inp.rtl + inp.deckThickness;
 
-  const minEl = res.fbl - 0.8;
-  const maxEl = Math.max(inp.hfl, deckTop) + 0.7;
+  const minEl = res.fbl - DEFAULT_GEOMETRY.ELEV_MARGIN_M;
+  const maxEl = Math.max(inp.hfl, deckTop) + DEFAULT_GEOMETRY.ELEV_MARGIN_M;
   const elRange = maxEl - minEl;
 
   const SVG_W = 960, SVG_H = 620;
@@ -239,11 +239,11 @@ function CrossSectionSVG({ inp, res }: { inp: Inputs; res: ComputedResults }) {
 // ─── LONGITUDINAL SECTION B-B ─────────────────────────────────────────────────
 
 function LongitudinalSVG({ inp, res }: { inp: Inputs; res: ComputedResults }) {
-  const ABUT_W = 0.8, PIER_W = 0.4, FEXT = 0.4, APP = 3.0;
+  const ABUT_W = DEFAULT_GEOMETRY.ABUT_W_M, PIER_W = DEFAULT_GEOMETRY.PIER_W_M, FEXT = DEFAULT_GEOMETRY.FEXT_M, APP = DEFAULT_GEOMETRY.APP_M;
   const totL = inp.numSpans * inp.deckSpan;
   const worldL = totL + 2 * ABUT_W + 2 * APP;
   const deckTop = inp.rtl + inp.deckThickness;
-  const minEl = res.fbl - 0.8, maxEl = Math.max(inp.hfl, deckTop) + 0.7;
+  const minEl = res.fbl - DEFAULT_GEOMETRY.ELEV_MARGIN_M, maxEl = Math.max(inp.hfl, deckTop) + DEFAULT_GEOMETRY.ELEV_MARGIN_M;
 
   const SVG_W = 960, SVG_H = 620;
   const ML = 100, MR = 30, MT = 56, TITLE_H = 80;
@@ -362,10 +362,10 @@ function LongitudinalSVG({ inp, res }: { inp: Inputs; res: ComputedResults }) {
 // ─── PLAN VIEW ────────────────────────────────────────────────────────────────
 
 function PlanViewSVG({ inp }: { inp: Inputs }) {
-  const ABUT_W = 0.8, APP = 3.0;
+  const ABUT_W = DEFAULT_GEOMETRY.ABUT_W_M, APP = DEFAULT_GEOMETRY.APP_M;
   const totL = inp.numSpans * inp.deckSpan;
   const worldL = totL + 2 * ABUT_W + 2 * APP;
-  const PMARG = 1.6, worldW = inp.deckWidth + 2 * PMARG;
+  const PMARG = DEFAULT_GEOMETRY.PMARG_M, worldW = inp.deckWidth + 2 * PMARG;
 
   const SVG_W = 960, SVG_H = 580;
   const ML = 28, MR = 28, MT = 56, TITLE_H = 80;
@@ -374,7 +374,7 @@ function PlanViewSVG({ inp }: { inp: Inputs }) {
 
   const xLA = APP, xCS = xLA + ABUT_W, xCE = xCS + totL, xRA = xCE, xRApp = xRA + ABUT_W;
   const yTop = -inp.deckWidth / 2, yBot = inp.deckWidth / 2;
-  const bankW = inp.deckWidth * 1.6;
+  const bankW = inp.deckWidth * DEFAULT_GEOMETRY.BANK_MULT;
 
   const mx = (lx: number) => ML + lx * hS;
   const my = (wy: number) => MT + (wy + PMARG) * vS;
