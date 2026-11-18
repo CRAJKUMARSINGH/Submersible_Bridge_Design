@@ -150,6 +150,34 @@ export interface UpliftResults {
   thrustBlockSafetyRatio: number;
 }
 
+/** One discrete IRC:6-2000 Cl.202 load combination, with its own resultant and limit check. */
+export interface LoadCombinationCase {
+  id: string; // C1 … C12
+  description: string;
+  /** Net vertical resultant on the foundation base (kN). */
+  vertical: number;
+  /** Horizontal driving force (kN). */
+  horizontal: number;
+  /** Overturning moment about the foundation toe (kNm). */
+  overturningMoment: number;
+  /** Restoring moment about the foundation toe (kNm). */
+  restoringMoment: number;
+  /** FOS against sliding (Infinity when there is no horizontal driving force). */
+  fosSliding: number;
+  /** FOS against overturning (Infinity when there is no overturning moment). */
+  fosOverturning: number;
+  /** Vertical > 0 and both FOS thresholds satisfied. */
+  safe: boolean;
+}
+
+export interface LoadCombinationResults {
+  cases: LoadCombinationCase[];
+  /** Cl.202 combinations applicable to this site (the 12-case set less the exempt ones). */
+  requiredCount: number;
+  /** Combinations excluded as not required at this site (seismic at a Zone-I site). */
+  exemptIds: string[];
+}
+
 export interface StructuralResults {
   deadLoads: DeadLoadResults;
   earthPressure: EarthPressureResults;
@@ -158,6 +186,7 @@ export interface StructuralResults {
   reinforcement: ReinforcementResults;
   transient: TransientResults;
   uplift: UpliftResults;
+  loadCombinations: LoadCombinationResults;
   warnings: string[];
 }
 
@@ -589,6 +618,95 @@ export function computeStructural(inputs: Inputs, hydraulic: ComputedResults): S
     thrustBlockSafetyRatio,
   };
 
+  // ── Task 35 — IRC:6-2000 Cl.202 load-combination matrix ───────────────────
+  // A discrete state per Cl.202 combination: every case returns its own
+  // resultant (vertical / horizontal / overturning moment) and is checked
+  // against the same sliding and overturning thresholds as the governing case.
+  const windLiveHeight = num(inputs.windLiveHeight_m, 1.5);
+  const dragLeverArm = num(inputs.deckExposedHeight_m, 1.755); // drag acts on the exposed deck face
+  const siltLoad = hydraulic.wSilt;
+  const seismicActing = seismicRequired ? seismicForce : 0;
+  const buoyedDeadWeight = 0.9 * deadLoads.totalDeadLoad - upliftForce; // W_sub − buoyancy
+  const dragForce = hydraulic.fDragTotal;
+
+  const buildCase = (
+    id: string,
+    description: string,
+    vertical: number,
+    horizontal: number,
+    overturningMoment: number,
+  ): LoadCombinationCase => {
+    const restoringMoment = vertical * verticalResultantFromToe;
+    const fosSlidingCase =
+      horizontal > 0 ? (SLIDING_FRICTION_COEFFICIENT * vertical) / horizontal : Infinity;
+    const fosOverturningCase =
+      overturningMoment > 0 ? restoringMoment / overturningMoment : Infinity;
+    const safe =
+      vertical > 0 &&
+      (!Number.isFinite(fosSlidingCase) || fosSlidingCase >= FOS_SLIDING_MIN) &&
+      (!Number.isFinite(fosOverturningCase) || fosOverturningCase >= FOS_OVERTURNING_MIN);
+    return {
+      id,
+      description,
+      vertical,
+      horizontal,
+      overturningMoment,
+      restoringMoment,
+      fosSliding: fosSlidingCase,
+      fosOverturning: fosOverturningCase,
+      safe,
+    };
+  };
+
+  const brakingMoment = brakingForce * brakingHeight;
+  const windDeckMoment = windOnDeck * windLiveHeight;
+  const windLiveMoment = windOnLiveLoad * windLiveHeight;
+  const dragMoment = dragForce * dragLeverArm;
+  const dl = deadLoads.totalDeadLoad;
+  const ll = liveLoadReaction;
+
+  const combinationCases: LoadCombinationCase[] = [
+    buildCase('C1', 'DL + LL', dl + ll, 0, 0),
+    buildCase('C2', 'DL + LL + WL (wind)', dl + ll, windOnDeck + windOnLiveLoad, windDeckMoment + windLiveMoment),
+    buildCase('C3', 'DL + LL + W (water current)', dl + ll, dragForce, dragMoment),
+    buildCase('C4', 'DL + buoyancy / uplift', buoyedDeadWeight, 0, 0),
+    buildCase('C5', 'DL + LL + silt', dl + ll + siltLoad, 0, 0),
+    buildCase('C6', 'DL + LL + EQ (seismic)', dl + ll, seismicActing, 0),
+    buildCase('C7', 'DL + LL + braking / tractive', dl + ll, brakingForce, brakingMoment),
+    buildCase(
+      'C8',
+      'DL + LL + EP (earth pressure)',
+      dl + earthPressure.verticalComponent + ll,
+      earthPressure.horizontalComponent,
+      earthPressure.momentAboutToe,
+    ),
+    buildCase(
+      'C9',
+      'DL + LL + WL + W',
+      dl + ll,
+      windOnDeck + windOnLiveLoad + dragForce,
+      windDeckMoment + windLiveMoment + dragMoment,
+    ),
+    buildCase('C10', 'DL + LL + W + buoyancy', buoyedDeadWeight + ll, dragForce, dragMoment),
+    buildCase('C11', 'DL + LL + EQ + water', buoyedDeadWeight + ll, dragForce + seismicActing, dragMoment),
+    buildCase(
+      'C12',
+      'DL + LL submersible (inundation, Cl.202.3 — no stress increase)',
+      buoyedDeadWeight + ll + siltLoad,
+      dragForce + earthPressure.horizontalComponent,
+      dragMoment + earthPressure.momentAboutToe,
+    ),
+  ];
+
+  // Combinations carrying a seismic action are exempt where seismic design is not
+  // required (Zone-I) — E6 / IRC:6-2000 Cl.222.1.
+  const exemptIds = seismicRequired ? [] : ['C6', 'C11'];
+  const loadCombinations: LoadCombinationResults = {
+    cases: combinationCases,
+    requiredCount: combinationCases.length - exemptIds.length,
+    exemptIds,
+  };
+
   // ── Advisories ────────────────────────────────────────────────────────────
   if (!slidingSafe) {
     warnings.push(
@@ -629,6 +747,7 @@ export function computeStructural(inputs: Inputs, hydraulic: ComputedResults): S
     reinforcement,
     transient,
     uplift,
+    loadCombinations,
     warnings,
   };
 }

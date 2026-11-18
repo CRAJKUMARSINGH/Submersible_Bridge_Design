@@ -282,7 +282,24 @@ function buildChildren(inputs: Inputs, results: ComputedResults): (Paragraph | T
   a.push(sub('6.7 Tractive / braking effort'));
   a.push(kv('Braking force (kN)', f(s.transient.brakingForce)));
   a.push(sub('6.8 Load combination matrix (IRC 6:2000 Cl.202)'));
-  a.push(body('Combinations evaluated: (1) DL+LL, (2) DL+LL+WC, (3) DL+LL+EQ, (4) DL+hydrostatic+uplift+silt, etc. — see Appendix F for the full 10–12 combination sub-tables.'));
+  const combos = s.loadCombinations;
+  const fosText = (n: number) => (Number.isFinite(n) ? f(n) : '∞');
+  a.push(table(
+    ['ID', 'Combination', 'V (kN)', 'H (kN)', 'FOS sliding', 'FOS overturning', 'Status'],
+    combos.cases.map((c) => [
+      c.id,
+      c.description,
+      f(c.vertical, 1),
+      f(c.horizontal, 1),
+      fosText(c.fosSliding),
+      fosText(c.fosOverturning),
+      combos.exemptIds.includes(c.id) ? 'EXEMPT (Zone-I)' : passFail(c.safe),
+    ]),
+  ));
+  a.push(kv(
+    'Applicable Cl.202 combinations evaluated',
+    `${combos.requiredCount} of ${combos.requiredCount}${combos.exemptIds.length ? ` (${combos.exemptIds.join(', ')} exempt — seismic not required at this site)` : ''}`,
+  ));
 
   // ── 8. Section 7 — Abutment & Pier Design (§18.8) ─────────────────────────
   a.push(heading(WORD_TOP_LEVEL_SECTIONS[7]));

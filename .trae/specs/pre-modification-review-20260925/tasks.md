@@ -383,13 +383,13 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 - Any findings → materialize as pending tasks in this file BEFORE selecting next work
 
 **Resolution:**
-- **V1–V9 re-run in one consolidated self-verification pass.** Results: V1 unit **60/60**; V2 regression **25/25** (SHA-256 golden master, deterministic); V3 extraction **27/27 = 100 %**; V4 calculation **11/32 = 34.4 % → FAIL** (21 divergences); V5 drawing dimensional **PASS** (single-source geometry; CAD overlay BLOCKED — no reference DXF); V6 clause conformance **PARTIAL** (26/26 traceable, 12/26 = 46.2 % explicit, 22/26 = 84.6 % code-cited); V7 report completeness **41/41 = 100 %**; V8 Word conformance **13/13 headings + 34/34 fields**; V9 load combinations **3/11 = 27 % → FAIL**.
+- **V1–V9 re-run in one consolidated self-verification pass.** Results: V1 unit **60/60**; V2 regression **25/25** (SHA-256 golden master, deterministic); V3 extraction **27/27 = 100 %**; V4 calculation **11/32 = 34.4 % → FAIL** (21 divergences); V5 drawing dimensional **PASS** (single-source geometry; CAD overlay BLOCKED — no reference DXF); V6 clause conformance **PARTIAL** (26/26 traceable, 12/26 = 46.2 % explicit, 22/26 = 84.6 % code-cited); V7 report completeness **41/41 = 100 %**; V8 Word conformance **13/13 headings + 34/34 fields**; V9 load combinations **3/11 = 27 % → FAIL** (**since closed by Task 35** — discrete Cl.202 engine, re-run **10/10 = 100 %**).
 - **Findings materialised BEFORE further work** (per the Task 19 scope rule): V4 → **Tasks 28–33**, V6 → **Task 34**, V9 → **Task 35**.
-- **V10 is BLOCKED.** The spec §14.5 deliverables cannot be signed while V4/V6/V9 are open — a PE hand-calc sign-off on a design set the app does not yet reproduce would be premature. No variance has been approved.
+- **V10 is BLOCKED.** The spec §14.5 deliverables cannot be signed while V4 and V6 are open — a PE hand-calc sign-off on a design set the app does not yet reproduce would be premature. V9 was closed by Task 35. No variance has been approved.
 
 **Evidence:** harnesses `scripts/v2-regression.test.ts` (+ `scripts/v2-golden-checksums.json`), `scripts/v6-clause-conformance.test.ts` (+ `data/clause-traceability-matrix.csv`), `scripts/v7-report-completeness.test.ts`, `scripts/v9-load-combinations.test.ts` (+ `data/load-combination-coverage.csv`); package.json scripts `test:v2-regression`, `test:v4`, `test:v6-clause`, `test:v7-report`, `test:v9-combos`. Full pass/fail matrix, evidence log, NC-1…NC-8 and the §14.5 checklist are in [`review.md`](file:///e:/Rajkumar/Submersible_Bridge_Design/.trae/specs/pre-modification-review-20260925/review.md).
 
-**Gate verdict:** **NOT PASSED** — V4 and V9 fail their criteria and V6 is partial. Task stays `blocked` until Tasks 28–35 are closed (or approved as variances) and an independent reviewer + qualified PE sign off.
+**Gate verdict:** **NOT PASSED** — V4 fails its criterion and V6 is partial (V9 closed by Task 35). Task stays `blocked` until Tasks 28–34 are closed (or approved as variances) and an independent reviewer + qualified PE sign off.
 
 ---
 
@@ -645,7 +645,7 @@ Explicit-clause rate = **12/26 = 46.2 %**; code-cited rate (EXACT+GENERAL) = **2
 **Acceptance:** raise the explicit-clause rate (or the code-cited rate) by stamping clause numbers that are **present in the evidence** — AFFLUX → IRC SP:13-2004 orifice sub-clause, LACEY_P → Lacey 1930, W_SELF → IRC:6-2000 dead-load clause, Q_WEIR → broad-crested weir clause. Source-silent items stay flagged as **PE to supply**; nothing is stamped without evidence.
 
 ### Task 35: Implement the IRC 6:2000 Cl.202 Load-Combination Matrix (V9 finding)
-**Status:** `pending`
+**Status:** `completed` (2026-11-19 — discrete Cl.202 combination engine + Word §6.8 table; V9 **10/10 = 100 %**, criterion ≥10/12 met)
 **Priority:** `high`
 **Scope:** V9 (`npm run test:v9-combos`) shows the engine does **not** enumerate the Cl.202 combination set. Applying [`data/load-combination-coverage.csv`](file:///e:/Rajkumar/Submersible_Bridge_Design/data/load-combination-coverage.csv) against the live `StructuralResults`: **3/11 required combinations fully evaluated = 27 %** (criterion ≥10/12).
 
@@ -655,5 +655,14 @@ Explicit-clause rate = **12/26 = 46.2 %**; code-cited rate (EXACT+GENERAL) = **2
 - NOT-REQUIRED (1): C6 seismic (Zone-I exempt, E6).
 
 **Acceptance:** implement a discrete combination state per Cl.202 (each returning its own resultant + limit check) so ≥10/12 are evaluated with results; surface them in the report (Word Section 6 / PDF Sheet 4) and re-run `test:v9-combos`. Note the current Word Section 6.8 narrative already claims "10–12 combination sub-tables" — that claim must be made true or removed.
+
+**Resolution (2026-11-19):**
+- **Engine** — `src/lib/structural.ts` gains `LoadCombinationCase` / `LoadCombinationResults` types and a discrete-state block in `computeStructural()`. Each of the 12 Cl.202 cases returns its own **net vertical resultant, horizontal driving force, overturning moment, restoring moment, FOS against sliding (μ = 0.5) and FOS against overturning**, plus a `safe` flag checked against the single-case thresholds (`FOS_SLIDING_MIN` 1.5, `FOS_OVERTURNING_MIN` 2.0). The block is **purely additive** — no existing constant or previously-computed value changes.
+- **Exemptions** — with a Zone-I site (seismic not required, E6 / IRC:6-2000 Cl.222.1) **C6** and **C11** carry a seismic action and are returned as `exemptIds`; `requiredCount` excludes them from the denominator.
+- **Report** — Word §6.8 now renders the real 12-row combination table (ID, description, V, H, FOS sliding, FOS overturning, status) plus the applicable-combination count, replacing the former "see Appendix F for the full 10–12 combination sub-tables" claim. (PDF Sheet 4 unchanged — the acceptance's "Word Section 6 / PDF Sheet 4" is satisfied on the Word path.)
+- **Tracker matrix** — `data/load-combination-coverage.csv` re-pointed: **10 EVALUATED** (`loadCombinations.cases.<n>.*`), 0 PARTIAL, 0 NOT-EVALUATED, **2 NOT-REQUIRED** (C6, C11).
+
+**Evidence:** `npm run test:v9-combos` → **EVALUATED 10, PARTIAL 0, NOT-EVALUATED 0, NOT-REQUIRED 2**; required 10 (of 12), **10/10 = 100 %** vs criterion ≥10/12 → **PASS**. `npm run test:v8-word` PASS (34/34 field values; §6.8 table renders). `npm run typecheck` exit 0; unit 60/60; structural 19/19; V3/V6/V7/verbatim/formula-trace PASS; `npm run build` exit 0.
+- **V2 note:** the additive `loadCombinations` field changes the SHA-256 of every canonical `ComputedResults`, so `scripts/v2-golden-checksums.json` was **regenerated**. Regeneration was justified before the fact: stripping `loadCombinations` from each set reproduces all **25/25** prior master hashes exactly, proving the drift is purely additive (no numeric change to any pre-existing result).
 
 ---
