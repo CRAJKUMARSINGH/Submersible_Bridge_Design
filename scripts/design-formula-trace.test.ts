@@ -31,8 +31,8 @@ const sampleResults: ComputedResults = {
   sanityWarnings: [],
   wSelf: 55.17,
   wSilt: 10.8,
-  wLive: 554,
-  totalVerticalLoad: 158.303,
+  wLive: 478.41,
+  totalVerticalLoad: 145.705,
   fDrag: 0.052,
   fUplift: 40.5,
   fAnchor: -14.67,
@@ -45,8 +45,8 @@ test('formula trace includes the complete current app calculation set', () => {
   assert.equal(new Set(rows.map((row) => row.id)).size, rows.length);
   assert.ok(rows.every((row) => row.equation.length > 0 && row.result.length > 0));
   const liveLoad = rows.find((row) => row.id === 'W_LIVE')!;
-  assert.match(liveLoad.equation, /app constant/);
-  assert.match(liveLoad.substitution, /554 kN/);
+  assert.match(liveLoad.equation, /axle-table/);
+  assert.match(liveLoad.substitution, /478 kN/);
 });
 
 test('changing an input changes its live substitution and reported result without changing the formula', () => {

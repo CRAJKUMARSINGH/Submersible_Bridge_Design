@@ -701,7 +701,7 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults): jsPDF
     head: [['Parameter', 'Symbol', 'Formula', 'Value', 'Unit']],
     body: [
       ['Velocity at HFL', 'V_HFL', 'Q / A_HFL', f(results.velocityHFL, 3), 'm/s'],
-      ["Afflux (Molesworth's formula)", 'h_f', '(V²/17.88+0.015)×((A_HFL/A_vent)²-1)', f(results.hAfflux, 4), 'm'],
+      ["Afflux (Molesworth's formula - indicative)", 'h_f', '(V²/17.88+0.015)×((A_HFL/A_vent)²-1)', f(results.hAfflux, 4), 'm'],
       ['Lacey Regime Perimeter', 'P', '4.75 × √Q', f(results.laceyPerimeter, 3), 'm'],
       ['Lacey Silt Factor', 'f', 'Site data (fine sand≈0.6, coarse≈1.5)', f(inputs.siltFactor, 2), '—'],
       ['Lacey Normal Scour Depth', 'R', '0.473 × (Q/f)^(1/3)', f(results.laceyScourDepth, 3), 'm'],
@@ -729,7 +729,7 @@ export function exportDesignPDF(inputs: Inputs, results: ComputedResults): jsPDF
   }
 
   doc.setFontSize(6); doc.setFont('helvetica', 'italic'); doc.setTextColor(100);
-  doc.text('Ref: Lacey (1930) regime scour equations, Molesworth afflux formula, IRC SP:82-2008 Cl.6', 12, yRef);
+  doc.text("Ref: Lacey (1930) regime scour, IRC SP:82-2008 Cl.6. Afflux method of record: IRC SP:13-2004 Orifice formula (0.131 m).", 12, yRef);
   doc.setTextColor(0);
   titleBlock(doc, inputs, 'HYDRAULIC DESIGN — STEP 2', 'CS/CALC/02', '—', '3', '9');
   pageFooterDisclaimer(doc);

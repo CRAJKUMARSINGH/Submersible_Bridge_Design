@@ -299,8 +299,29 @@ export function computeResults(inputs: Inputs): ComputedResults {
   // ─── STEP 3 ───────────────────────────────────────────────────────────────
   const wSelf = (inputs.concreteDensity * 9.81 * inputs.deckWidth * inputs.deckSpan * inputs.deckThickness) / 1000;
   const wSilt = inputs.siltLoadDeck * inputs.deckWidth * inputs.deckSpan;
-  const wLive = inputs.liveLoadType === "IRC Class 70R" ? 900 : inputs.liveLoadType === "IRC Class AA" ? 700 : 554;
-  /* [PLACEHOLDER E1 — IRC Class 70R wLive=900kN is DEFAULT ESTIMATE pending E1 decision (IRC 6 axle table). RED-FLAGGED — OVERRIDE.] */
+
+  // IRC Class A live load — axle-table derivation (E1; IRC:6-2000 Cl.207.1.3 & 207.4).
+  // Replaces the previous unsourced 554 kN constant. Wheel point loads from the Class A
+  // train placed on the deck slab plus the distributed load on the remaining loaded area
+  // (source: TYPE_document.md L274-280):
+  //   wheels = 4 × 57.00 kN (11.4 t axle) + 2 × 34.00 kN (6.8 t axle) = 296.00 kN
+  //   UDL    = (5.00 live + 2.25 silt) kN/m² × (0.45 + 3.25) m × L_deck = 182.41 kN
+  //                                                        total      = 478.41 kN
+  const CLASS_A_WHEEL_POINT_LOADS_kN = 4 * 57.0 + 2 * 34.0;
+  const CLASS_A_LOADED_UDL_kN_m2 = 5.0 + 2.25;
+  const CLASS_A_LOADED_WIDTH_m = 0.45 + 3.25;
+  const classALiveLoad =
+    CLASS_A_WHEEL_POINT_LOADS_kN +
+    CLASS_A_LOADED_UDL_kN_m2 * CLASS_A_LOADED_WIDTH_m * (inputs.deckSlabLength ?? 6.8);
+
+  // IRC:6-2000 Cl.204 — standard vehicle classes. Class AA and Class 70R are both
+  // governed by the 700 kN tracked vehicle for these short spans; Class A governs
+  // otherwise (no source-supported value exists for any other class).
+  const wLive =
+    inputs.liveLoadType === "IRC Class AA" || inputs.liveLoadType === "IRC Class 70R"
+      ? 700
+      : classALiveLoad;
+
   const totalVerticalLoad = wSelf + wSilt + (wLive / inputs.numSpans);
 
   const fDrag = (inputs.dragCoefficient * 0.5 * inputs.waterDensity * Math.pow(velocityHFL, 2) * (inputs.deckWidth * inputs.deckThickness)) / 1000;

@@ -94,7 +94,9 @@ const scourSafe       = fbl < (inputs.gl - 0.5);
 
 const wSelf  = (inputs.concreteDensity * 9.81 * inputs.deckWidth * inputs.deckSpan * inputs.deckThickness) / 1000;
 const wSilt  = inputs.siltLoadDeck * inputs.deckWidth * inputs.deckSpan;
-const wLive  = inputs.liveLoadType === 'IRC Class AA' ? 700 : 554;
+const wLive  = inputs.liveLoadType === 'IRC Class AA'
+  ? 700
+  : (4 * 57.0 + 2 * 34.0) + (5.0 + 2.25) * (0.45 + 3.25) * 6.8; // IRC Class A = 478.41 kN
 const totalVerticalLoad = wSelf + wSilt + wLive / inputs.numSpans;
 const fDrag  = (inputs.dragCoefficient * 0.5 * inputs.waterDensity * Math.pow(velocityHFL, 2) * (inputs.deckWidth * inputs.deckThickness)) / 1000;
 const fUplift = (inputs.waterDensity * 9.81 * inputs.deckWidth * inputs.deckSpan * inputs.deckThickness) / 1000;

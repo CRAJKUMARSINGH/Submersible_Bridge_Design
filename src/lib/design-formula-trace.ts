@@ -154,7 +154,7 @@ export function buildDesignFormulaTrace(inputs: Inputs, results: ComputedResults
     },
     {
       id: 'W_LIVE', section: 'Step 3 — Structural',
-      equation: 'W_live = app constant: 554 kN (Class A), 700 kN (Class AA)',
+      equation: 'W_live = IRC:6-2000 Cl.207.1.3/207.4 axle-table live load (Class A = 296.00 wheels + 7.25×3.70×L_deck UDL = 478.41 kN; Class AA/70R = 700 kN)',
       substitution: `${inputs.liveLoadType} → ${n(results.wLive, 0)} kN`,
       result: n(results.wLive, 0), unit: 'kN', prototypeReference: structuralRef,
     },

@@ -19,7 +19,7 @@ IN-17,step2_hydraulic,ventWidth,m,6.00,L4817,EXACT
 IN-18,step2_hydraulic,ventHeight,m,(not directly stated; vented area = 26.21 m2 total),L4825,NOT-STATED
 IN-19,step2_hydraulic,approachVelocity,m/s,2.58,L4805,EXACT
 IN-20,step2_hydraulic,siltFactor,-,2.00,L4913,EXACT
-IN-21,step2_hydraulic,cdVent,-,4.10,L4801,EXACT
+IN-21,step2_hydraulic,cdVent,-,(not stated in reference),- ,NOT-STATED
 IN-22,step3_structural,deckWidth,m,6.00,L51,EXACT
 IN-23,step3_structural,deckSpan,m,6.00,L48,EXACT
 IN-24,step3_structural,deckThickness,m,0.480,L52,EXACT
@@ -27,7 +27,7 @@ IN-25,step3_structural,numSpans,-,3,L4817,EXACT
 IN-26,step3_structural,liveLoadType,-,IRC Class A,L230,EXACT
 IN-27,step3_structural,waterDensity,kg/m3,1000 (10 kN/m3),L100,EXACT
 IN-28,step3_structural,concreteDensity,kg/m3,2500 (25 kN/m3 RCC),L93,EXACT
-IN-29,step3_structural,dragCoefficient,-,4.10,L4801,EXACT
+IN-29,step3_structural,dragCoefficient,-,"(not stated; drag/lift per IRC SP:82-2008 without a numeric Cd)",L31-32,NOT-STATED
 IN-30,step3_structural,siltLoadDeck,kN/m2,2.25,L254,EXACT
 IN-31,step3_structural,sbc_kN_m2,kN/m2,147.15 (15 t/m2),L113,EXACT
 IN-32,step3_structural,fck_pcc,N/mm2,20,L114,EXACT

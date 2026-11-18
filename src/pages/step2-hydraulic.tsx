@@ -169,7 +169,7 @@ export default function Step2Hydraulic() {
 
           <Card>
             <CardHeader>
-              <CardTitle>2b. Afflux (Molesworth's Formula)</CardTitle>
+              <CardTitle>2b. Afflux (Molesworth's formula — indicative)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -185,6 +185,10 @@ export default function Step2Hydraulic() {
               <div className="rounded-md bg-background/50 border border-card-border p-3 text-xs font-mono text-muted-foreground">
                 A_HFL/A_vent = {results.aHFL > 0 ? (results.aHFL / (results.aVent || 1)).toFixed(3) : '—'}  |  V_HFL = {results.velocityHFL.toFixed(3)} m/s  |  h_afflux = {results.hAfflux.toFixed(4)} m
               </div>
+              <p className="text-xs text-muted-foreground">
+                Note: this single-step Molesworth estimate is indicative only. The design of record
+                adopted the IRC SP:13-2004 <strong>Orifice formula</strong> (afflux = 0.131 m) — see E2.
+              </p>
             </CardContent>
           </Card>
 

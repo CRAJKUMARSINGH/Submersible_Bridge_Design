@@ -25,9 +25,11 @@ export const SLIDING_FRICTION_COEFFICIENT = 0.5;
 export const NO_TENSION_LIMIT = 1.0; // 6e/b must be < 1 (IRC:78-2000 Cl.706.3.3.1)
 export const BAR_DIAMETER_MM = 12; // assumed bar diameter (stated per Task 15)
 export const REINFORCEMENT_COVER_MM = 50; // source "Cover to reinforcement = 50 mm"
-export const FCK_VRCC = 25; // M25 VRCC (beam / abutment)
-export const FCK_PCC = 20; // M20 PCC
-export const STEEL_FY = 415; // Fe415
+export const FCK_VRCC = 25; // M25 VRCC (beam / abutment) — E18
+export const FCK_PCC = 20; // M20 PCC — E18
+export const STEEL_FY = 415; // Fe415 — E18
+// NOTE (E18 / Task 22): M15 appears only in the source bearing-pressure tables and is
+// deliberately NOT used for any design check — design uses M20 (PCC) / M25 (VRCC).
 export const MIN_STEEL_SLAB_PCT = 0.12; // IS456 Cl.26.5.2.1 (slab/abutment stem)
 export const MIN_STEEL_FOOTING_PCT = 0.15; // IS456 Cl.26.5.2.1 (footings)
 export const KG_PER_M3_TO_KN_PER_M3 = 100;

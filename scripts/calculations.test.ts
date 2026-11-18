@@ -168,8 +168,10 @@ export function calcWSilt(siltLoadDeck: number, deckW: number, deckSpan: number)
   return siltLoadDeck * deckW * deckSpan;
 }
 
-export function calcWLive(liveLoadType: string): number {
-  return liveLoadType === "IRC Class AA" ? 700 : 554;
+export function calcWLive(liveLoadType: string, deckSlabLength = 6.8): number {
+  if (liveLoadType === "IRC Class AA" || liveLoadType === "IRC Class 70R") return 700;
+  // IRC Class A axle-table derivation → 478.41 kN at L_deck = 6.8 m (IRC:6-2000 Cl.207.1.3/207.4)
+  return (4 * 57.0 + 2 * 34.0) + (5.0 + 2.25) * (0.45 + 3.25) * deckSlabLength;
 }
 
 export function calcFDrag(Cd: number, ρw: number, V: number, deckW: number, deckT: number): number {
@@ -472,18 +474,17 @@ test("S3-02 wSelf deckSpan=0 → 0", () => {
   assertExact(calcWSelf(2500, 7.5, 0, 0.35), 0);
 });
 
-test("S3-03 wLive IRC Class A → 554 exact", () => {
-  assertExact(calcWLive("IRC Class A"), 554);
+test("S3-03 wLive IRC Class A → 478.41 kN (axle-table, IRC:6-2000 Cl.207.1.3/207.4)", () => {
+  assertApprox(calcWLive("IRC Class A"), 478.41, 1e-6);
 });
 
 test("S3-04 wLive IRC Class AA → 700 exact", () => {
   assertExact(calcWLive("IRC Class AA"), 700);
 });
 
-test("S3-05 wLive unknown/other (e.g. 70R unsupported) → 554 fallback", () => {
-  // Actual code only supports A | AA; anything else falls to 554
-  assertExact(calcWLive("IRC Class 70R"), 554);
-  assertExact(calcWLive("anything"), 554);
+test("S3-05 wLive 70R → 700 kN; unknown class falls back to Class A 478.41 kN", () => {
+  assertExact(calcWLive("IRC Class 70R"), 700); // IRC:6-2000 Cl.204 tracked vehicle
+  assertApprox(calcWLive("anything"), 478.41, 1e-6);
 });
 
 test("S3-06 wSilt siltLoad=1.5 deckW=7.5 S=5.0 → 56.25 exact", () => {
@@ -599,18 +600,20 @@ test("S3-21 Class A totalVertical = wSelf + wSilt + wLive_A/numSpans", () => {
   });
   const wS = calcWSelf(2500, 7.5, 5.0, 0.35);
   const wSi = calcWSilt(1.2, 7.5, 5.0);
-  const total = wS + wSi + 554 / 6;
+  const total = wS + wSi + calcWLive("IRC Class A") / 6;
   assertApprox(s3.totalVerticalLoad, total, 1e-9);
 });
 
-test("S3-22 Class AA load 700 > Class A 554", () => {
+test("S3-22 Class AA load 700 > Class A 478.41", () => {
   assertTrue(calcWLive("IRC Class AA") > calcWLive("IRC Class A"));
 });
 
-test("S3-23 70R (unsupported) falls to 554; AA is larger than 554", () => {
-  const w70R = calcWLive("IRC Class 70R"); // 554 per actual code
-  const wAA = calcWLive("IRC Class AA");   // 700
-  assertTrue(wAA > w70R);
+test("S3-23 70R and AA are both 700 kN; Class A is the smallest class load", () => {
+  const w70R = calcWLive("IRC Class 70R"); // 700 kN tracked vehicle (IRC:6-2000 Cl.204)
+  const wAA = calcWLive("IRC Class AA");   // 700 kN tracked vehicle
+  assertExact(w70R, 700);
+  assertExact(wAA, 700);
+  assertTrue(wAA > calcWLive("IRC Class A"));
 });
 
 test("S3-24 scourSafe boolean branch 2 (via calcStep2 integrated)", () => {

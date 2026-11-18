@@ -1,4 +1,4 @@
-a then b# TASKS — Pre-Modification Review Follow-up (Post-Approval)
+# TASKS — Pre-Modification Review Follow-up (Post-Approval)
 
 **Spec:** [spec.md](file:///e:/Rajkumar/Submersible_Bridge_Design/.trae/specs/pre-modification-review-20260925/spec.md)
 **Decision:** Option C (REDESIGN) recommended per [Section 16](file:///e:/Rajkumar/Submersible_Bridge_Design/.trae/specs/pre-modification-review-20260925/spec.md#L16)
@@ -76,8 +76,10 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Phase C.1 — REPAIR (Data bugs + safety flags)
 
 ### Task 3: Fix cdVent 4.1 Data Error in 25-set CSV (R2 / M6)
-**Status:** `pending` (blocked by C.0 only for final QA check; schema check can begin)
+**Status:** `pending` (T21 re-audit 2026-11-18: premise unsupported — see note; validator + CSV audit still to do)
 **Priority:** `high`
+
+**Re-audit note (T21, 2026-11-18):** `test-variables-25-sets.csv` shows **cdVent = 0.9 for all 25 sets** — no set carries 4.1. The "sets 02/03/08/11/14/19/21 = 4.1" premise is therefore **not confirmed** by the file of record. The stray `4.10` in the source document is the surplus-weir discharge coefficient (not a cdVent). Recommend re-scoping this task to: add the `cdVent ∈ [0.6, 1.1]` validator and a fresh scan of all 25 sets before any value is changed.
 
 **Scope:**
 - Audit `test-variables-25-sets.csv` sets 02, 03, 08, 11, 14, 19, 21 → cdVent column value = 4.1
@@ -362,19 +364,31 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Findings Materialized from C.0 Resolution (Task 1)
 
 ### Task 20: Replace Unsourced wLive 554/700 kN (E1 finding)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — axle-table derivation replaces the hardcoded constants; all 5 mirror sites in lockstep)
 **Priority:** `high`
 **Scope:** Reference document derives total live load = 478.41 kN (wheel 296.00 + UDL 22.185 + 160.225) with critical reaction 295.77 kN. Replace hardcoded `wLive=554/700` in `calculations.tsx` with axle-table derivation (IRC:6-2000 Cl.207.1.3/207.4) + impact factor 4.5/(6+L)=0.352 (Cl.211, 50% below bed block = 0.176).
 
+**Resolution:** Class A is now derived, not hardcoded — `4 × 57.0 + 2 × 34.0 = 296.00 kN` wheels + `(5.0+2.25) × (0.45+3.25) × L_deck` UDL = **478.41 kN** (L_deck = 6.8 m). Class AA / 70R remain 700 kN. Anti-drift: the same derivation is mirrored in `scripts/src/generate-sample-pdf.ts`, `scripts/calculations.test.ts`, `src/lib/design-formula-trace.ts` (+ its test), and the class labels in `src/pages/step3-structural.tsx`.
+**Evidence:** `calculations.test.ts` 58/58; S3-03 asserts Class A ≈ 478.41 (±1e-6), S3-04/05 Class AA/70R = 700. `npm run typecheck` exit 0.
+
 ### Task 21: Correct Afflux Formula Label + Drag Cd (E2/E5 findings)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — label corrected; E5/IN-21/IN-29 re-audited; Task 3 premise found unsupported)
 **Priority:** `high`
 **Scope:** (a) Afflux is the **orifice formula** (0.131 m), not "Molesworth's" — fix label in `calculations.tsx` L183. (b) Reference Cd = **4.10** (Irrigation authorities), not 2.0 — correct `pdf-export.ts` comment and any Cd default. (c) Re-audit Task 3: cdVent=4.1 appears **correct** per source, so revisit the "data error" premise before "fixing".
 
+**Resolution:**
+- (a) `step2-hydraulic.tsx` card retitled "Afflux (Molesworth's formula — indicative)" with a note that the method of record is the IRC SP:13-2004 **Orifice formula** (afflux = 0.131 m); same relabel in `pdf-export.ts` (L704) + reference line (L732).
+- (b) **Re-audit result — prior attribution was wrong.** The reference states drag/lift "per IRC SP:82-2008" with **no numeric drag Cd**. `4.10` at `TYPE_document.md` L4801 is the **surplus-weir discharge coefficient** (q = Cd·L·h^1.5), neither a drag coefficient nor the ventway `cdVent`. Corrected E5 in `data/engineering-decisions-e1-e20.csv` (confidence high→medium) and marked IN-21 / IN-29 `NOT-STATED` in `data/golden-reference-set.csv`. Tool default `dragCoefficient = 2.0` (blunt body) retained.
+- (c) `test-variables-25-sets.csv` — **all 25 sets carry cdVent = 0.9**; no 4.1 present. The Task 3 "cdVent=4.1 is a data error" premise is **unsupported by this file**. See Task 3 note.
+
+**Evidence:** `pdf-export.ts` L704/L732; `step2-hydraulic.tsx`; E5/IN-21/IN-29 rows updated.
+
 ### Task 22: Add Bearing-Pressure/Design Grade Split (E18 finding)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — split already modeled in Task 15; M15-exclusion now documented)
 **Priority:** `medium`
 **Scope:** Model separate grades — fck_PCC = 20 (M20), fck_VRCC = 25 (M25), fy = 415 (Fe415). M15 appears only in bearing-pressure tables; do not use for design checks.
+
+**Resolution:** The grade split was already modeled in Task 15 — `FCK_VRCC = 25`, `FCK_PCC = 20`, `STEEL_FY = 415` in `src/lib/structural.ts`. Task 22 adds the explicit E18 note that **M15 appears only in the source bearing-pressure tables and is not used for any design check** (design uses M20 PCC / M25 VRCC). No M15 constant exists in the design code path.
 
 ---
 

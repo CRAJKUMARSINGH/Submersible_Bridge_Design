@@ -51,9 +51,9 @@ export default function Step3Structural() {
                   value={inputs.liveLoadType}
                   onChange={e => updateInput("liveLoadType", e.target.value as "IRC Class A" | "IRC Class AA" | "IRC Class 70R")}
                 >
-                  <option value="IRC Class A">IRC Class A (554 kN)</option>
+                  <option value="IRC Class A">IRC Class A (478.41 kN)</option>
                   <option value="IRC Class AA">IRC Class AA (700 kN)</option>
-                  <option value="IRC Class 70R">IRC Class 70R (900 kN est.)</option>
+                  <option value="IRC Class 70R">IRC Class 70R (700 kN)</option>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
