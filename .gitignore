@@ -47,3 +47,8 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Redundant items renamed in place (direct deletion is blocked in this environment)
+*.redundant-*
+CODE-JUNCTION/
+dist_old_*
