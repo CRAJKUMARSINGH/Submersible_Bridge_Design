@@ -25,9 +25,10 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 ## Phase C.0 — GAP RESOLUTION (Blocking, no code changes)
 
 ### Task 1: Confirm Engineering Decisions E1–E20 (Section 13.1)
-**Status:** `pending`
+**Status:** `completed` (2026-11-18 — all 20 resolved from PE-authored reference document)
 **Priority:** `high`
 **Depends On:** None (user input required)
+**Resolution:** [`data/engineering-decisions-e1-e20.csv`](file:///e:/Rajkumar/Submersible_Bridge_Design/data/engineering-decisions-e1-e20.csv) — each item carries clause reference + source-line evidence (from `data/extracted/TYPE_document.md`). 17/20 fully source-cited; E2/E9/E10 cite the governing IRC code with clause-number stamping pending.
 **Scope:** User/PE provides clause references and numeric values for:
   - E1 wLive Class A/AA/70R source derivation (axle tables, lane factors, impact %)
   - E2 Afflux formula IRC SP:82 clause reference
@@ -355,6 +356,25 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
   - Code-clause trace final audit
 - review.md artifact with pass/fail/blocked per checkpoint (per TRAE-spec-mode Review rules)
 - Any findings → materialize as pending tasks in this file BEFORE selecting next work
+
+---
+
+## Findings Materialized from C.0 Resolution (Task 1)
+
+### Task 20: Replace Unsourced wLive 554/700 kN (E1 finding)
+**Status:** `pending`
+**Priority:** `high`
+**Scope:** Reference document derives total live load = 478.41 kN (wheel 296.00 + UDL 22.185 + 160.225) with critical reaction 295.77 kN. Replace hardcoded `wLive=554/700` in `calculations.tsx` with axle-table derivation (IRC:6-2000 Cl.207.1.3/207.4) + impact factor 4.5/(6+L)=0.352 (Cl.211, 50% below bed block = 0.176).
+
+### Task 21: Correct Afflux Formula Label + Drag Cd (E2/E5 findings)
+**Status:** `pending`
+**Priority:** `high`
+**Scope:** (a) Afflux is the **orifice formula** (0.131 m), not "Molesworth's" — fix label in `calculations.tsx` L183. (b) Reference Cd = **4.10** (Irrigation authorities), not 2.0 — correct `pdf-export.ts` comment and any Cd default. (c) Re-audit Task 3: cdVent=4.1 appears **correct** per source, so revisit the "data error" premise before "fixing".
+
+### Task 22: Add Bearing-Pressure/Design Grade Split (E18 finding)
+**Status:** `pending`
+**Priority:** `medium`
+**Scope:** Model separate grades — fck_PCC = 20 (M20), fck_VRCC = 25 (M25), fy = 415 (Fe415). M15 appears only in bearing-pressure tables; do not use for design checks.
 
 ---
 
