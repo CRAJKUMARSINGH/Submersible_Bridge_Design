@@ -9,6 +9,14 @@
  *   data/extracted/TYPE_document.md  — "Design of Abutments for causeway"
  *   IRC:6-2000, IRC:78-2000, IRC SP:82-2007, IRC:SP20-2002, IS 456 (SP:16)
  *
+ * Design method (E11 — RESOLVED 2026-11-18, Task 27): the source designs the RCC
+ * members by LIMIT STATE (IS 456 + SP:16) — d = Mu / 0.133·fck·b (L1787), Mu/bd²
+ * with SP:16 Table 3 (L1793–1796), factored shear vs IS 456 Table 20 (L1809–1813)
+ * and IS 456 Table 19 (L1817–1818). IRC:6-2000 Cl.202.3 (L148–149) is the
+ * "no increase in permissible stresses" rule for the submersible (inundation) load
+ * combination; it governs permissible-SERVICE-stress checks only and does not make
+ * member design working stress. This module therefore stays limit state (1.5).
+ *
  * The document works in kN/m³ (RCC 25, PCC 24, backfill 18, water 10) whereas the
  * app `Inputs` carry concrete / water density in kg/m³ (2500, 1000). Dividing the
  * kg/m³ input by 100 reproduces the document's exact kN/m³ unit weights.

@@ -1,5 +1,12 @@
 # Post-c5faa6f verification report
 
+> **SUPERSEDED (2026-11-18).** This report is a point-in-time snapshot as of commit `c5faa6f`.
+> Its three BLOCKED items have since been resolved: **E3** normal-scour coefficient → Task 25;
+> **E11** design method and **E2** afflux clause → Task 27; **E9/E10** clause numbers reclassified
+> as source-silent (PE to supply). See `.trae/specs/pre-modification-review-20260925/tasks.md`
+> Tasks 25–27 and `data/engineering-decisions-e1-e20.csv`. The BLOCKED section below is
+> historical and no longer reflects the repository state.
+
 Produced in response to `CODE-JUNCTION/Submersible_Bridge_Design_Consolidated_Patch_v2`
 (`TRAE_PROMPT.md` step 6, `REMAINING_TASKS.md`, `ACCEPTANCE_CHECKLIST.md`).
 

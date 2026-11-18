@@ -405,7 +405,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 
 **BLOCKED pending qualified PE review (deliberately NOT changed):**
 - **E3 Lacey coefficient** — **CLOSED 2026-11-18 by Task 25**: the reference form `1.34·(q²/f)^⅓` (q = discharge per metre width, `TYPE_document.md` L4915) has been adopted in place of the classic `0.473·(Q/f)^⅓`.
-- **E11 design method** — source is working-stress (M20 σ_cc = 5, σ_bt = −2.8 N/mm², IRC:6-2000 Cl.202.3); `structural.ts` reinforcement uses limit-state IS456 (1.5 factor). Methods must not be switched unilaterally.
+- **E11 design method** — **CLOSED 2026-11-18 by Task 27**: the source is limit state for member design (SP:16 Table 3 / IS 456 Tables 19 & 20) and IRC:6-2000 Cl.202.3 is a service-stress rule, so there is no WSD-vs-LSM conflict. `structural.ts` is unchanged.
 
 **Verification:** `npm run typecheck` exit 0; tests 58/58 + 19/19 + 3/3 + 2/2 + 1/1 + 4/4.
 
@@ -426,7 +426,7 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 
 **Not done (per bundle rules — requires explicit approval):** no commit, no push, no deletion.
 
-**Carried-forward blockers (E3 Lacey coefficient closed 2026-11-18 by Task 25):** E11 WSD-vs-LSM method; E2/E9/E10 clause-number stamping.
+**Carried-forward blockers (2026-11-18 — E3 closed by Task 25; E11 + E2 closed by Task 27):** none code-blocking remain. E9/E10 clause numbers are **SOURCE-SILENT** — the reference cites IRC SP:82-2007 only in general terms (`L35-36`), so no clause can be stamped without fabrication; logged as PE-to-supply.
 
 ---
 
@@ -472,6 +472,32 @@ Every task below has a prerequisite: **Phase C.0 items signed off by PE/user** (
 **Residual evidence discrepancy (not a code defect):** `L4912` states a 1.30 multiplier, but its own printed foundation discharge of **60.85 cumecs implies 1.33×** (45.75 × 1.30 = 59.475). The app implements the clause-conformant **1.30** factor per IRC:5-1985 Cl.101.1.2, so its absolute scour sits ~1.5 % below the reference's printed values. **PE confirmation requested: 1.30 or 1.33?**
 
 **Verification:** `npm run typecheck` exit 0; calculation tests **60/60**; structural 19/19; formula-trace 3/3; verbatim-renderer 4/4; `npm run build` exit 0.
+
+---
+
+### Task 27: Resolve E11 (Design Method) + E2 (Afflux Clause) — Blocker Closure
+**Status:** `completed` (2026-11-18 — E11 and E2 closed on source evidence; E9/E10 reclassified as source-silent)
+**Priority:** `high`
+**Scope:** Close the two remaining BLOCKED items carried from Task 23/24 — "E11 WSD-vs-LSM method" and "E2/E9/E10 clause-number stamping".
+
+**Result — no code change was required; both were documentation/evidence gaps, not defects.**
+
+**E11 — design method. RULING: limit state for member design; no WSD-vs-LSM conflict.**
+- Evidence (`TYPE_document.md`): `d = Mu / 0.133·fck·b` (L1787); `Mu/bd²` against **SP:16 Table 3** for percentage of steel (L1793–1796); **"factored design shear force"** (L1809) with **IS 456 Table 20** (L1811–1813) and **IS 456 Table 19** (L1817–1818). Every one of these is limit-state vocabulary.
+- IRC:6-2000 Cl.202.3 (L148–149, L1922) is the **"no increase in permissible stresses"** rule for the **submersible (inundation) load combination** — a **service-stress** rule, not a member-design method.
+- Therefore `structural.ts`'s limit-state implementation (`astFromMoment()`, 1.5 partial safety factor) is **source-conformant** and correctly left unchanged. The app has no permissible-stress design path, so Cl.202.3 has no code surface — recorded as not-applicable rather than added as dead code.
+- Documented in the `structural.ts` module header (design-basis comment) and in the E11 CSV row.
+
+**E2 — afflux formula. RULING: Orifice formula; coefficients from IRC SP:13-2004.**
+- Evidence (L4840–4908): `Q = Co·(2g)^0.5·L·Dd·[h + (1+e)u²/2g]^0.5` with `a/A = 0.71` → **Co = 0.867**, **e = 0.91** (coefficients "from IRC SP:13-2004", L4860–4862); the surplus-weir branch cites **IRC SP:13-2004 Cl.15.2** (C = 0.94, L4891) and yields 0.137 m; because 0.137 m < ¼ Dd (L4907–4908) the **orifice value 0.131 m** is the method of record. Ventway design is per **IRC SP:82-2008** (L19–21).
+- E2 confidence raised `medium` → `high`. Label already corrected to "Orifice formula" in Task 21.
+- Honest limit: the **orifice-form sub-clause number is not printed** in the source (only the surplus-weir branch cites Cl.15.2). Recorded as source-silent, not guessed.
+
+**E9 / E10 — RECLASSIFIED (not closed by stamping).** The source cites **IRC SP:82-2007 only in general terms** ("Stainless steel anchor bars and VRCC thrust blocks are proposed as per IRC SP:82--2007", L35–36). **No clause number exists in the provided evidence**, so stamping one would be fabrication. Both rows are now explicitly marked **SOURCE-SILENT — PE to supply**; the *procedures* were already implemented in Task 17 (uplift 145.80 kN, anchor FOS, VRCC thrust-block safety ratio). This is a **blocked-on-external-input** item for the PE, not a code defect.
+
+**Changes:** `src/lib/structural.ts` (design-basis comment only), `data/engineering-decisions-e1-e20.csv` (E2, E9, E10, E11 rows), this tracker (Task 23/24 blocker lists).
+
+**Verification:** `npm run typecheck` exit 0; calculation 60/60; structural 19/19; formula-trace 3/3; verbatim-renderer 4/4; `npm run build` exit 0. No formula changed — `structural.ts` behaviour is byte-identical.
 
 ---
 
