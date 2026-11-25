@@ -33,9 +33,10 @@ for review. The launch and construction acceptance gates remain open.
 | V2 regression | 25/25 cases matched committed checksums |
 | CLI export with the default inputs | PDF, DOCX, and XLSX generated successfully |
 | Report checks | Draft footer on all nine PDF pages and in the Word footer. Serialized Excel retains failed checks and source trace |
+| Chrome browser smoke test | Loaded the small quick-start example, opened Summary and A4 Preview, and downloaded valid PDF, DOCX, and XLSX files |
 
-The launch gate returned exit code 1. Interactive browser acceptance and
-engineering sign-off are outstanding.
+The launch gate returned exit code 1. The browser smoke test covers the
+quick-start export path. Independent engineering sign-off remains outstanding.
 
 ## Outstanding acceptance work
 
