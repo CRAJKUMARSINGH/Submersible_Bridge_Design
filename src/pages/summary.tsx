@@ -3,6 +3,7 @@ import { useCalculations, DEFAULT_GEOMETRY } from '../lib/calculations';
 import { Card, CardHeader, CardTitle, CardContent, Badge } from '../components/ui/components';
 import { downloadDesignPDF } from '../lib/pdf-export';
 import { downloadDesignWord } from '../lib/word-export';
+import { DRAFT_STATUS, getDesignChecks, validateDesignInputs } from '../lib/design-review';
 import { FileDown } from 'lucide-react';
 
 function SectionDiagram() {
@@ -122,28 +123,50 @@ export default function SummaryReport() {
   const { inputs, results } = useCalculations();
   const [exporting, setExporting] = React.useState(false);
   const [exportingWord, setExportingWord] = React.useState(false);
+  const [exportingWorkbook, setExportingWorkbook] = React.useState(false);
+  const [exportError, setExportError] = React.useState('');
   const V10_SIGNED_OFF = false;
+  const invalidInputs = validateDesignInputs(inputs).length > 0;
 
   const handleExport = () => {
+    setExportError('');
     setExporting(true);
     setTimeout(() => {
       try { downloadDesignPDF(inputs, results); }
+      catch { setExportError('PDF export failed. Try again.'); }
       finally { setExporting(false); }
     }, 50);
   };
 
   const handleExportWord = async () => {
+    setExportError('');
     setExportingWord(true);
     try { await downloadDesignWord(inputs, results); }
+    catch { setExportError('Word export failed. Try again.'); }
     finally { setExportingWord(false); }
   };
 
-  const allPass = results.passRTL && results.passHFL && results.passMinCarriageWidth_m && results.scourSafe && results.fAnchor <= 0;
+  const handleExportWorkbook = async () => {
+    setExportError('');
+    setExportingWorkbook(true);
+    try {
+      const { downloadDesignWorkbook } = await import('../lib/workbook-export');
+      downloadDesignWorkbook(inputs, results);
+    } catch {
+      setExportError('Excel export failed. Try again.');
+    } finally {
+      setExportingWorkbook(false);
+    }
+  };
+
+  const checks = getDesignChecks(inputs, results);
+  const warnings = [...results.sanityWarnings, ...results.structural.warnings];
+  const allPass = !invalidInputs && warnings.length === 0 && checks.every((row) => row.pass);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       {!V10_SIGNED_OFF && (
-        <div className="v10-unsigned-banner" style={{border:'2px solid #b91c1c',background:'#fee2e2',padding:'12px',marginBottom:'16px',borderRadius:'6px',color:'#7f1d1d',fontWeight:600}}>Engineering accuracy NOT independently verified. PE V&V sign-off (V10) required before construction use.</div>
+        <div className="v10-unsigned-banner rounded-md border border-red-800 bg-red-100 p-3 font-semibold text-red-900">{DRAFT_STATUS}. PE V&V sign-off (V10) is required before construction use.</div>
       )}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -151,10 +174,10 @@ export default function SummaryReport() {
           <p className="text-muted-foreground mt-1 text-sm">Live calculations and formula substitutions for the inputs currently modeled in this app.</p>
           <p className="text-muted-foreground mt-1 text-xs">Unmapped equations in the long prototype remain reference-only and are not recalculated from these inputs.</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleExport}
-            disabled={exporting}
+            disabled={exporting || invalidInputs}
             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-all font-semibold text-sm disabled:opacity-60 shrink-0"
           >
             <FileDown className="w-4 h-4" />
@@ -162,23 +185,37 @@ export default function SummaryReport() {
           </button>
           <button
             onClick={handleExportWord}
-            disabled={exportingWord}
+            disabled={exportingWord || invalidInputs}
             className="flex items-center gap-2 px-5 py-2.5 border border-primary text-primary rounded-md hover:bg-primary/5 transition-all font-semibold text-sm disabled:opacity-60 shrink-0"
           >
             <FileDown className="w-4 h-4" />
             {exportingWord ? 'Generating…' : 'Export Word (.docx)'}
           </button>
+          <button
+            onClick={handleExportWorkbook}
+            disabled={exportingWorkbook || invalidInputs}
+            className="flex items-center gap-2 rounded-md border border-primary px-5 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5 disabled:opacity-60"
+          >
+            <FileDown className="w-4 h-4" />
+            {exportingWorkbook ? 'Generating…' : 'Export Excel (.xlsx)'}
+          </button>
         </div>
       </div>
+      {exportError && <p role="alert" className="text-sm text-destructive">{exportError}</p>}
 
       {/* Overall status banner */}
       <div className={`p-4 rounded-lg border ${allPass ? 'bg-success/10 border-success/30' : 'bg-destructive/10 border-destructive/30'}`}>
         <div className="flex items-center gap-3">
           <div className={`w-3 h-3 rounded-full ${allPass ? 'bg-success' : 'bg-destructive'}`} />
           <span className={`font-bold text-sm ${allPass ? 'text-success' : 'text-destructive'}`}>
-            {allPass ? 'MODELLED CHECKS PASS — independent project-specific engineering review is still required' : 'MODEL CHECK FAILED — review parameters and obtain engineering review'}
+            {allPass ? 'MODELLED CHECKS PASS. Independent engineering review is still required.' : 'REVIEW REQUIRED. Check the input messages and model results below.'}
           </span>
         </div>
+        {warnings.length > 0 && (
+          <ul className="mt-3 list-disc space-y-1 pl-6 text-sm">
+            {warnings.map((warning) => <li key={warning}>{warning}</li>)}
+          </ul>
+        )}
       </div>
 
       {/* Project info */}
@@ -313,13 +350,7 @@ export default function SummaryReport() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {[
-                  { check: 'Ventway obstruction @ RTL', val: `${results.pctObsRTL.toFixed(1)}%`, limit: '< 70%', pass: results.passRTL },
-                  { check: 'Ventway obstruction @ HFL', val: `${results.pctObsHFL.toFixed(1)}%`, limit: '< 30%', pass: results.passHFL },
-                  { check: 'Min carriageway width (E17)', val: `${inputs.carriageWidth_m.toFixed(2)}m`, limit: '≥ 6.0m (IRC SP:82 Cl.6.4.2(vi))', pass: results.passMinCarriageWidth_m },
-                  { check: 'Foundation depth vs scour', val: `${results.recommendedDepth.toFixed(2)}m below GL`, limit: '> 0.5m', pass: results.scourSafe },
-                  { check: 'Deck uplift resistance', val: `F_anchor = ${results.fAnchor.toFixed(2)} kN`, limit: 'W_self > F_uplift', pass: results.fAnchor <= 0 },
-                ].map(row => (
+                {checks.map(row => (
                   <tr key={row.check}>
                     <td className="py-3 pr-4 text-foreground">{row.check}</td>
                     <td className="py-3 pr-4 text-primary">{row.val}</td>

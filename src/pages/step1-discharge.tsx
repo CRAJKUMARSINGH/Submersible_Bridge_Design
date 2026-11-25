@@ -16,7 +16,7 @@ export default function Step1Discharge() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <h2 className="text-2xl font-bold tracking-tight text-foreground">Step 1: Design Discharge</h2>
-        <p className="text-muted-foreground mt-1 text-sm">Determine the maximum expected flow using three IRC-approved methods. The highest governs.</p>
+        <p className="text-muted-foreground mt-1 text-sm">Compare the three modeled flow estimates. The highest is used unless you supply a design discharge in Step 2.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

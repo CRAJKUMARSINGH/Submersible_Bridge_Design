@@ -3,7 +3,8 @@ import test from 'node:test';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { defaultInputs, type ComputedResults } from '../src/lib/calculations.tsx';
+import { computeResults, defaultInputs, type ComputedResults } from '../src/lib/calculations.tsx';
+import { DRAFT_STATUS } from '../src/lib/design-review';
 import {
   exportDesignPDF,
   COVER_DISCLAIMER_HEADING,
@@ -14,6 +15,7 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const sampleResults: ComputedResults = {
+  ...computeResults(defaultInputs),
   qRational: 125,
   qWeir: 9.46,
   qVelocity: 54,
@@ -81,6 +83,7 @@ test('T5-02 every sheet carries the automated/unverified footer disclaimer', () 
   const pages = (doc as any).internal.getNumberOfPages() as number;
   assert.ok(pages >= 9, `expected at least 9 sheets, got ${pages}`);
   assert.equal(occurrences, pages, `footer disclaimer must appear on all ${pages} sheets, found ${occurrences}`);
+  assert.equal(raw.split(DRAFT_STATUS).length - 1, pages, 'every sheet must display the draft status');
 });
 
 test('T5-03 summary page shows the red unsigned (V10) banner when not signed off', () => {

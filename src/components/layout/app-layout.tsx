@@ -3,6 +3,8 @@ import { Link, useLocation } from 'wouter';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Calculator, Waves, Construction, FileText, PenLine, Layers, FileSpreadsheet, ScrollText, BookText, ShieldCheck } from 'lucide-react';
+import { useCalculations } from '../../lib/calculations';
+import { validateDesignInputs } from '../../lib/design-review';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -22,6 +24,8 @@ const navItems = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const { inputs } = useCalculations();
+  const errors = validateDesignInputs(inputs);
 
   return (
     <div className="min-h-[100dvh] flex flex-col md:flex-row bg-background">
@@ -80,6 +84,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Main */}
       <main className="flex-1 flex flex-col max-h-[100dvh] overflow-y-auto">
         <div className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full">
+          {errors.length > 0 && (
+            <div role="alert" className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm">
+              <p className="font-semibold">Correct these design inputs before exporting</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {errors.map((error) => <li key={error}>{error}</li>)}
+              </ul>
+            </div>
+          )}
           {children}
         </div>
       </main>

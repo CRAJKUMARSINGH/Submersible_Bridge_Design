@@ -14,6 +14,7 @@
 import {
   AlignmentType,
   Document,
+  Footer,
   HeadingLevel,
   PageBreak,
   Packer,
@@ -26,6 +27,8 @@ import {
 } from 'docx';
 import type { Inputs, ComputedResults } from './calculations';
 import { COVER_DISCLAIMER_HEADING, COVER_DISCLAIMER_LINES } from './pdf-export';
+import { DRAFT_STATUS, getDesignChecks } from './design-review';
+import { buildDesignFormulaTrace } from './design-formula-trace';
 
 const f = (n: number, d = 2) => n.toFixed(d);
 
@@ -147,6 +150,7 @@ function buildChildren(inputs: Inputs, results: ComputedResults): (Paragraph | T
   a.push(bullet('IS 1893 — Seismic (where applicable)'));
   a.push(bullet('IRC 103 — Wind (where applicable)'));
   a.push(sub(COVER_DISCLAIMER_HEADING));
+  a.push(body(DRAFT_STATUS));
   for (const line of COVER_DISCLAIMER_LINES) a.push(body(line));
   a.push(sub('Contents'));
   for (const sec of WORD_TOP_LEVEL_SECTIONS) a.push(body(sec));
@@ -383,7 +387,10 @@ function buildChildren(inputs: Inputs, results: ComputedResults): (Paragraph | T
     ['Deck uplift (anchors or self-weight)', 'W_self > F_uplift', passFail(results.fAnchor <= 0)],
   ]));
   a.push(sub('11.3 Overall verdict'));
-  a.push(body('Suitable for construction subject to the items above and to PE V&V sign-off (V10).'));
+  a.push(body('Construction use requires site-specific engineering review and PE V&V sign-off (V10).'));
+  a.push(table(['Check', 'Computed', 'Criterion', 'Status'], getDesignChecks(inputs, results)
+    .map(({ check, val, limit, pass }) => [check, val, limit, pass ? 'PASS' : 'REVIEW'])));
+  for (const warning of [...results.sanityWarnings, ...s.warnings]) a.push(bullet(warning));
 
   // ── 12. Section 12 — Engineering Drawings (§18.12) ────────────────────────
   a.push(heading(WORD_TOP_LEVEL_SECTIONS[11]));
@@ -393,6 +400,11 @@ function buildChildren(inputs: Inputs, results: ComputedResults): (Paragraph | T
   // ── 13. Appendices (A–S) (§18.13) ────────────────────────────────────────
   a.push(heading(WORD_TOP_LEVEL_SECTIONS[12]));
   for (const ap of APPENDICES) a.push(bullet(ap));
+  a.push(sub('Live Formula Trace'));
+  a.push(table(['ID', 'Equation', 'Substitution', 'Result and unit', 'Source'],
+    buildDesignFormulaTrace(inputs, results).map((row) => [
+      row.id, row.equation, row.substitution, `${row.result} ${row.unit}`, row.prototypeReference,
+    ])));
 
   return a;
 }
@@ -402,8 +414,11 @@ export function buildDesignDocument(inputs: Inputs, results: ComputedResults): D
   return new Document({
     creator: 'CSWY-CALC 82',
     title: 'Vented Submersible Causeway Design Report',
-    description: 'IRC SP:82-2008 & IRC 6:2000 compliant design report',
-    sections: [{ children: buildChildren(inputs, results) }],
+    description: DRAFT_STATUS,
+    sections: [{
+      children: buildChildren(inputs, results),
+      footers: { default: new Footer({ children: [body(DRAFT_STATUS)] }) },
+    }],
   });
 }
 

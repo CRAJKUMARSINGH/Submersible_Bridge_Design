@@ -3,13 +3,22 @@ import * as XLSX from 'xlsx';
 import { Upload, FileSpreadsheet, Download, RotateCcw, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Input, Label, Badge } from '../components/ui/components';
 import { Button } from '../components/ui/button';
-import { useCalculations } from '../lib/calculations';
+import { defaultInputs, useCalculations } from '../lib/calculations';
 import {
   INPUT_FIELD_DEFINITIONS,
   buildTemplateCsv,
   buildTemplateRows,
+  buildRowsFromInputs,
   parseVariableTable,
 } from '../lib/spreadsheet-import';
+import exampleCases from '../../test-variables-25-sets.csv?raw';
+
+const [exampleHeader, ...exampleRows] = exampleCases.trim().split(/\r?\n/).map((line) => line.split(','));
+const quickStartCases = [
+  { id: '01', label: 'Small example · Tropical Creek' },
+  { id: '02', label: 'Medium example · Temperate River' },
+  { id: '03', label: 'Large example · Flat Floodplain' },
+];
 
 export default function ImportVariablesPage() {
   const { inputs, mergeInputs, resetInputs } = useCalculations();
@@ -30,22 +39,24 @@ export default function ImportVariablesPage() {
   }, []);
 
   const handleExportCurrent = React.useCallback(() => {
-    const rows = [
-      ['variable', 'value', 'section', 'label', 'description', 'unit'],
-      ...INPUT_FIELD_DEFINITIONS.map((field) => [
-        String(field.key),
-        inputs[field.key] === null ? 'auto' : String(inputs[field.key]),
-        field.section,
-        field.label,
-        field.description,
-        field.unit ?? '',
-      ]),
-    ];
-    const sheet = XLSX.utils.aoa_to_sheet(rows);
+    const sheet = XLSX.utils.aoa_to_sheet(buildRowsFromInputs(inputs));
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, 'Variables');
     XLSX.writeFile(workbook, 'causeway-current-inputs.xlsx');
   }, [inputs]);
+
+  const loadExample = (id: string) => {
+    const values = exampleRows.find(([setId]) => setId === id);
+    if (!values) return;
+    const { patch, importedKeys, warnings } = parseVariableTable(exampleHeader.slice(1).map(
+      (variable, index) => [variable, values[index + 1]],
+    ));
+    const example = { ...defaultInputs, linearWaterway_m: undefined, fbl_m: undefined, recommendedDepth_m: undefined, ...patch };
+    mergeInputs({ ...example, gl: example.lbl_m, date: inputs.date });
+    setImportedKeys(importedKeys.map(String));
+    setWarnings(warnings);
+    setFileName(`Example set ${id}`);
+  };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -107,6 +118,20 @@ export default function ImportVariablesPage() {
           </Button>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick-start examples</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">Loads a regression example in place of your current inputs. These examples use the low-bed level as the ground-level datum. Replace example levels with surveyed values.</p>
+          <div className="flex flex-wrap gap-2">
+            {quickStartCases.map(({ id, label }) => (
+              <Button key={id} variant="outline" onClick={() => loadExample(id)}>{label}</Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>

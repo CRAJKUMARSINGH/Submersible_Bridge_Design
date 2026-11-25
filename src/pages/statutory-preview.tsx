@@ -1,9 +1,10 @@
 import React from 'react';
-import { FileDown, FileSpreadsheet, Eye, ScrollText } from 'lucide-react';
+import { FileDown, FileSpreadsheet, ScrollText } from 'lucide-react';
 import { useCalculations } from '../lib/calculations';
 import { Button } from '../components/ui/button';
 import { buildRowsFromInputs } from '../lib/spreadsheet-import';
 import * as XLSX from 'xlsx';
+import { DRAFT_STATUS } from '../lib/design-review';
 
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
@@ -19,7 +20,7 @@ function A4Page({ children, title, pageNo }: { children: React.ReactNode; title:
     <div className="mx-auto w-[210mm] min-h-[297mm] bg-white shadow-2xl border border-slate-300 p-[14mm] print:shadow-none print:border-none print:mx-0 print:w-full print:min-h-0">
       <div className="flex items-start justify-between border-b-2 border-slate-900 pb-3 mb-4">
         <div>
-          <p className="text-[10px] tracking-[0.25em] uppercase text-slate-500">Statutory A4 Preview</p>
+          <p className="text-[10px] font-bold uppercase text-red-800">{DRAFT_STATUS}</p>
           <h2 className="text-xl font-bold text-slate-900 mt-1">{title}</h2>
         </div>
         <div className="text-right text-[11px] text-slate-600">
@@ -55,7 +56,7 @@ export default function StatutoryPreviewPage() {
     XLSX.writeFile(workbook, 'causeway-current-inputs.xlsx');
   }, [inputs]);
 
-  const commandExample = `pnpm --filter @workspace/scripts run pdf:statutory -- --input /path/to/causeway-current-inputs.xlsx --output /workspace/my-statutory-report.pdf`;
+  const commandExample = 'npm run export:design -- causeway-current-inputs.json draft-exports';
 
   return (
     <div className="space-y-6 pb-16">
@@ -63,7 +64,7 @@ export default function StatutoryPreviewPage() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">A4 Statutory Preview</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Live page-style preview from the current inputs. Use the export command below to build the full 169-page detailed PDF from CSV or Excel.
+            Review the current model in an A4 layout. Download JSON to generate the draft PDF, Word, and Excel reports from the command line.
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -81,11 +82,11 @@ export default function StatutoryPreviewPage() {
       <div className="rounded-xl border border-card-border bg-card p-4 space-y-3">
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <ScrollText className="w-4 h-4 text-primary" />
-          Full report generator command
+          Export draft reports from JSON
         </div>
         <pre className="rounded-lg bg-slate-950 text-slate-100 p-4 text-xs overflow-x-auto whitespace-pre-wrap">{commandExample}</pre>
         <p className="text-xs text-muted-foreground">
-          The generator reads the same spreadsheet keys used by the import page, computes the live results, and writes a 169-page A4 portrait statutory report.
+          The command uses the same calculations and report generators as Summary. Choose a new output directory.
         </p>
       </div>
 
@@ -119,7 +120,7 @@ export default function StatutoryPreviewPage() {
 
           <div className="mt-16 border-t border-slate-300 pt-6 text-[12px] leading-6 text-slate-700">
             <p>
-              This preview mirrors the statutory report structure and updates from the same live inputs used by the design steps. The full generator preserves the 169-page count while rewriting project-specific values and computed checks from the imported spreadsheet.
+              This preview reflects the current model inputs. The draft reports include the modeled results and calculation trace.
             </p>
           </div>
         </A4Page>
@@ -179,25 +180,16 @@ export default function StatutoryPreviewPage() {
               <MetricRow label="Total drag" value={`${results.fDragTotal.toFixed(3)} kN`} />
             </div>
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wide text-slate-700 mb-3">Generator behavior</h3>
-              <p className="text-[11px] leading-6 text-slate-700">
-                The detailed statutory generator reads a CSV, XLSX, or JSON input file, applies the same variable keys used by this app, computes the live design values, and then rebuilds a page-aligned 169-page A4 portrait document using the original statutory source pages as the narrative base.
-              </p>
-              <p className="text-[11px] leading-6 text-slate-700 mt-3">
-                Use the import page for spreadsheet upload, use this preview page for A4 layout review, and use the script command above when you need the final detailed PDF deliverable.
-              </p>
+              <h3 className="text-sm font-bold uppercase tracking-wide text-slate-700 mb-3">Review items</h3>
+              <ul className="list-disc space-y-2 pl-4 text-[11px] leading-5 text-slate-700">
+                {[...results.sanityWarnings, ...results.structural.warnings].map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+                <li>Independent engineering review and PE sign-off are required before construction use.</li>
+              </ul>
             </div>
           </div>
 
-          <div className="mt-10 rounded-xl border border-dashed border-slate-400 p-6">
-            <div className="flex items-center gap-2 text-slate-800 font-semibold">
-              <Eye className="w-4 h-4" />
-              Preview scope
-            </div>
-            <p className="mt-3 text-[11px] leading-6 text-slate-700">
-              This page intentionally previews the first part of the statutory layout in browser-friendly A4 blocks. The actual PDF generator writes the full detailed set to a file and keeps the statutory page count fixed at 169 pages.
-            </p>
-          </div>
         </A4Page>
       </div>
     </div>

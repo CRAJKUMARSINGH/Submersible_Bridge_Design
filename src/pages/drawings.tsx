@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCalculations, DEFAULT_GEOMETRY, drawingScaleLabel, laceyScourProfileDepth } from '../lib/calculations';
 import type { Inputs, ComputedResults } from '../lib/calculations';
 import { downloadDesignPDF } from '../lib/pdf-export';
+import { validateDesignInputs } from '../lib/design-review';
 import { FileDown, Layers } from 'lucide-react';
 
 // ─── Shared SVG helpers ───────────────────────────────────────────────────────
@@ -521,11 +522,14 @@ export default function DrawingsPage() {
   const { inputs, results, updateInput } = useCalculations();
   const [tab, setTab] = useState('cs');
   const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(false);
 
   const handleExport = () => {
+    setExportError(false);
     setExporting(true);
     setTimeout(() => {
       try { downloadDesignPDF(inputs, results); }
+      catch { setExportError(true); }
       finally { setExporting(false); }
     }, 50);
   };
@@ -539,14 +543,15 @@ export default function DrawingsPage() {
         </div>
         <button
           onClick={handleExport}
-          disabled={exporting}
+          disabled={exporting || validateDesignInputs(inputs).length > 0}
           className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-all font-semibold text-sm disabled:opacity-60 shrink-0"
         >
           <FileDown className="w-4 h-4" />
-          {exporting ? 'Generating PDF...' : 'Export 7-Sheet PDF'}
+          {exporting ? 'Generating PDF...' : 'Export 9-Sheet PDF'}
         </button>
       </div>
 
+      {exportError && <p role="alert" className="text-sm text-destructive">PDF export failed. Try again.</p>}
       <div className="flex gap-0 border-b border-border overflow-x-auto">
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}

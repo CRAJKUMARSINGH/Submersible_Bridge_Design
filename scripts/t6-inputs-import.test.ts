@@ -70,13 +70,15 @@ test('T6-04 the E17 minimum-carriageway rule fires from the calculation engine',
 test('T6-05 the compliance summary (sheet 4, 3C) carries the E17 carriageway row', () => {
   const src = readFileSync(resolve(__dirname, '../src/lib/pdf-export.ts'), 'utf8');
   assert.match(src, /3C\. COMPLIANCE SUMMARY/);
-  assert.match(src, /Min carriageway width/);
-  assert.match(src, /passMinCarriageWidth_m\s*\?\s*'PASS'\s*:\s*'FAIL'/);
 
   const raw = exportDesignPDF(defaultInputs, computeResults(defaultInputs)).output() as string;
   assert.ok(raw.includes('Min carriageway width'), 'generated PDF must contain the carriageway compliance row');
   // AutoTable silently drops a cell whose text contains glyphs outside the WinAnsi
   // set (e.g. '≥'), so the criterion must stay ASCII for it to reach the report.
   assert.ok(raw.includes('IRC SP:82-2008 Cl.6.4.2'), 'generated PDF carriageway row must cite IRC SP:82-2008 Cl.6.4.2(vi)');
-  assert.ok(src.includes("'>= 6.0m (IRC SP:82-2008 Cl.6.4.2(vi))'"), 'criterion cell text must remain ASCII-safe');
+  assert.ok(raw.includes('>= 6.0m'), 'criterion cell text must remain ASCII-safe');
+  const narrow = { ...defaultInputs, carriageWidth_m: 5.5 };
+  const rejected = exportDesignPDF(narrow, computeResults(narrow)).output() as string;
+  const carriageway = rejected.indexOf('Min carriageway width');
+  assert.ok(carriageway >= 0 && rejected.slice(carriageway, carriageway + 1100).includes('(REVIEW) Tj'));
 });
